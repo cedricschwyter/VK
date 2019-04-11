@@ -14,7 +14,7 @@
 #include "VK_STATUS_CODE.hpp"
 
 /**
-	Implements a namespace to prevent global naming conflicts
+	Prototypes a namespace to prevent global naming conflicts
 */
 namespace vk {
 
