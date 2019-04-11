@@ -9,17 +9,49 @@
 */
 
 #pragma once
+#include <iostream>
+
 #include "VK_STATUS_CODE.hpp"
 
 class VKEngine {
 public:
 
 	/**
-		Initializes the application and loads dependencies
+		Initializes VKEngine and loads dependencies
 
-		@return		VK_STATUS_CODE	Returns VK_SC_SUCCESS on success
+		@return		Returns VK_SC_SUCCESS on success
 	*/
 	VK_STATUS_CODE init(void);
+
+private:
+
+	/**
+		Initializes the windowing library
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE initWindow(void);
+
+	/**
+		Initializes the Vulkan API
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE initVulkan(void);
+
+	/**
+		Contains the main loop
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE loop(void);
+
+	/**
+		Handles cleaning of resources on exit
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE clean(void);
 
 };
 
