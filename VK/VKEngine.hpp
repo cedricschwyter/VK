@@ -40,7 +40,6 @@ private:
 		Initializes the logger
 
 		@return		Returns LOGGER_SC_SUCCESS on success
-		@return		Returns LOGGER_SC_INVALID_FILE_ATTRIBUTES on filesystem error
 		@return		Returns LOGGER_SC_UNKNOWN_ERROR on error
 	*/
 	LOGGER_STATUS_CODE initLogger(void);

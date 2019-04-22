@@ -20,7 +20,6 @@ namespace logger {
 		Initializes logger and creates necessary directories
 
 		@return		Returns LOGGER_SC_SUCCESS on success
-		@return		Returns LOGGER_SC_INVALID_FILE_ATTRIBUTES on filesystem error
 		@return		Returns LOGGER_SC_UNKNOWN_ERROR on error
 	*/
 	LOGGER_STATUS_CODE init(void);
