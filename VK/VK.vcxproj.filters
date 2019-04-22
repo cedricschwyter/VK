@@ -30,6 +30,9 @@
     <ClCompile Include="LOG_TYPE.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ASSERT.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VK_STATUS_CODE.hpp">

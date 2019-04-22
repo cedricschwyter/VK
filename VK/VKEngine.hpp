@@ -16,8 +16,7 @@
 
 #include "VK_STATUS_CODE.hpp"
 #include "Logger.hpp"
-
-#define ASSERT()
+#include "ASSERT.cpp"
 
 class VKEngine {
 public:

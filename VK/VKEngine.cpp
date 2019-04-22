@@ -12,13 +12,13 @@
 
 
 VK_STATUS_CODE VKEngine::init() {
-	
-	if (initLogger()	!= LOGGER_SC_SUCCESS)	return VK_SC_LOGGER_ERROR;
+
+	ASSERT(initLogger(), "Logger initialization error", LOGGER_SC_UNKNOWN_ERROR);
 	logger::log(START_LOG, "Initializing...");
-	if (initWindow()	!= VK_SC_SUCCESS)		return VK_SC_WINDOW_ERROR;
-	if (initVulkan()	!= VK_SC_SUCCESS)		return VK_SC_VULKAN_ERROR;
-	if (loop()			!= VK_SUCCESS)			return VK_SC_VULKAN_RUNTIME_ERROR;
-	if (clean()			!= VK_SUCCESS)			return VK_SC_CLEANUP_ERROR;
+	ASSERT(initWindow(), "Window initialization error", VK_SC_WINDOW_ERROR);
+	ASSERT(initVulkan(), "Vulkan initialization error", VK_SC_VULKAN_ERROR);
+	ASSERT(loop(), "Vulkan runtime error", VK_SC_VULKAN_RUNTIME_ERROR);
+	ASSERT(clean(), "Application cleanup error", VK_SC_CLEANUP_ERROR);
 	logger::log(START_LOG, "Shutting down...");
 
 	return VK_SC_SUCCESS;
