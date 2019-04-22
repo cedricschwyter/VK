@@ -137,10 +137,12 @@
   <ItemGroup>
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="LOGGER_STATUS_CODE.cpp" />
+    <ClCompile Include="LOG_TYPE.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="VKEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ConsoleColor.hpp" />
     <ClInclude Include="Logger.hpp" />
     <ClInclude Include="VKEngine.hpp" />
     <ClInclude Include="VK_STATUS_CODE.hpp" />

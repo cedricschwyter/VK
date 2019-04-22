@@ -28,7 +28,7 @@ namespace logger {
 	/**
 		Writes to specified log and prints message to console
 
-		@param		log_	Specify log-file to write
+		@param		log_	Specify log-file to write to
 		@param		msg_	The actual text to write and print
 
 		@return		Returns LOGGER_SC_SUCCESS on success
