@@ -15,6 +15,9 @@
 #include <iostream>
 
 #include "VK_STATUS_CODE.hpp"
+#include "Logger.hpp"
+
+#define ASSERT()
 
 class VKEngine {
 public:
@@ -33,6 +36,15 @@ public:
 private:
 
 	GLFWwindow*				window;
+
+	/**
+		Initializes the logger
+
+		@return		Returns LOGGER_SC_SUCCESS on success
+		@return		Returns LOGGER_SC_INVALID_FILE_ATTRIBUTES on filesystem error
+		@return		Returns LOGGER_SC_UNKNOWN_ERROR on error
+	*/
+	LOGGER_STATUS_CODE initLogger(void);
 
 	/**
 		Initializes the windowing library

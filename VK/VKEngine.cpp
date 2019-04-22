@@ -13,12 +13,19 @@
 
 VK_STATUS_CODE VKEngine::init() {
 	
-	initWindow();
-	initVulkan();
-	loop();
-	clean();
+	if (initLogger()	!= LOGGER_SC_SUCCESS)	return VK_SC_LOGGER_ERROR;
+	if (initWindow()	!= VK_SC_SUCCESS)		return VK_SC_WINDOW_ERROR;
+	if (initVulkan()	!= VK_SC_SUCCESS)		return VK_SC_VULKAN_ERROR;
+	if (loop()			!= VK_SUCCESS)			return VK_SC_VULKAN_RUNTIME_ERROR;
+	if (clean()			!= VK_SUCCESS)			return VK_SC_CLEANUP_ERROR;
 	
 	return VK_SC_SUCCESS;
+
+}
+
+LOGGER_STATUS_CODE VKEngine::initLogger() {
+
+	return logger::init();
 
 }
 

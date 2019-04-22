@@ -10,9 +10,17 @@
 */
 #pragma once
 
+/**
+	Status code enumeration for easier exception-backtracing
+*/
 typedef enum VK_STATUS_CODE {
 
-	VK_SC_SUCCESS			= 0,
-	VK_SC_UKNOWN_ERROR		= -1
+	VK_SC_CLEANUP_ERROR				= -6,
+	VK_SC_VULKAN_RUNTIME_ERROR		= -5,
+	VK_SC_VULKAN_ERROR				= -4,
+	VK_SC_WINDOW_ERROR				= -3,
+	VK_SC_LOGGER_ERROR				= -2,
+	VK_SC_UKNOWN_ERROR				= -1,
+	VK_SC_SUCCESS					= 0
 
 } VK_STATUS_CODE;
