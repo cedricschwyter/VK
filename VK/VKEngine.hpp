@@ -9,12 +9,19 @@
 */
 
 #pragma once
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
 #include <iostream>
 
 #include "VK_STATUS_CODE.hpp"
 
 class VKEngine {
 public:
+
+	const unsigned int		WIDTH		= 1280;
+	const unsigned int		HEIGHT		= 720;
+	const char*				TITLE		= "VK by D3PSI";
 
 	/**
 		Initializes VKEngine and loads dependencies
@@ -24,6 +31,8 @@ public:
 	VK_STATUS_CODE init(void);
 
 private:
+
+	GLFWwindow*				window;
 
 	/**
 		Initializes the windowing library

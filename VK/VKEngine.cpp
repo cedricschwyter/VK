@@ -12,9 +12,7 @@
 
 
 VK_STATUS_CODE VKEngine::init() {
-
-	std::cout << "Hello from VKEngine!" << std::endl;
-
+	
 	initWindow();
 	initVulkan();
 	loop();
@@ -25,6 +23,21 @@ VK_STATUS_CODE VKEngine::init() {
 }
 
 VK_STATUS_CODE VKEngine::initWindow() {
+
+	glfwInit();
+
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+	window = glfwCreateWindow(
+	
+		WIDTH,
+		HEIGHT,
+		TITLE,
+		nullptr,
+		nullptr
+	
+	);
 
 	return VK_SC_SUCCESS;
 
@@ -38,11 +51,20 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 
 VK_STATUS_CODE VKEngine::loop() {
 
+	while (!glfwWindowShouldClose(window)) {
+	
+		glfwPollEvents();
+	
+	}
+
 	return VK_SC_SUCCESS;
 
 }
 
 VK_STATUS_CODE VKEngine::clean() {
+
+	glfwDestroyWindow(window);
+	glfwTerminate();
 
 	return VK_SC_SUCCESS;
 
