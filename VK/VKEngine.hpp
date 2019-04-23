@@ -9,6 +9,8 @@
 */
 
 #pragma once
+#include "Version.hpp"
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -23,9 +25,9 @@
 class VKEngine {
 public:
 
-	const unsigned int			WIDTH			= 1280;
-	const unsigned int			HEIGHT			= 720;
-	const char*					TITLE			= "VK by D3PSI";
+	const unsigned int					WIDTH					= 1280;
+	const unsigned int					HEIGHT					= 720;
+	const char*							TITLE					= "VK by D3PSI";
 
 	/**
 		Initializes VKEngine and loads dependencies
@@ -36,10 +38,21 @@ public:
 
 private:
 
-	VkResult					result;
-	GLFWwindow*					window;
-	VkAllocationCallbacks*		allocator		= nullptr;
-	VkInstance					instance;
+	VkResult								result;
+	GLFWwindow*								window;
+	VkAllocationCallbacks*					allocator			= nullptr;
+	VkInstance								instance;
+	const std::vector< const char* >		validationLayers	= {
+	
+		"VK_LAYER_LUNARG_standard_validation"
+	
+	};
+#ifdef VK_DEVELOPMENT
+	const bool								validationLayersEnabled			= true;
+#else
+	const bool								validationLayersEnabled			= false;
+#endif
+	VkDebugUtilsMessengerEXT				validationLayerDebugMessenger;
 
 	/**
 		Initializes the logger
@@ -84,5 +97,44 @@ private:
 	*/
 	VK_STATUS_CODE createInstance(void);
 
-};
+	/**
+		Checks whether validation layers are supported
 
+		@return		Returns true if validation layers are supported
+		@return		Returns false if validation layers are not supported
+	*/
+	bool validationLayersSupported(void);
+
+	/**
+		Get the required extensions for Vulkan to activate
+
+		@return		Returns an std::vector< const char* > with extension names
+	*/
+	std::vector< const char* > queryRequiredExtensions(void);
+
+	/**
+		Message callback function for Vulkan validation layers so they can actually display their messages
+
+		@param		messageSeverity_	Message severity level (internal)
+		@param		messageType_		Message type (internal)
+		@param		pCallbackData_		Actual message (internal)
+		@param		pUserData_			User specified data
+
+		@return		Returns VK_FALSE
+
+	*/
+	static VKAPI_ATTR VkBool32 VKAPI_CALL validationLayerDebugMessageCallback(
+		VkDebugUtilsMessageSeverityFlagBitsEXT			messageSeverity_,
+		VkDebugUtilsMessageTypeFlagsEXT					messageType_,
+		const VkDebugUtilsMessengerCallbackDataEXT*		pCallbackData_,
+		void*											pUserData_
+		);
+
+	/**
+		Creates the VkDebugUtilsMessengerEXT for validation layer messages
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE debugUtilsMessenger(void);
+
+};

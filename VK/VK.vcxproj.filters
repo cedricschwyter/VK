@@ -33,6 +33,12 @@
     <ClCompile Include="ASSERT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Version.hpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VK.hpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VK_STATUS_CODE.hpp">

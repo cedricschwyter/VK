@@ -34,4 +34,14 @@ namespace logger {
 	*/
 	LOGGER_STATUS_CODE log(LOG_TYPE log_, const char* msg_);
 
+	/**
+		Writes to specified log and prints message to console
+
+		@param		log_	Specify log-file to write to
+		@param		msg_	The actual text to write and print
+
+		@return		Returns LOGGER_SC_SUCCESS on success
+	*/
+	LOGGER_STATUS_CODE log(LOG_TYPE log_, std::string msg_);
+
 }

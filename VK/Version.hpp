@@ -9,5 +9,11 @@
 */
 #pragma once
 
-#define VK_DEVELOPMENT
+// Edit configuration here
+//#define VK_DEVELOPMENT
 //#define VK_RELEASE
+
+// Default values
+#if !defined VK_DEVELOPMENT && !defined VK_RELEASE
+	#define VK_DEVELOPMENT
+#endif

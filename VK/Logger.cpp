@@ -194,4 +194,10 @@ namespace logger {
 
 	}
 
+	LOGGER_STATUS_CODE log(LOG_TYPE log_, std::string msg_) {
+	
+		return logger::log(log_, msg_.c_str());
+
+	}
+
 }
