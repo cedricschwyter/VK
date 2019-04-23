@@ -13,6 +13,8 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <vector>
+#include <conio.h>
 
 #include "VK_STATUS_CODE.hpp"
 #include "Logger.hpp"
@@ -21,9 +23,9 @@
 class VKEngine {
 public:
 
-	const unsigned int		WIDTH		= 1280;
-	const unsigned int		HEIGHT		= 720;
-	const char*				TITLE		= "VK by D3PSI";
+	const unsigned int			WIDTH			= 1280;
+	const unsigned int			HEIGHT			= 720;
+	const char*					TITLE			= "VK by D3PSI";
 
 	/**
 		Initializes VKEngine and loads dependencies
@@ -34,7 +36,10 @@ public:
 
 private:
 
-	GLFWwindow*				window;
+	VkResult					result;
+	GLFWwindow*					window;
+	VkAllocationCallbacks*		allocator		= nullptr;
+	VkInstance					instance;
 
 	/**
 		Initializes the logger
@@ -71,6 +76,13 @@ private:
 		@return		Returns VK_SC_SUCCESS on success
 	*/
 	VK_STATUS_CODE clean(void);
+
+	/**
+		Creates the VkInstance class member
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE createInstance(void);
 
 };
 

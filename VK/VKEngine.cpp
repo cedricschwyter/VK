@@ -56,6 +56,8 @@ VK_STATUS_CODE VKEngine::initWindow() {
 
 VK_STATUS_CODE VKEngine::initVulkan() {
 
+	createInstance();
+
 	return VK_SC_SUCCESS;
 
 }
@@ -78,11 +80,64 @@ VK_STATUS_CODE VKEngine::loop() {
 
 VK_STATUS_CODE VKEngine::clean() {
 
+	vkDestroyInstance(instance, allocator);
+	logger::log(EVENT_LOG, "Successfully destroyed instance");
+
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	logger::log(EVENT_LOG, "Successfully terminated GLFW");
 
 	logger::log(EVENT_LOG, "Successfully cleaned allocated resources, shutting down...");
+
+	std::cout << "\n\nPress any key to continue...";
+	_getch();
+
+	return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::createInstance() {
+
+	VkApplicationInfo applicationInfo				= {};
+	applicationInfo.sType							= VK_STRUCTURE_TYPE_APPLICATION_INFO;
+	applicationInfo.pApplicationName				= TITLE;
+	applicationInfo.applicationVersion				= VK_MAKE_VERSION(1, 0, 0);
+	applicationInfo.pEngineName						= "D3PSI's VKEngine";
+	applicationInfo.engineVersion					= VK_MAKE_VERSION(1, 0, 0);
+	applicationInfo.apiVersion						= VK_API_VERSION_1_0;
+
+	logger::log(EVENT_LOG, "Querying available extensions...");
+	uint32_t extCount								= 0;
+	vkEnumerateInstanceExtensionProperties(nullptr, &extCount, nullptr);
+	
+	std::vector< VkExtensionProperties > extensions(extCount);
+	vkEnumerateInstanceExtensionProperties(nullptr, &extCount, extensions.data());
+	std::string exts = "Available extensions:\n";
+	for (const auto& ext : extensions) {
+	
+		std::string extName = ext.extensionName;
+		exts += "\t\t\t\t\t\t\t" + extName + "\n";
+
+	}
+	logger::log(EVENT_LOG, exts.c_str());
+
+	uint32_t glfwExtCount							= 0;
+	const char** glfwExt;
+
+	logger::log(EVENT_LOG, "Querying GLFW-extensions...");
+	glfwExt = glfwGetRequiredInstanceExtensions(&glfwExtCount);
+	logger::log(EVENT_LOG, "Successfully enabled required GLFW-extensions");
+
+	VkInstanceCreateInfo instanceCreateInfo			= {};
+	instanceCreateInfo.sType						= VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+	instanceCreateInfo.pApplicationInfo				= &applicationInfo;
+	instanceCreateInfo.enabledExtensionCount		= glfwExtCount;
+	instanceCreateInfo.ppEnabledExtensionNames		= glfwExt;
+	instanceCreateInfo.enabledLayerCount			= 0;	// TODO: Enable validation layers!
+
+	logger::log(EVENT_LOG, "Creating VkInstance...");
+	result = vkCreateInstance(&instanceCreateInfo, allocator, &instance);
+	ASSERT(result, "Failed to create VkInstance!", VK_SC_INSTANCE_CREATON_ERROR);
 
 	return VK_SC_SUCCESS;
 

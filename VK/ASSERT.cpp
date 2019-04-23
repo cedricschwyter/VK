@@ -8,6 +8,9 @@
 	@brief		Implementation of the ASSERT function
 */
 #pragma once
+#include <iostream>
+#include <conio.h>
+
 #include "Logger.hpp"
 
 /**
@@ -17,15 +20,23 @@
 	@param		msg_	Error message that will get logged
 	@param		ret_	Return code
 
-	@return		Returns ret_
+	@return		Returns ret_ if val_ is not 0
+	@return		Returns val_ if val_ is 0
 */
 inline int ASSERT(int val_, const char* msg_, int ret_) {	
 
 	if (val_ != 0) {
 
 		logger::log(ERROR_LOG, msg_);
-		__debugbreak();
+		std::cout << "\n\nPress any key to continue...";
+		_getch();
+
 		return ret_;
+
+	}
+	else {
+	
+		return val_;
 
 	}
 
