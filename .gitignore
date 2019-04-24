@@ -262,3 +262,7 @@ __pycache__/
 
 # Application specific log files
 *.log
+
+# Dependency directory
+VK/ext/
+ext/
