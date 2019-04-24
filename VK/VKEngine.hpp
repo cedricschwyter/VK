@@ -17,6 +17,7 @@
 #include <iostream>
 #include <vector>
 #include <conio.h>
+#include <map>
 
 #include "VK_STATUS_CODE.hpp"
 #include "Logger.hpp"
@@ -53,6 +54,7 @@ private:
 	const bool								validationLayersEnabled			= false;
 #endif
 	VkDebugUtilsMessengerEXT				validationLayerDebugMessenger;
+	VkPhysicalDevice						physicalDevice					= VK_NULL_HANDLE;
 
 	/**
 		Initializes the logger
@@ -134,7 +136,34 @@ private:
 		Creates the VkDebugUtilsMessengerEXT for validation layer messages
 
 		@return		Returns VK_SC_SUCCESS on success
+		@return		Returns VK_SC_DEBUG_UTILS_MESSENGER_CREATION_ERROR on error
 	*/
 	VK_STATUS_CODE debugUtilsMessenger(void);
+
+	/**
+		Enumerates and selects the best physical device (GPU)
+
+		@return		Returns VK_SC_SUCCESS on success
+		@return		Returns VK_SC_PHYSICAL_DEVICE_ERROR on error
+	*/
+	VK_STATUS_CODE selectBestPhysicalDevice(void);
+
+	/**
+		Rates GPU for the operations that are about to be performed
+
+		@param		device_		The VkPhysicalDevice to be rated
+
+		@return		Returns an integer value as score
+	*/
+	int evaluateDeviceSuitabilityScore(VkPhysicalDevice device_);
+
+	/**
+		Prints information about GPU !!!NOT YET FULLY IMPLEMENTED!!!
+
+		@param		device_		The VkPhysicalDevice to print information about
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE printPhysicalDevicePropertiesAndFeatures(VkPhysicalDevice device_);
 
 };

@@ -57,6 +57,7 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 
 	ASSERT(createInstance(), "Instance creation error", VK_SC_INSTANCE_CREATON_ERROR);
 	ASSERT(debugUtilsMessenger(), "Debug utils messenger creation error", VK_SC_DEBUG_UTILS_MESSENGER_CREATION_ERROR);
+	ASSERT(selectBestPhysicalDevice(), "Failed to find a suitable GPU that supports Vulkan", VK_SC_PHYSICAL_DEVICE_ERROR);
 
 	return VK_SC_SUCCESS;
 
@@ -275,6 +276,88 @@ VK_STATUS_CODE VKEngine::debugUtilsMessenger() {
 	ASSERT(result, "Debug utils messenger creation error", VK_SC_DEBUG_UTILS_MESSENGER_CREATION_ERROR);
 
 	logger::log(EVENT_LOG, "Successfully created debug utils messenger");
+
+	return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::selectBestPhysicalDevice() {
+
+	logger::log(EVENT_LOG, "Enumerating GPUs...");
+	uint32_t physicalDeviceCount = 0;
+	vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
+
+	if (physicalDeviceCount == 0) {
+	
+		logger::log(ERROR_LOG, "Failed to find a suitable GPU");
+		return VK_SC_PHYSICAL_DEVICE_ERROR;
+	
+	}
+
+	std::vector< VkPhysicalDevice > physicalDevices(physicalDeviceCount);
+	vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, physicalDevices.data());
+
+	std::multimap< int, VkPhysicalDevice > possibleGPUs;
+
+	for (const auto& physicalDev : physicalDevices) {
+	
+		printPhysicalDevicePropertiesAndFeatures(physicalDev);
+
+		int rating = evaluateDeviceSuitabilityScore(physicalDev);
+
+		possibleGPUs.insert(std::make_pair(rating, physicalDev));
+	
+	}
+
+	if (possibleGPUs.rbegin()->first > 0) {		// Is the first possibility even suitable?
+
+		logger::log(EVENT_LOG, "Suitable GPU found");
+		physicalDevice = possibleGPUs.rbegin()->second;
+
+		return VK_SC_SUCCESS;
+
+	}
+	else {
+	
+		logger::log(ERROR_LOG, "Failed to find a suitable GPU that supports Vulkan");
+		return VK_SC_PHYSICAL_DEVICE_VULKAN_SUPPORT_ERROR;
+
+	}
+
+}
+
+int VKEngine::evaluateDeviceSuitabilityScore(VkPhysicalDevice device_) {
+
+	VkPhysicalDeviceProperties physicalDeviceProperties;
+	vkGetPhysicalDeviceProperties(device_, &physicalDeviceProperties);
+
+	VkPhysicalDeviceFeatures physicalDeviceFeatures;
+	vkGetPhysicalDeviceFeatures(device_, &physicalDeviceFeatures);
+
+	int score = 0;
+
+	if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+
+		score += 1000;
+
+	}
+
+	return score;
+
+}
+
+VK_STATUS_CODE VKEngine::printPhysicalDevicePropertiesAndFeatures(VkPhysicalDevice device_) {
+
+	VkPhysicalDeviceProperties physicalDeviceProperties;
+	vkGetPhysicalDeviceProperties(device_, &physicalDeviceProperties);
+
+	VkPhysicalDeviceFeatures physicalDeviceFeatures;
+	vkGetPhysicalDeviceFeatures(device_, &physicalDeviceFeatures);
+
+	// TODO: Print info
+	std::string info = std::string("GPU information:	") + physicalDeviceProperties.deviceName;
+
+	logger::log(EVENT_LOG, info);
 
 	return VK_SC_SUCCESS;
 
