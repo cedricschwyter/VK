@@ -22,6 +22,7 @@
 #include "VK_STATUS_CODE.hpp"
 #include "Logger.hpp"
 #include "ASSERT.cpp"
+#include "QueueFamily.cpp"
 
 class VKEngine {
 public:
@@ -165,5 +166,14 @@ private:
 		@return		Returns VK_SC_SUCCESS on success
 	*/
 	VK_STATUS_CODE printPhysicalDevicePropertiesAndFeatures(VkPhysicalDevice device_);
+
+	/**
+		Finds queue families that are suitable for the operations that are about to be performed on them
+	
+		@param		device_		A valid VkPhysicalDevice handle whose queue families are to be tested
+
+		@return		Returns a QueueFamily struct
+	*/
+	QueueFamily findSuitableQueueFamilies(VkPhysicalDevice device_);
 
 };

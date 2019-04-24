@@ -39,6 +39,9 @@
     <ClCompile Include="VK.hpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="QueueFamily.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VK_STATUS_CODE.hpp">

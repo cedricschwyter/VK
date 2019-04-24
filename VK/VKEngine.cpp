@@ -328,6 +328,8 @@ VK_STATUS_CODE VKEngine::selectBestPhysicalDevice() {
 
 int VKEngine::evaluateDeviceSuitabilityScore(VkPhysicalDevice device_) {
 
+	QueueFamily queue = findSuitableQueueFamilies(device_);
+
 	VkPhysicalDeviceProperties physicalDeviceProperties;
 	vkGetPhysicalDeviceProperties(device_, &physicalDeviceProperties);
 
@@ -339,6 +341,12 @@ int VKEngine::evaluateDeviceSuitabilityScore(VkPhysicalDevice device_) {
 	if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
 
 		score += 1000;
+
+	}
+
+	if (!queue.isComplete()) {
+	
+		return 0;
 
 	}
 
@@ -360,5 +368,38 @@ VK_STATUS_CODE VKEngine::printPhysicalDevicePropertiesAndFeatures(VkPhysicalDevi
 	logger::log(EVENT_LOG, info);
 
 	return VK_SC_SUCCESS;
+
+}
+
+QueueFamily VKEngine::findSuitableQueueFamilies(VkPhysicalDevice device_) {
+
+	QueueFamily indices;
+
+	uint32_t queueFamilyCount = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties(device_, &queueFamilyCount, nullptr);
+
+	std::vector< VkQueueFamilyProperties > queueFamilies(queueFamilyCount);
+	vkGetPhysicalDeviceQueueFamilyProperties(device_, &queueFamilyCount, queueFamilies.data());
+
+	int i = 0;
+	for (const auto& qF : queueFamilies) {
+	
+		if (qF.queueCount > 0 && (qF.queueFlags & VK_QUEUE_GRAPHICS_BIT)) {		// Does the queue family have at least one queue and does it support graphics-operations?
+		
+			indices.queueFamily = i;
+
+		}
+
+		if (indices.isComplete()) {
+		
+			break;
+
+		}
+
+		i++;
+
+	}
+
+	return indices;
 
 }
