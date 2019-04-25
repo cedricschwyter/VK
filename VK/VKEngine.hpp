@@ -56,6 +56,8 @@ private:
 #endif
 	VkDebugUtilsMessengerEXT				validationLayerDebugMessenger;
 	VkPhysicalDevice						physicalDevice					= VK_NULL_HANDLE;
+	VkDevice								logicalDevice;
+	VkQueue									graphicsQueue;
 
 	/**
 		Initializes the logger
@@ -175,5 +177,13 @@ private:
 		@return		Returns a QueueFamily struct
 	*/
 	QueueFamily findSuitableQueueFamilies(VkPhysicalDevice device_);
+
+	/**
+		Creates a VkDevice handle from a VkPhysicalDevice (class member)
+
+		@return		Returns VK_SC_SUCCESS on success
+		@return		Returns VK_SC_LOGICAL_DEVICE_ERROR on error
+	*/
+	VK_STATUS_CODE createLogicalDeviceFromPhysicalDevice(void);
 
 };

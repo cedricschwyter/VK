@@ -58,6 +58,7 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 	ASSERT(createInstance(), "Instance creation error", VK_SC_INSTANCE_CREATON_ERROR);
 	ASSERT(debugUtilsMessenger(), "Debug utils messenger creation error", VK_SC_DEBUG_UTILS_MESSENGER_CREATION_ERROR);
 	ASSERT(selectBestPhysicalDevice(), "Failed to find a suitable GPU that supports Vulkan", VK_SC_PHYSICAL_DEVICE_ERROR);
+	ASSERT(createLogicalDeviceFromPhysicalDevice(), "Failed to create a logical device from the selected physical device", VK_SC_LOGICAL_DEVICE_ERROR);
 
 	return VK_SC_SUCCESS;
 
@@ -81,6 +82,8 @@ VK_STATUS_CODE VKEngine::loop() {
 
 VK_STATUS_CODE VKEngine::clean() {
 
+	vkDestroyDevice(logicalDevice, allocator);
+
 	if (validationLayersEnabled) {
 	
 		vk::destroyDebugUtilsMessenger(instance, validationLayerDebugMessenger, allocator);
@@ -89,6 +92,7 @@ VK_STATUS_CODE VKEngine::clean() {
 	}
 
 	vkDestroyInstance(instance, allocator);
+
 	logger::log(EVENT_LOG, "Successfully destroyed instance");
 
 	glfwDestroyWindow(window);
@@ -233,11 +237,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL VKEngine::validationLayerDebugMessageCallback(
 	std::string header = "Validation Layer:	";
 	std::string message(pCallbackData_->pMessage);
 
-	if (messageSeverity_ <= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
-
-		logger::log(EVENT_LOG, header + message);
-
-	}
+	logger::log(EVENT_LOG, header + message);
 
 	if (messageSeverity_ > VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
 	
@@ -328,7 +328,7 @@ VK_STATUS_CODE VKEngine::selectBestPhysicalDevice() {
 
 int VKEngine::evaluateDeviceSuitabilityScore(VkPhysicalDevice device_) {
 
-	QueueFamily queue = findSuitableQueueFamilies(device_);
+	QueueFamily families = findSuitableQueueFamilies(device_);
 
 	VkPhysicalDeviceProperties physicalDeviceProperties;
 	vkGetPhysicalDeviceProperties(device_, &physicalDeviceProperties);
@@ -344,7 +344,7 @@ int VKEngine::evaluateDeviceSuitabilityScore(VkPhysicalDevice device_) {
 
 	}
 
-	if (!queue.isComplete()) {
+	if (!families.isComplete()) {
 	
 		return 0;
 
@@ -373,7 +373,7 @@ VK_STATUS_CODE VKEngine::printPhysicalDevicePropertiesAndFeatures(VkPhysicalDevi
 
 QueueFamily VKEngine::findSuitableQueueFamilies(VkPhysicalDevice device_) {
 
-	QueueFamily indices;
+	QueueFamily families;
 
 	uint32_t queueFamilyCount = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties(device_, &queueFamilyCount, nullptr);
@@ -386,11 +386,11 @@ QueueFamily VKEngine::findSuitableQueueFamilies(VkPhysicalDevice device_) {
 	
 		if (qF.queueCount > 0 && (qF.queueFlags & VK_QUEUE_GRAPHICS_BIT)) {		// Does the queue family have at least one queue and does it support graphics-operations?
 		
-			indices.queueFamily = i;
+			families.queueFamily = i;
 
 		}
 
-		if (indices.isComplete()) {
+		if (families.isComplete()) {
 		
 			break;
 
@@ -400,6 +400,65 @@ QueueFamily VKEngine::findSuitableQueueFamilies(VkPhysicalDevice device_) {
 
 	}
 
-	return indices;
+	return families;
+
+}
+
+VK_STATUS_CODE VKEngine::createLogicalDeviceFromPhysicalDevice() {
+
+	logger::log(EVENT_LOG, "Creating logical device...");
+	QueueFamily families = findSuitableQueueFamilies(physicalDevice);
+
+	VkDeviceQueueCreateInfo deviceQueueCreateInfo			= {};
+	deviceQueueCreateInfo.sType								= VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	deviceQueueCreateInfo.queueFamilyIndex					= families.queueFamily.value();
+	deviceQueueCreateInfo.queueCount						= 1;
+
+	float queuePriority										= 1.0f;
+	deviceQueueCreateInfo.pQueuePriorities					= &queuePriority;
+
+	VkPhysicalDeviceFeatures physicalDeviceFeatures			= {};		// No features are necessary at the moment so this struct is just initialized to VK_FALSE (0)
+	
+	VkDeviceCreateInfo deviceCreateInfo						= {};
+	deviceCreateInfo.sType									= VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	deviceCreateInfo.pQueueCreateInfos						= &deviceQueueCreateInfo;
+	deviceCreateInfo.queueCreateInfoCount					= 1;
+	deviceCreateInfo.pEnabledFeatures						= &physicalDeviceFeatures;
+
+	deviceCreateInfo.enabledExtensionCount = 0;
+
+	if (validationLayersEnabled) {
+
+		deviceCreateInfo.enabledLayerCount = static_cast< uint32_t >(validationLayers.size());
+		deviceCreateInfo.ppEnabledLayerNames = validationLayers.data();
+
+	}
+	else {
+
+		deviceCreateInfo.enabledLayerCount = 0;
+
+	}
+
+	result = vkCreateDevice(
+		physicalDevice, 
+		&deviceCreateInfo, 
+		allocator, 
+		&logicalDevice
+		);
+	ASSERT(result, "Failed to create a logical device", VK_SC_LOGICAL_DEVICE_ERROR);
+
+	logger::log(EVENT_LOG, "Successfully created logical device");
+	logger::log(EVENT_LOG, "Retrieving queue handle for graphics queue...");
+
+	vkGetDeviceQueue(
+		logicalDevice, 
+		families.queueFamily.value(), 
+		0, 
+		&graphicsQueue
+		);
+
+	logger::log(EVENT_LOG, "Successfully retrieved queue handle for graphics queue");
+
+	return VK_SC_SUCCESS;
 
 }
