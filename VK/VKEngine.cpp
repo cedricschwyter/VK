@@ -393,9 +393,24 @@ QueueFamily VKEngine::findSuitableQueueFamilies(VkPhysicalDevice device_) {
 	
 		if (qF.queueCount > 0 && (qF.queueFlags & VK_QUEUE_GRAPHICS_BIT)) {		// Does the queue family have at least one queue and does it support graphics-operations?
 		
-			families.queueFamily = i;
+			families.graphicsFamilyIndex = i;
 
 		}
+
+		VkBool32 presentSupport = false;
+		vkGetPhysicalDeviceSurfaceSupportKHR(
+			device_,
+			i, 
+			surface,
+			&presentSupport
+			);
+
+		if (qF.queueCount > 0 && presentSupport) {		// Also a presentation queue family is needed to actually display to the surface
+
+			families.presentationFamilyIndex = i;
+		
+		}
+
 
 		if (families.isComplete()) {
 		
@@ -416,20 +431,28 @@ VK_STATUS_CODE VKEngine::createLogicalDeviceFromPhysicalDevice() {
 	logger::log(EVENT_LOG, "Creating logical device...");
 	QueueFamily families = findSuitableQueueFamilies(physicalDevice);
 
-	VkDeviceQueueCreateInfo deviceQueueCreateInfo			= {};
-	deviceQueueCreateInfo.sType								= VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	deviceQueueCreateInfo.queueFamilyIndex					= families.queueFamily.value();
-	deviceQueueCreateInfo.queueCount						= 1;
+	std::vector< VkDeviceQueueCreateInfo > deviceQueueCreateInfos;
+	std::set< uint32_t > uniqueQueueFamilies = { families.graphicsFamilyIndex.value(), families.presentationFamilyIndex.value() };
 
-	float queuePriority										= 1.0f;
-	deviceQueueCreateInfo.pQueuePriorities					= &queuePriority;
+	float queuePriority = 1.0f;
+	for (uint32_t qF : uniqueQueueFamilies) {
+
+		VkDeviceQueueCreateInfo deviceQueueCreateInfo				= {};
+		deviceQueueCreateInfo.sType								= VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		deviceQueueCreateInfo.queueFamilyIndex					= qF;
+		deviceQueueCreateInfo.queueCount							= 1;
+		deviceQueueCreateInfo.pQueuePriorities					= &queuePriority;
+
+		deviceQueueCreateInfos.push_back(deviceQueueCreateInfo);
+
+	}
 
 	VkPhysicalDeviceFeatures physicalDeviceFeatures			= {};		// No features are necessary at the moment so this struct is just initialized to VK_FALSE (0)
 	
 	VkDeviceCreateInfo deviceCreateInfo						= {};
 	deviceCreateInfo.sType									= VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	deviceCreateInfo.pQueueCreateInfos						= &deviceQueueCreateInfo;
-	deviceCreateInfo.queueCreateInfoCount					= 1;
+	deviceCreateInfo.pQueueCreateInfos						= deviceQueueCreateInfos.data();
+	deviceCreateInfo.queueCreateInfoCount					= static_cast< uint32_t >(deviceQueueCreateInfos.size());
 	deviceCreateInfo.pEnabledFeatures						= &physicalDeviceFeatures;
 
 	deviceCreateInfo.enabledExtensionCount = 0;
@@ -453,18 +476,25 @@ VK_STATUS_CODE VKEngine::createLogicalDeviceFromPhysicalDevice() {
 		&logicalDevice
 		);
 	ASSERT(result, "Failed to create a logical device", VK_SC_LOGICAL_DEVICE_ERROR);
-
 	logger::log(EVENT_LOG, "Successfully created logical device");
-	logger::log(EVENT_LOG, "Retrieving queue handle for graphics queue...");
 
+	logger::log(EVENT_LOG, "Retrieving queue handle for graphics queue...");
 	vkGetDeviceQueue(
 		logicalDevice, 
-		families.queueFamily.value(), 
+		families.graphicsFamilyIndex.value(), 
 		0, 
 		&graphicsQueue
 		);
-
 	logger::log(EVENT_LOG, "Successfully retrieved queue handle for graphics queue");
+
+	logger::log(EVENT_LOG, "Retrieving queue handle for presentation queue...");
+	vkGetDeviceQueue(
+		logicalDevice,
+		families.presentationFamilyIndex.value(),
+		0,
+		&presentationQueue
+	);
+	logger::log(EVENT_LOG, "Successfully retrieved queue handle for presentation queue");
 
 	return VK_SC_SUCCESS;
 

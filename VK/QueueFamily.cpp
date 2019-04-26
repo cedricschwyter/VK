@@ -15,7 +15,8 @@
 */
 struct QueueFamily {
 
-	std::optional< uint32_t > queueFamily;		// using std::optional here allows to use one boolean variable less and is a neat C++17 feature
+	std::optional< uint32_t > graphicsFamilyIndex;		// using std::optional here allows to use one boolean variable less and is a neat C++17 feature
+	std::optional< uint32_t > presentationFamilyIndex;
 
 	/**
 		Checks whether a queue family index has been found
@@ -24,7 +25,7 @@ struct QueueFamily {
 	*/
 	bool isComplete(void) {
 	
-		return queueFamily.has_value();
+		return graphicsFamilyIndex.has_value() && presentationFamilyIndex.has_value();
 
 	}
 

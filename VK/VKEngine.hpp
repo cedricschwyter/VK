@@ -17,6 +17,7 @@
 #include <iostream>
 #include <vector>
 #include <conio.h>
+#include <set>
 #include <map>
 
 #include "VK_STATUS_CODE.hpp"
@@ -58,6 +59,7 @@ private:
 	VkPhysicalDevice						physicalDevice					= VK_NULL_HANDLE;
 	VkDevice								logicalDevice;
 	VkQueue									graphicsQueue;
+	VkQueue									presentationQueue;
 	VkSurfaceKHR							surface;
 
 	/**
