@@ -14,11 +14,6 @@ SDL_STATUS_CODE LoadingScreen::loop() {
 
 
 	SDL_Event e;
-	SDL_Rect rect;
-	rect.x = 100;
-	rect.y = 500;
-	rect.w = 400;
-	rect.h = 20;
 
 	while (!close) {
 
@@ -34,12 +29,6 @@ SDL_STATUS_CODE LoadingScreen::loop() {
 
 		}
 
-		SDL_Rect rectProgress;
-		rectProgress.x = 100;
-		rectProgress.y = 500;
-		rectProgress.w = static_cast< int >(vk::engine.loadingProgress * 400);
-		rectProgress.h = 20;
-
 		SDL_RenderCopy(
 			renderer,
 			background,
@@ -47,26 +36,6 @@ SDL_STATUS_CODE LoadingScreen::loop() {
 			NULL
 			);
 
-		SDL_SetRenderDrawColor(
-			renderer,
-			255,
-			255,
-			255,
-			SDL_ALPHA_OPAQUE
-			);
-
-		SDL_RenderFillRect(renderer, &rect);
-
-		SDL_SetRenderDrawColor(
-			renderer,
-			150,
-			82,
-			104,
-			SDL_ALPHA_OPAQUE
-			);
-
-		SDL_RenderDrawRect(renderer, &rect);
-		SDL_RenderFillRect(renderer, &rectProgress);
 		SDL_RenderPresent(renderer);
 
 	}

@@ -34,7 +34,6 @@ public:
 	const unsigned int					HEIGHT					= 720;
 	const char*							TITLE					= "VK by D3PSI";
 	std::mutex							closeLoadingScreen;
-	float								loadingProgress			= 0.0f;
 
 	/**
 		Initializes VKEngine and loads dependencies
