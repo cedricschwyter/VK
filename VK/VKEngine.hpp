@@ -43,9 +43,9 @@ private:
 
 	VkResult								result;
 	GLFWwindow*								window;
-	VkAllocationCallbacks*					allocator			= nullptr;
+	VkAllocationCallbacks*					allocator						= nullptr;
 	VkInstance								instance;
-	const std::vector< const char* >		validationLayers	= {
+	const std::vector< const char* >		validationLayers				= {
 	
 		"VK_LAYER_LUNARG_standard_validation"
 	
@@ -61,6 +61,11 @@ private:
 	VkQueue									graphicsQueue;
 	VkQueue									presentationQueue;
 	VkSurfaceKHR							surface;
+	const std::vector< const char* >		requiredExtensions				= {
+	
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME
+	
+	};
 
 	/**
 		Initializes the logger
@@ -195,5 +200,14 @@ private:
 		@return		Returns VK_SC_SUCCESS on success
 	*/
 	VK_STATUS_CODE createSurfaceGLFW(void);
+
+	/**
+		Checks whether the device supports the swapchain extension (should be implicit if it supports Vulkan, but double checking never hurts, right?)
+		
+		@param		device_		The VkPhysicalDevice handle that should be tested
+
+		@return		Returns true if the device supports the VK_KHR_swapchain extension
+	*/
+	bool checkDeviceSwapchainExtensionSupport(VkPhysicalDevice device_);
 
 };

@@ -351,7 +351,7 @@ int VKEngine::evaluateDeviceSuitabilityScore(VkPhysicalDevice device_) {
 
 	}
 
-	if (!families.isComplete()) {
+	if (!families.isComplete() || !checkDeviceSwapchainExtensionSupport(device_)) {
 	
 		return 0;
 
@@ -510,5 +510,40 @@ VK_STATUS_CODE VKEngine::createSurfaceGLFW() {
 		), "GLFW surface creation error", VK_SC_SURFACE_CREATION_ERROR);
 
 	return VK_SC_SUCCESS;
+
+}
+
+bool VKEngine::checkDeviceSwapchainExtensionSupport(VkPhysicalDevice device_) {
+
+	logger::log(EVENT_LOG, "Checking, whether the device supports the necessary extensions...");
+
+	uint32_t extensionCount;
+	vkEnumerateDeviceExtensionProperties(
+		device_,
+		nullptr,
+		&extensionCount,
+		nullptr
+		);
+
+	std::vector< VkExtensionProperties > availableExtensions(extensionCount);
+	vkEnumerateDeviceExtensionProperties(
+		device_,
+		nullptr,
+		&extensionCount, 
+		availableExtensions.data()
+		);
+
+	// Check whether all required extensions are amongst the available ones
+	std::set< std::string > extensions(requiredExtensions.begin(), requiredExtensions.end());
+
+	for (const auto& extension : availableExtensions) {
+
+		extensions.erase(extension.extensionName);
+	
+	}
+	
+	logger::log(EVENT_LOG, extensions.empty() ? "Device supports necessary extensions" : "Device does not support necessary extensions");
+
+	return extensions.empty();
 
 }
