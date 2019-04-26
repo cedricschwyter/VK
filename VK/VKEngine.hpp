@@ -19,11 +19,13 @@
 #include <conio.h>
 #include <set>
 #include <map>
+#include <thread>
 
 #include "VK_STATUS_CODE.hpp"
 #include "Logger.hpp"
 #include "ASSERT.cpp"
 #include "QueueFamily.cpp"
+#include "LoadingScreen.hpp"
 
 class VKEngine {
 public:
@@ -31,6 +33,8 @@ public:
 	const unsigned int					WIDTH					= 1280;
 	const unsigned int					HEIGHT					= 720;
 	const char*							TITLE					= "VK by D3PSI";
+	std::mutex							closeLoadingScreen;
+	float								loadingProgress			= 0.0f;
 
 	/**
 		Initializes VKEngine and loads dependencies
@@ -66,6 +70,7 @@ private:
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME
 	
 	};
+	LoadingScreen* loadingScreen;
 
 	/**
 		Initializes the logger
@@ -209,5 +214,10 @@ private:
 		@return		Returns true if the device supports the VK_KHR_swapchain extension
 	*/
 	bool checkDeviceSwapchainExtensionSupport(VkPhysicalDevice device_);
+
+	/**
+		Initializes the loading screen
+	*/
+	void initLoadingScreen(void);
 
 };
