@@ -12,10 +12,14 @@
 
 #include "VKEngine.hpp"
 #include "VK_STATUS_CODE.hpp"
+#include "VK.hpp"
 
 namespace vk {
 
-	VKEngine engine;
+	VKEngine							engine;
+	const unsigned int					WIDTH		= 1280;
+	const unsigned int					HEIGHT		= 720;
+	const char*							TITLE		= "VK by D3PSI";
 
 	VK_STATUS_CODE init() {
 	

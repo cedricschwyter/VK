@@ -16,6 +16,8 @@ VK_STATUS_CODE VKEngine::init() {
 
 	ASSERT(initLogger(), "Logger initialization error", LOGGER_SC_UNKNOWN_ERROR);
 	logger::log(START_LOG, "Initializing...");
+	logger::log(EVENT_LOG, "Initializing loading screen...");
+	initLoadingScreen();
 	ASSERT(initWindow(), "Window initialization error", VK_SC_WINDOW_ERROR);
 	ASSERT(initVulkan(), "Vulkan initialization error", VK_SC_VULKAN_ERROR);
 	ASSERT(loop(), "Vulkan runtime error", VK_SC_VULKAN_RUNTIME_ERROR);
@@ -39,11 +41,14 @@ VK_STATUS_CODE VKEngine::initWindow() {
 
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+	glfwWindowHint(GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	glfwWindowHint(GLFW_FOCUSED, GLFW_TRUE);
+	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
 	window = glfwCreateWindow(
-		WIDTH,
-		HEIGHT,
-		TITLE,
+		vk::WIDTH,
+		vk::HEIGHT,
+		vk::TITLE,
 		nullptr,
 		nullptr
 		);
@@ -60,6 +65,13 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 	ASSERT(createSurfaceGLFW(), "Surface creation error", VK_SC_SURFACE_CREATION_ERROR);
 	ASSERT(selectBestPhysicalDevice(), "Failed to find a suitable GPU that supports Vulkan", VK_SC_PHYSICAL_DEVICE_ERROR);
 	ASSERT(createLogicalDeviceFromPhysicalDevice(), "Failed to create a logical device from the selected physical device", VK_SC_LOGICAL_DEVICE_ERROR);
+
+	glfwShowWindow(window);
+	glfwFocusWindow(window);
+
+	loadingScreen->closeMutex.lock();
+	loadingScreen->close = true;
+	loadingScreen->closeMutex.unlock();
 
 	return VK_SC_SUCCESS;
 
@@ -128,9 +140,9 @@ VK_STATUS_CODE VKEngine::createInstance() {
 
 	VkApplicationInfo applicationInfo				= {};
 	applicationInfo.sType							= VK_STRUCTURE_TYPE_APPLICATION_INFO;
-	applicationInfo.pApplicationName				= TITLE;
+	applicationInfo.pApplicationName				= vk::TITLE;
 	applicationInfo.applicationVersion				= VK_MAKE_VERSION(1, 0, 0);
-	applicationInfo.pEngineName						= "D3PSI's VKEngine";
+	applicationInfo.pEngineName						= vk::TITLE;
 	applicationInfo.engineVersion					= VK_MAKE_VERSION(1, 0, 0);
 	applicationInfo.apiVersion						= VK_API_VERSION_1_0;
 
@@ -545,5 +557,20 @@ bool VKEngine::checkDeviceSwapchainExtensionSupport(VkPhysicalDevice device_) {
 	logger::log(EVENT_LOG, extensions.empty() ? "Device supports necessary extensions" : "Device does not support necessary extensions");
 
 	return extensions.empty();
+
+}
+
+void VKEngine::initLoadingScreen() {
+
+	loadingScreen = new LoadingScreen();
+
+	logger::log(EVENT_LOG, "Starting loading screen thread...");
+	std::thread t0([=]() {
+
+		loadingScreen->loop();
+		logger::log(EVENT_LOG, "Stopping loading screen thread...");
+
+	});
+	t0.detach();
 
 }
