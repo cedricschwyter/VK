@@ -58,6 +58,7 @@ private:
 	VkPhysicalDevice						physicalDevice					= VK_NULL_HANDLE;
 	VkDevice								logicalDevice;
 	VkQueue									graphicsQueue;
+	VkSurfaceKHR							surface;
 
 	/**
 		Initializes the logger
@@ -185,5 +186,12 @@ private:
 		@return		Returns VK_SC_LOGICAL_DEVICE_ERROR on error
 	*/
 	VK_STATUS_CODE createLogicalDeviceFromPhysicalDevice(void);
+
+	/**
+		Creates a VkSurfaceKHR handle via GLFW
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE createSurfaceGLFW(void);
 
 };

@@ -57,6 +57,7 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 
 	ASSERT(createInstance(), "Instance creation error", VK_SC_INSTANCE_CREATON_ERROR);
 	ASSERT(debugUtilsMessenger(), "Debug utils messenger creation error", VK_SC_DEBUG_UTILS_MESSENGER_CREATION_ERROR);
+	ASSERT(createSurfaceGLFW(), "Surface creation error", VK_SC_SURFACE_CREATION_ERROR);
 	ASSERT(selectBestPhysicalDevice(), "Failed to find a suitable GPU that supports Vulkan", VK_SC_PHYSICAL_DEVICE_ERROR);
 	ASSERT(createLogicalDeviceFromPhysicalDevice(), "Failed to create a logical device from the selected physical device", VK_SC_LOGICAL_DEVICE_ERROR);
 
@@ -83,6 +84,7 @@ VK_STATUS_CODE VKEngine::loop() {
 VK_STATUS_CODE VKEngine::clean() {
 
 	vkDestroyDevice(logicalDevice, allocator);
+	logger::log(EVENT_LOG, "Successfully destroyed device");
 
 	if (validationLayersEnabled) {
 	
@@ -91,11 +93,15 @@ VK_STATUS_CODE VKEngine::clean() {
 
 	}
 
-	vkDestroyInstance(instance, allocator);
+	vkDestroySurfaceKHR(instance, surface, allocator);
+	logger::log(EVENT_LOG, "Successfully destroyed surface");
 
+	vkDestroyInstance(instance, allocator);
 	logger::log(EVENT_LOG, "Successfully destroyed instance");
 
 	glfwDestroyWindow(window);
+	logger::log(EVENT_LOG, "Successfully destroyed window");
+
 	glfwTerminate();
 	logger::log(EVENT_LOG, "Successfully terminated GLFW");
 
@@ -311,7 +317,8 @@ VK_STATUS_CODE VKEngine::selectBestPhysicalDevice() {
 
 	if (possibleGPUs.rbegin()->first > 0) {		// Is the first possibility even suitable?
 
-		logger::log(EVENT_LOG, "Suitable GPU found");
+		logger::log(EVENT_LOG, "Suitable GPU found: ");
+		printPhysicalDevicePropertiesAndFeatures(possibleGPUs.rbegin()->second);
 		physicalDevice = possibleGPUs.rbegin()->second;
 
 		return VK_SC_SUCCESS;
@@ -458,6 +465,19 @@ VK_STATUS_CODE VKEngine::createLogicalDeviceFromPhysicalDevice() {
 		);
 
 	logger::log(EVENT_LOG, "Successfully retrieved queue handle for graphics queue");
+
+	return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::createSurfaceGLFW() {
+
+	ASSERT(glfwCreateWindowSurface(
+		instance, 
+		window, 
+		allocator, 
+		&surface
+		), "GLFW surface creation error", VK_SC_SURFACE_CREATION_ERROR);
 
 	return VK_SC_SUCCESS;
 
