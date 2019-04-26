@@ -21,9 +21,9 @@ SDL_STATUS_CODE LoadingScreen::loop() {
 
 			if (e.type == SDL_QUIT) {
 
-				vk::engine.closeLoadingScreen.lock();
+				closeMutex.lock();
 				close = true;
-				vk::engine.closeLoadingScreen.unlock();
+				closeMutex.unlock();
 
 			}
 
@@ -57,7 +57,7 @@ LoadingScreen::LoadingScreen() {
 
 	window = SDL_CreateWindow(
 
-		vk::engine.TITLE,
+		vk::TITLE,
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
 		1300,

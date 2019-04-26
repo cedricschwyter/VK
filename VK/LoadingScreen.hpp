@@ -21,7 +21,8 @@ class LoadingScreen
 {
 public:
 
-	bool close = false;
+	bool			close				= false;
+	std::mutex		closeMutex;
 
 	/**
 		Contains the main loop for the loading screen window

@@ -9,7 +9,10 @@
 */
 namespace vk {
 
-	extern VKEngine engine;
+	extern VKEngine					engine;
+	extern const unsigned int		HEIGHT;
+	extern const unsigned int		WIDTH;
+	extern const char*				TITLE;
 
 	/**
 		Handles main initialization of everything

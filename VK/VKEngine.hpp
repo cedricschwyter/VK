@@ -30,11 +30,6 @@
 class VKEngine {
 public:
 
-	const unsigned int					WIDTH					= 1280;
-	const unsigned int					HEIGHT					= 720;
-	const char*							TITLE					= "VK by D3PSI";
-	std::mutex							closeLoadingScreen;
-
 	/**
 		Initializes VKEngine and loads dependencies
 

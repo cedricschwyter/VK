@@ -46,9 +46,9 @@ VK_STATUS_CODE VKEngine::initWindow() {
 	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
 	window = glfwCreateWindow(
-		WIDTH,
-		HEIGHT,
-		TITLE,
+		vk::WIDTH,
+		vk::HEIGHT,
+		vk::TITLE,
 		nullptr,
 		nullptr
 		);
@@ -69,9 +69,9 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 	glfwShowWindow(window);
 	glfwFocusWindow(window);
 
-	closeLoadingScreen.lock();
+	loadingScreen->closeMutex.lock();
 	loadingScreen->close = true;
-	closeLoadingScreen.unlock();
+	loadingScreen->closeMutex.unlock();
 
 	return VK_SC_SUCCESS;
 
@@ -140,9 +140,9 @@ VK_STATUS_CODE VKEngine::createInstance() {
 
 	VkApplicationInfo applicationInfo				= {};
 	applicationInfo.sType							= VK_STRUCTURE_TYPE_APPLICATION_INFO;
-	applicationInfo.pApplicationName				= TITLE;
+	applicationInfo.pApplicationName				= vk::TITLE;
 	applicationInfo.applicationVersion				= VK_MAKE_VERSION(1, 0, 0);
-	applicationInfo.pEngineName						= "D3PSI's VKEngine";
+	applicationInfo.pEngineName						= vk::TITLE;
 	applicationInfo.engineVersion					= VK_MAKE_VERSION(1, 0, 0);
 	applicationInfo.apiVersion						= VK_API_VERSION_1_0;
 
