@@ -10,8 +10,8 @@
 #pragma once
 
 // Edit configuration here
-#define VK_DEVELOPMENT
-//#define VK_RELEASE
+//#define VK_DEVELOPMENT	// enable this for verbose output
+#define VK_RELEASE			// enable this for performance
 
 // Default values
 #if !defined VK_DEVELOPMENT && !defined VK_RELEASE
