@@ -25,9 +25,11 @@ namespace logger {
 	const std::string		START_LOG_PATH		= "logs/start.log";
 	const std::string		EVENT_LOG_PATH		= "logs/event.log";
 
+	std::mutex				streamBusy;
+
 	LOGGER_STATUS_CODE init() {
 	
-		_mkdir(LOG_DIR);
+		if(_mkdir(LOG_DIR) >= 0) return LOGGER_SC_DIRECTORY_CREATION_ERROR;
 		std::ofstream error;
 		std::ofstream start;
 		std::ofstream event;
@@ -44,6 +46,7 @@ namespace logger {
 
 	LOGGER_STATUS_CODE log(LOG_TYPE log_, const char* msg_) {
 	
+		streamBusy.lock();
 		static int countEvent = 0;
 		static int countError = 0;
 		std::ofstream stream;
@@ -79,7 +82,7 @@ namespace logger {
 					<< blue << msg_ << white << std::endl;
 
 				stream.close();
-
+#ifdef VK_DEVELOPMENT
 				std::cerr << green << Day << white << ":"
 					<< green << Month << white << ":"
 					<< green << Year << white << "   "
@@ -88,8 +91,7 @@ namespace logger {
 					<< green << Sec << white << "		===		"
 					<< red << "CRITICAL: "
 					<< blue << msg_ << white << std::endl;
-
-
+#endif
 			}
 			else {
 
@@ -104,6 +106,8 @@ namespace logger {
 					<< red << "CRITICAL: "
 					<< blue << msg_ << white << std::endl;
 
+				stream.close();
+#ifdef VK_DEVELOPMENT
 				std::cerr << green << Day << white << ":"
 					<< green << Month << white << ":"
 					<< green << Year << white << "   "
@@ -112,9 +116,7 @@ namespace logger {
 					<< green << Sec << white << "		===		"
 					<< red << "CRITICAL: "
 					<< blue << msg_ << white << std::endl;
-
-				stream.close();
-
+#endif
 			}
 		case START_LOG:
 			stream.open(START_LOG_PATH, std::ios::app);
@@ -144,7 +146,7 @@ namespace logger {
 					<< blue << msg_ << white << std::endl;
 
 				stream.close();
-
+#ifdef VK_DEVELOPMENT
 				std::cout << green << Day << white << ":"
 					<< green << Month << white << ":"
 					<< green << Year << white << "   "
@@ -152,7 +154,7 @@ namespace logger {
 					<< green << Min << white << ":"
 					<< green << Sec << white << "		===		"
 					<< blue << msg_ << white << std::endl;
-
+#endif
 			}
 			else {
 
@@ -167,7 +169,7 @@ namespace logger {
 					<< blue << msg_ << white << std::endl;
 
 				stream.close();
-
+#ifdef VK_DEVELOPMENT
 				std::cout << green << Day << white << ":"
 					<< green << Month << white << ":"
 					<< green << Year << white << "   "
@@ -175,7 +177,7 @@ namespace logger {
 					<< green << Min << white << ":"
 					<< green << Sec << white << "		===		"
 					<< blue << msg_ << white << std::endl;
-
+#endif
 			}
 			break;
 
@@ -189,6 +191,8 @@ namespace logger {
 			throw std::runtime_error(msg_);
 
 		}
+
+		streamBusy.unlock();
 
 		return LOGGER_SC_SUCCESS;
 

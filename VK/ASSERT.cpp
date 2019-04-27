@@ -28,8 +28,6 @@ inline int ASSERT(int val_, const char* msg_, int ret_) {
 	if (val_ != 0) {
 
 		logger::log(ERROR_LOG, msg_);
-		std::cout << "\n\nPress any key to continue...";
-		_getch();
 
 		return ret_;
 

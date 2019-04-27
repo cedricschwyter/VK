@@ -8,7 +8,15 @@
 	@brief		Implementation of the Vulkan-part for my Vulkan vs. OpenGL comparison (Maturaarbeit)
 */
 
+#include "Version.hpp"
+
+#if !defined VK_DEVELOPMENT && defined VK_RELEASE
+	#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+#endif
+
 #include <iostream>
+#define NOMINMAX		// Fixes std::min/std::max/std::clamp error
+#include <Windows.h>
 
 #include "VKEngine.hpp"
 #include "VK_STATUS_CODE.hpp"
@@ -86,6 +94,24 @@ namespace vk {
 			return VK_SC_DEBUG_UTILS_MESSENGER_CLEANUP_ERROR;
 		
 		}
+	
+	}
+
+	void hideConsole() {
+
+		::ShowWindow(::GetConsoleWindow(), SW_HIDE);
+	
+	}
+
+	void showConsole() {
+
+		::ShowWindow(::GetConsoleWindow(), SW_SHOW);
+	
+	}
+
+	bool isConsoleVisible() {
+
+		return ::IsWindowVisible(::GetConsoleWindow()) != FALSE;
 	
 	}
 

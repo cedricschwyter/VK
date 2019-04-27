@@ -8,6 +8,9 @@
 	@brief		Prototype of the Logger namespace
 */
 #pragma once
+#include <mutex>
+
+#include "Version.hpp"
 #include "LOGGER_STATUS_CODE.cpp"
 #include "LOG_TYPE.cpp"
 

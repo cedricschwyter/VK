@@ -20,12 +20,14 @@
 #include <set>
 #include <map>
 #include <thread>
+#include <algorithm>
 
 #include "VK_STATUS_CODE.hpp"
 #include "Logger.hpp"
 #include "ASSERT.cpp"
 #include "QueueFamily.cpp"
 #include "LoadingScreen.hpp"
+#include "SwapchainDetails.cpp"
 
 class VKEngine {
 public:
@@ -39,32 +41,36 @@ public:
 
 private:
 
-	VkResult								result;
-	GLFWwindow*								window;
-	VkAllocationCallbacks*					allocator						= nullptr;
-	VkInstance								instance;
-	const std::vector< const char* >		validationLayers				= {
+	VkResult								result								= VK_SUCCESS;
+	GLFWwindow*								window								= nullptr;
+	VkAllocationCallbacks*					allocator							= nullptr;
+	VkInstance								instance							= VK_NULL_HANDLE;
+	const std::vector< const char* >		validationLayers					= {
 	
 		"VK_LAYER_LUNARG_standard_validation"
 	
 	};
 #ifdef VK_DEVELOPMENT
-	const bool								validationLayersEnabled			= true;
+	const bool								validationLayersEnabled				= true;
 #else
-	const bool								validationLayersEnabled			= false;
+	const bool								validationLayersEnabled				= false;
 #endif
-	VkDebugUtilsMessengerEXT				validationLayerDebugMessenger;
-	VkPhysicalDevice						physicalDevice					= VK_NULL_HANDLE;
-	VkDevice								logicalDevice;
-	VkQueue									graphicsQueue;
-	VkQueue									presentationQueue;
-	VkSurfaceKHR							surface;
-	const std::vector< const char* >		requiredExtensions				= {
+	VkDebugUtilsMessengerEXT				validationLayerDebugMessenger		= VK_NULL_HANDLE;
+	VkPhysicalDevice						physicalDevice						= VK_NULL_HANDLE;
+	VkDevice								logicalDevice						= VK_NULL_HANDLE;
+	VkQueue									graphicsQueue						= VK_NULL_HANDLE;
+	VkQueue									presentationQueue					= VK_NULL_HANDLE;
+	VkSurfaceKHR							surface								= VK_NULL_HANDLE;
+	const std::vector< const char* >		requiredExtensions					= {
 	
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME
 	
 	};
-	LoadingScreen* loadingScreen;
+	LoadingScreen*							loadingScreen						= nullptr;
+	VkSwapchainKHR							swapchain							= VK_NULL_HANDLE;
+	VkFormat								swapchainImageFormat;
+	VkExtent2D								swapchainImageExtent;
+	std::vector< VkImage >					swapchainImages;
 
 	/**
 		Initializes the logger
@@ -206,6 +212,7 @@ private:
 		@param		device_		The VkPhysicalDevice handle that should be tested
 
 		@return		Returns true if the device supports the VK_KHR_swapchain extension
+		@return		Returns false if the device does not support the VK_KHR_swapchain extensions
 	*/
 	bool checkDeviceSwapchainExtensionSupport(VkPhysicalDevice device_);
 
@@ -213,5 +220,48 @@ private:
 		Initializes the loading screen
 	*/
 	void initLoadingScreen(void);
+
+	/**
+		Queries the specified device's swap chain capabilities and details
+
+		@param		device_		The device whose details are to be enumerated
+
+		@return		Returns a SwapchainDetails struct containing the enumerated information
+	*/
+	SwapchainDetails querySwapchainDetails(VkPhysicalDevice device_);
+
+	/**
+		Determines the best swapchain-format to use (in the entire application)
+
+		@param		availableFormats_		A reference to an std::vector containing formats to choose from
+
+		@return		Returns the preferred VkSurfaceFormatKHR
+	*/
+	VkSurfaceFormatKHR evaluateBestSwapchainSurfaceFormat(const std::vector< VkSurfaceFormatKHR >& availableFormats_);
+
+	/**
+		Determines the best swapchain-present-mode to use
+
+		@param		availablePresentModes_		A reference to an std::vector containing present modes to choose from
+
+		@return		Returns the preferred VkPresentModeKHR
+	*/
+	VkPresentModeKHR evaluateBestSwapchainSurfacePresentMode(const std::vector< VkPresentModeKHR >& availablePresentModes_);
+
+	/**
+		Determines the swapchain extent from a set of given surface capabilities
+
+		@param		capabilities_		The supported swapchain-extents of the GPU can be fount in a VkSurfaceCapabilitiesKHR struct
+
+		@return		Returns a VkExtent2D which should be specified in VkSwapchainCreateInfoKHR
+	*/
+	VkExtent2D evaluateSwapchainExtent(const VkSurfaceCapabilitiesKHR& capabilities_); 
+
+	/**
+		Creates a VkSwapchain handle
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE createSwapchain(void);
 
 };

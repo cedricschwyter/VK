@@ -56,4 +56,22 @@ namespace vk {
 		const VkAllocationCallbacks*		pAllocator_
 	);
 
+	/**
+		Makes the console invisible
+	*/
+	void hideConsole(void);
+	
+	/**
+		Makes the console visible
+	*/
+	void showConsole(void);
+	
+	/**
+		Checks whether the console window is visible at the moment
+
+		@return		Returns true if the console window is visible
+		@return		Returns false if the console window is not visible
+	*/
+	bool isConsoleVisible(void);
+
 }

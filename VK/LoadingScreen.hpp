@@ -38,10 +38,10 @@ public:
 
 private:
 
-	SDL_Window*			window;
-	SDL_Surface*		imageSurface;
-	SDL_Texture*		background;
-	SDL_Renderer*		renderer;
+	SDL_Window*			window				= nullptr;
+	SDL_Surface*		imageSurface		= nullptr;
+	SDL_Texture*		background			= nullptr;
+	SDL_Renderer*		renderer			= nullptr;
 
 	/**
 		Cleans allocated resources and terminates SDL2

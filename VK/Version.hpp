@@ -10,7 +10,7 @@
 #pragma once
 
 // Edit configuration here
-//#define VK_DEVELOPMENT
+#define VK_DEVELOPMENT
 //#define VK_RELEASE
 
 // Default values
