@@ -21,6 +21,7 @@
 #include <map>
 #include <thread>
 #include <algorithm>
+#include <string>
 
 #include "VK_STATUS_CODE.hpp"
 #include "Logger.hpp"
@@ -71,6 +72,7 @@ private:
 	VkFormat								swapchainImageFormat;
 	VkExtent2D								swapchainImageExtent;
 	std::vector< VkImage >					swapchainImages;
+	std::vector< VkImageView >				swapchainImageViews;
 
 	/**
 		Initializes the logger
@@ -263,5 +265,12 @@ private:
 		@return		Returns VK_SC_SUCCESS on success
 	*/
 	VK_STATUS_CODE createSwapchain(void);
+
+	/**
+		Creates an array of VkImageViews for the VkImages in the swapchain
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE createSwapchainImageViews(void);
 
 };

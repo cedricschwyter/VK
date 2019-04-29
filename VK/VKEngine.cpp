@@ -66,6 +66,7 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 	ASSERT(selectBestPhysicalDevice(), "Failed to find a suitable GPU that supports Vulkan", VK_SC_PHYSICAL_DEVICE_ERROR);
 	ASSERT(createLogicalDeviceFromPhysicalDevice(), "Failed to create a logical device from the selected physical device", VK_SC_LOGICAL_DEVICE_ERROR);
 	ASSERT(createSwapchain(), "Failed to create a swapchain with the given parameters", VK_SC_SWAPCHAIN_CREATION_ERROR);
+	ASSERT(createSwapchainImageViews(), "Failed to create swapchain image views", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
 
 	glfwShowWindow(window);
 	glfwFocusWindow(window);
@@ -95,6 +96,12 @@ VK_STATUS_CODE VKEngine::loop() {
 }
 
 VK_STATUS_CODE VKEngine::clean() {
+
+	for (auto imageView : swapchainImageViews) {
+
+		vkDestroyImageView(logicalDevice, imageView, allocator);
+
+	}
 
 	vkDestroySwapchainKHR(logicalDevice, swapchain, allocator);
 	logger::log(EVENT_LOG, "Successfully destroyed swapchain");
@@ -768,6 +775,41 @@ VK_STATUS_CODE VKEngine::createSwapchain() {
 		swapchainImages.data()
 		);
 	logger::log(EVENT_LOG, "Successfully retrieved the handles for the swapchain images");
+
+	return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::createSwapchainImageViews() {
+
+	swapchainImageViews.resize(swapchainImages.size());
+
+	for (size_t i = 0; i < swapchainImages.size(); i++) {
+	
+		VkImageViewCreateInfo imageViewCreateInfo				= {};
+		imageViewCreateInfo.sType								= VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		imageViewCreateInfo.image								= swapchainImages[i];
+		imageViewCreateInfo.viewType							= VK_IMAGE_VIEW_TYPE_2D;			// 2D textures will be used
+		imageViewCreateInfo.format								= swapchainImageFormat;
+		imageViewCreateInfo.components.r						= VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageViewCreateInfo.components.g						= VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageViewCreateInfo.components.b						= VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageViewCreateInfo.components.a						= VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageViewCreateInfo.subresourceRange.aspectMask			= VK_IMAGE_ASPECT_COLOR_BIT;		// use as color target
+		imageViewCreateInfo.subresourceRange.baseMipLevel		= 0;
+		imageViewCreateInfo.subresourceRange.levelCount			= 1;
+		imageViewCreateInfo.subresourceRange.baseArrayLayer		= 0;
+		imageViewCreateInfo.subresourceRange.layerCount			= 1;
+
+		result = vkCreateImageView(
+			logicalDevice,
+			&imageViewCreateInfo,
+			allocator,
+			&swapchainImageViews[i]
+			);
+		ASSERT(result, "Failed to create VkImageView", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
+
+	}
 
 	return VK_SC_SUCCESS;
 
