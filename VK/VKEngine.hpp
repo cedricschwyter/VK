@@ -273,4 +273,11 @@ private:
 	*/
 	VK_STATUS_CODE createSwapchainImageViews(void);
 
+	/**
+		Creates the necessary graphics pipelines
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE createGraphicsPipelines(void);
+	
 };

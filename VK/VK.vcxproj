@@ -136,6 +136,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ASSERT.cpp" />
+    <ClCompile Include="GraphicsPipeline.cpp" />
     <ClCompile Include="LoadingScreen.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="LOGGER_STATUS_CODE.cpp" />
@@ -143,6 +144,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="QueueFamily.cpp" />
     <ClCompile Include="SDL_STATUS_CODE.cpp" />
+    <ClCompile Include="ShaderStage.cpp" />
     <ClCompile Include="SwapchainDetails.cpp" />
     <ClCompile Include="Version.hpp" />
     <ClCompile Include="VK.hpp" />
@@ -150,10 +152,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsoleColor.hpp" />
+    <ClInclude Include="GraphicsPipeline.hpp" />
     <ClInclude Include="LoadingScreen.hpp" />
     <ClInclude Include="Logger.hpp" />
+    <ClInclude Include="ShaderStage.hpp" />
     <ClInclude Include="VKEngine.hpp" />
     <ClInclude Include="VK_STATUS_CODE.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\standard\compile.bat" />
+    <None Include="shaders\standard\shader.frag" />
+    <None Include="shaders\standard\shader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

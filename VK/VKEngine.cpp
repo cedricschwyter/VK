@@ -63,10 +63,11 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 	ASSERT(createInstance(), "Instance creation error", VK_SC_INSTANCE_CREATON_ERROR);
 	ASSERT(debugUtilsMessenger(), "Debug utils messenger creation error", VK_SC_DEBUG_UTILS_MESSENGER_CREATION_ERROR);
 	ASSERT(createSurfaceGLFW(), "Surface creation error", VK_SC_SURFACE_CREATION_ERROR);
-	ASSERT(selectBestPhysicalDevice(), "Failed to find a suitable GPU that supports Vulkan", VK_SC_PHYSICAL_DEVICE_ERROR);
-	ASSERT(createLogicalDeviceFromPhysicalDevice(), "Failed to create a logical device from the selected physical device", VK_SC_LOGICAL_DEVICE_ERROR);
+	ASSERT(selectBestPhysicalDevice(), "Failed to find a suitable GPU that supports Vulkan", VK_SC_PHYSICAL_DEVICE_CREATION_ERROR);
+	ASSERT(createLogicalDeviceFromPhysicalDevice(), "Failed to create a logical device from the selected physical device", VK_SC_LOGICAL_DEVICE_CREATION_ERROR);
 	ASSERT(createSwapchain(), "Failed to create a swapchain with the given parameters", VK_SC_SWAPCHAIN_CREATION_ERROR);
 	ASSERT(createSwapchainImageViews(), "Failed to create swapchain image views", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
+	ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
 
 	glfwShowWindow(window);
 	glfwFocusWindow(window);
@@ -320,7 +321,7 @@ VK_STATUS_CODE VKEngine::selectBestPhysicalDevice() {
 	if (physicalDeviceCount == 0) {
 	
 		logger::log(ERROR_LOG, "Failed to find a suitable GPU");
-		return VK_SC_PHYSICAL_DEVICE_ERROR;
+		return VK_SC_PHYSICAL_DEVICE_CREATION_ERROR;
 	
 	}
 
@@ -504,7 +505,7 @@ VK_STATUS_CODE VKEngine::createLogicalDeviceFromPhysicalDevice() {
 		allocator, 
 		&logicalDevice
 		);
-	ASSERT(result, "Failed to create a logical device", VK_SC_LOGICAL_DEVICE_ERROR);
+	ASSERT(result, "Failed to create a logical device", VK_SC_LOGICAL_DEVICE_CREATION_ERROR);
 	logger::log(EVENT_LOG, "Successfully created logical device");
 
 	logger::log(EVENT_LOG, "Retrieving queue handle for graphics queue...");
@@ -810,6 +811,12 @@ VK_STATUS_CODE VKEngine::createSwapchainImageViews() {
 		ASSERT(result, "Failed to create VkImageView", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
 
 	}
+
+	return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 
 	return VK_SC_SUCCESS;
 
