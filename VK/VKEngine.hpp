@@ -76,7 +76,9 @@ private:
 	VkExtent2D								swapchainImageExtent;
 	std::vector< VkImage >					swapchainImages;
 	std::vector< VkImageView >				swapchainImageViews;
+	VkRenderPass							renderPass;
 	VkPipelineLayout						pipelineLayout;
+	VkPipeline								graphicsPipeline;
 
 	/**
 		Initializes the logger
@@ -284,4 +286,11 @@ private:
 	*/
 	VK_STATUS_CODE createGraphicsPipelines(void);
 	
+	/**
+		Creates the necessary render pass(es)
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE createRenderPasses(void);
+
 };

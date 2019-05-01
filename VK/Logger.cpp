@@ -187,7 +187,9 @@ namespace logger {
 		}
 
 		if (log_ == ERROR_LOG) {
-
+#ifdef VK_DEVELOPMENT
+			__debugbreak();
+#endif
 			throw std::runtime_error(msg_);
 
 		}

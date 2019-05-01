@@ -62,13 +62,14 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 
 	allocator = nullptr;
 
-	ASSERT(createInstance(), "Instance creation error", VK_SC_INSTANCE_CREATON_ERROR);
-	ASSERT(debugUtilsMessenger(), "Debug utils messenger creation error", VK_SC_DEBUG_UTILS_MESSENGER_CREATION_ERROR);
-	ASSERT(createSurfaceGLFW(), "Surface creation error", VK_SC_SURFACE_CREATION_ERROR);
+	ASSERT(createInstance(), "Failed to create instance", VK_SC_INSTANCE_CREATON_ERROR);
+	ASSERT(debugUtilsMessenger(), "Failed to create debug utils messenger", VK_SC_DEBUG_UTILS_MESSENGER_CREATION_ERROR);
+	ASSERT(createSurfaceGLFW(), "Failed to create GLFW surface", VK_SC_SURFACE_CREATION_ERROR);
 	ASSERT(selectBestPhysicalDevice(), "Failed to find a suitable GPU that supports Vulkan", VK_SC_PHYSICAL_DEVICE_CREATION_ERROR);
 	ASSERT(createLogicalDeviceFromPhysicalDevice(), "Failed to create a logical device from the selected physical device", VK_SC_LOGICAL_DEVICE_CREATION_ERROR);
 	ASSERT(createSwapchain(), "Failed to create a swapchain with the given parameters", VK_SC_SWAPCHAIN_CREATION_ERROR);
 	ASSERT(createSwapchainImageViews(), "Failed to create swapchain image views", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
+	ASSERT(createRenderPasses(), "Failed to create render passes", VK_SC_RENDER_PASS_CREATION_ERROR);
 	ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
 
 	glfwShowWindow(window);
@@ -100,11 +101,19 @@ VK_STATUS_CODE VKEngine::loop() {
 
 VK_STATUS_CODE VKEngine::clean() {
 
+	vkDestroyPipeline(logicalDevice, graphicsPipeline, allocator);
+	logger::log(EVENT_LOG, "Successfully destroyed graphics pipeline");
+
 	vkDestroyPipelineLayout(logicalDevice, pipelineLayout, allocator);
+	logger::log(EVENT_LOG, "Successfully destroyed pipeline layout");
+
+	vkDestroyRenderPass(logicalDevice, renderPass, allocator);
+	logger::log(EVENT_LOG, "Successfully destroyed render pass");
 
 	for (auto imageView : swapchainImageViews) {
 
 		vkDestroyImageView(logicalDevice, imageView, allocator);
+		logger::log(EVENT_LOG, "Successfully destroyed image view");
 
 	}
 
@@ -907,6 +916,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 
 	};
 
+	// Dynamic states require GPU features that I do not want to activate just now, so I'll define this struct here but not reference it in the pipeline create info
 	VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo						= {};
 	dynamicStateCreateInfo.sType												= VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 	dynamicStateCreateInfo.dynamicStateCount									= dynamicStates.size();
@@ -925,7 +935,81 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 	ASSERT(result, "Failed to create pipeline layout", VK_SC_PIPELINE_LAYOUT_CREATION_ERROR);
 	logger::log(EVENT_LOG, "Successfully created pipeline layout");
 
+	VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo						= {};
+	graphicsPipelineCreateInfo.sType											= VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	graphicsPipelineCreateInfo.stageCount										= 2;
+	graphicsPipelineCreateInfo.pStages											= stages.stages.data();
+	graphicsPipelineCreateInfo.pVertexInputState								= &vertexInputStateCreateInfo;
+	graphicsPipelineCreateInfo.pInputAssemblyState								= &inputAssemblyStateCreateInfo;
+	graphicsPipelineCreateInfo.pViewportState									= &viewportStateCreateInfo;
+	graphicsPipelineCreateInfo.pRasterizationState								= &rasterizationStateCreateInfo;
+	graphicsPipelineCreateInfo.pMultisampleState								= &multisampleStateCreateInfo;
+	graphicsPipelineCreateInfo.pDepthStencilState								= nullptr;						// Still no depth/stencil buffering
+	graphicsPipelineCreateInfo.pColorBlendState									= &colorBlendStateCreateInfo;
+	graphicsPipelineCreateInfo.pDynamicState									= nullptr;						// Defined, but not referenced
+	graphicsPipelineCreateInfo.layout											= pipelineLayout;				// Reference fixed-function stage
+	graphicsPipelineCreateInfo.renderPass										= renderPass;
+	graphicsPipelineCreateInfo.subpass											= 0;
+	graphicsPipelineCreateInfo.basePipelineHandle								= VK_NULL_HANDLE;				// No base pipeline
+	graphicsPipelineCreateInfo.basePipelineIndex								= -1;
+
+	result = vkCreateGraphicsPipelines(
+		logicalDevice,
+		VK_NULL_HANDLE,						// No pipeline cache will be used
+		1,									// Create only one pipeline, might change in the future
+		&graphicsPipelineCreateInfo,
+		allocator,
+		&graphicsPipeline
+		);
+	ASSERT(result, "Failed to create graphics pipeline", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
+
+	logger::log(EVENT_LOG, "Successfully created graphics pipeline");
+
 	stages.destroyModules();
+
+	return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::createRenderPasses() {
+
+	logger::log(EVENT_LOG, "Creating render pass...");
+
+	VkAttachmentDescription colorAttachmentDescription		= {};
+	colorAttachmentDescription.format						= swapchainImageFormat;
+	colorAttachmentDescription.samples						= VK_SAMPLE_COUNT_1_BIT;		// Still no multisampling (yet)
+	colorAttachmentDescription.loadOp						= VK_ATTACHMENT_LOAD_OP_CLEAR;
+	colorAttachmentDescription.storeOp						= VK_ATTACHMENT_STORE_OP_STORE;
+	colorAttachmentDescription.stencilLoadOp				= VK_ATTACHMENT_LOAD_OP_DONT_CARE;		// No stencil buffering, so nobody cares about stencil operations
+	colorAttachmentDescription.stencilStoreOp				= VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	colorAttachmentDescription.initialLayout				= VK_IMAGE_LAYOUT_UNDEFINED;
+	colorAttachmentDescription.finalLayout					= VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;		// Render the image to screen, so layout should be presentable in the swapchain
+
+	VkAttachmentReference colorAttachmentReference			= {};
+	colorAttachmentReference.attachment						= 0;
+	colorAttachmentReference.layout							= VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+	VkSubpassDescription subpassDescription					= {};
+	subpassDescription.pipelineBindPoint					= VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpassDescription.colorAttachmentCount					= 1;
+	subpassDescription.pColorAttachments					= &colorAttachmentReference;
+
+	VkRenderPassCreateInfo renderPassCreateInfo				= {};
+	renderPassCreateInfo.sType								= VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	renderPassCreateInfo.attachmentCount					= 1;
+	renderPassCreateInfo.pAttachments						= &colorAttachmentDescription;
+	renderPassCreateInfo.subpassCount						= 1;
+	renderPassCreateInfo.pSubpasses							= &subpassDescription;
+
+	result = vkCreateRenderPass(
+		logicalDevice,
+		&renderPassCreateInfo, 
+		allocator, 
+		&renderPass
+		);
+	ASSERT(result, "Failed to create render pass", VK_SC_RENDER_PASS_CREATION_ERROR);
+
+	logger::log(EVENT_LOG, "Successfully created render pass");
 
 	return VK_SC_SUCCESS;
 

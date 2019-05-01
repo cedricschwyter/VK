@@ -20,6 +20,8 @@ class VertFragShaderStages
 {
 public:
 
+	std::vector< VkPipelineShaderStageCreateInfo >		stages;
+
 	/**
 		Default constructor
 
@@ -27,13 +29,6 @@ public:
 		@param		fragPath_		(Relative) path to the SPIR-V-compile fragment shader file
 	*/
 	VertFragShaderStages(const char* vertPath_, const char* fragPath_);
-
-	/**
-		Get a pointer to an array containing the two shader stage create infos
-
-		@return		Returns a pointer to an array containing the shader stage create infos
-	*/
-	const std::array< VkPipelineShaderStageCreateInfo, 2 >* getStageInfos(void);
 
 	/**
 		Destroys allocated resources and handles cleaning of shader modules
@@ -44,10 +39,10 @@ public:
 
 private:
 
-	VkShaderModule vertModule;
-	VkShaderModule fragModule;
-	VkPipelineShaderStageCreateInfo vertStageInfo;
-	VkPipelineShaderStageCreateInfo fragStageInfo;
+	VkShaderModule										vertModule;
+	VkShaderModule										fragModule;
+	VkPipelineShaderStageCreateInfo						vertStageInfo;
+	VkPipelineShaderStageCreateInfo						fragStageInfo;
 
 	/**
 		Creates a VkShaderModule handle from binary code

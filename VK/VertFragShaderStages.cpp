@@ -30,6 +30,8 @@ VertFragShaderStages::VertFragShaderStages(const char* vertPath_, const char* fr
 	fragStageInfo.module								= fragModule;
 	fragStageInfo.pName									= "main";
 
+	stages												= { vertStageInfo, fragStageInfo };
+
 }
 
 VK_STATUS_CODE VertFragShaderStages::destroyModules() {
@@ -62,13 +64,5 @@ VkShaderModule VertFragShaderStages::createShaderModuleFromBinary(const std::vec
 	logger::log(EVENT_LOG, "Successfully created shader module");
 
 	return module;
-
-}
-
-const std::array< VkPipelineShaderStageCreateInfo, 2 >* VertFragShaderStages::getStageInfos() {
-
-	std::array< VkPipelineShaderStageCreateInfo, 2 > stages = { vertStageInfo, fragStageInfo };
-
-	return &stages;
 
 }
