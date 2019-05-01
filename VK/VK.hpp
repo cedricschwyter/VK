@@ -74,4 +74,11 @@ namespace vk {
 	*/
 	bool isConsoleVisible(void);
 
+	/**
+		Loads a file from disc and returns its contents in a char array
+
+		@return		Returns an std::vector< char > containing the binary content of the specified input file
+	*/
+	static const std::vector< char >& loadFile(const std::string& filePath_);
+
 }

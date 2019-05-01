@@ -8,6 +8,6 @@
 ::	  @brief		Implementation of batch-commands to compile GLSL-files to SPIR-V format
 ::
 
-C:/VulkanSDK/x.x.x.x/Bin32/glslangValidator.exe -V shader.vert
-C:/VulkanSDK/x.x.x.x/Bin32/glslangValidator.exe -V shader.frag
+C:/VulkanSDK/1.1.85.0/Bin32/glslangValidator.exe -V shader.vert
+C:/VulkanSDK/1.1.85.0/Bin32/glslangValidator.exe -V shader.frag
 pause

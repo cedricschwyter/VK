@@ -21,6 +21,7 @@
 #include <map>
 #include <thread>
 #include <algorithm>
+#include <fstream>
 #include <string>
 
 #include "VK_STATUS_CODE.hpp"
@@ -29,9 +30,14 @@
 #include "QueueFamily.cpp"
 #include "LoadingScreen.hpp"
 #include "SwapchainDetails.cpp"
+#include "VertFragShaderStages.hpp"
 
 class VKEngine {
 public:
+
+	static VkResult							result;
+	static VkDevice							logicalDevice;
+	static VkAllocationCallbacks*			allocator;
 
 	/**
 		Initializes VKEngine and loads dependencies
@@ -42,9 +48,7 @@ public:
 
 private:
 
-	VkResult								result								= VK_SUCCESS;
 	GLFWwindow*								window								= nullptr;
-	VkAllocationCallbacks*					allocator							= nullptr;
 	VkInstance								instance							= VK_NULL_HANDLE;
 	const std::vector< const char* >		validationLayers					= {
 	
@@ -58,7 +62,6 @@ private:
 #endif
 	VkDebugUtilsMessengerEXT				validationLayerDebugMessenger		= VK_NULL_HANDLE;
 	VkPhysicalDevice						physicalDevice						= VK_NULL_HANDLE;
-	VkDevice								logicalDevice						= VK_NULL_HANDLE;
 	VkQueue									graphicsQueue						= VK_NULL_HANDLE;
 	VkQueue									presentationQueue					= VK_NULL_HANDLE;
 	VkSurfaceKHR							surface								= VK_NULL_HANDLE;

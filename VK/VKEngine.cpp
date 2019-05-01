@@ -60,6 +60,8 @@ VK_STATUS_CODE VKEngine::initWindow() {
 
 VK_STATUS_CODE VKEngine::initVulkan() {
 
+	allocator = nullptr;
+
 	ASSERT(createInstance(), "Instance creation error", VK_SC_INSTANCE_CREATON_ERROR);
 	ASSERT(debugUtilsMessenger(), "Debug utils messenger creation error", VK_SC_DEBUG_UTILS_MESSENGER_CREATION_ERROR);
 	ASSERT(createSurfaceGLFW(), "Surface creation error", VK_SC_SURFACE_CREATION_ERROR);
@@ -817,6 +819,12 @@ VK_STATUS_CODE VKEngine::createSwapchainImageViews() {
 }
 
 VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
+
+	VertFragShaderStages stages("shaders/standard/vert.spv", "shaders/standard/frag.spv");
+
+
+
+	stages.destroyModules();
 
 	return VK_SC_SUCCESS;
 
