@@ -71,6 +71,7 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 	ASSERT(createSwapchainImageViews(), "Failed to create swapchain image views", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
 	ASSERT(createRenderPasses(), "Failed to create render passes", VK_SC_RENDER_PASS_CREATION_ERROR);
 	ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
+	ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
 
 	glfwShowWindow(window);
 	glfwFocusWindow(window);
@@ -100,6 +101,15 @@ VK_STATUS_CODE VKEngine::loop() {
 }
 
 VK_STATUS_CODE VKEngine::clean() {
+
+	logger::log(EVENT_LOG, "Destroying framebuffers...");
+	for (auto framebuffer : swapchainFramebuffers) {
+	
+		vkDestroyFramebuffer(logicalDevice, framebuffer, allocator);
+		logger::log(EVENT_LOG, "Successfully destroyed framebuffer");
+
+	}
+	logger::log(EVENT_LOG, "Successfully destroyed framebuffers");
 
 	vkDestroyPipeline(logicalDevice, graphicsPipeline, allocator);
 	logger::log(EVENT_LOG, "Successfully destroyed graphics pipeline");
@@ -585,7 +595,7 @@ bool VKEngine::checkDeviceSwapchainExtensionSupport(VkPhysicalDevice device_) {
 	
 	}
 	
-	logger::log(extensions.empty() ? EVENT_LOG : ERROR_LOG, extensions.empty() ? "Device supports necessary extensions" : "Device does not support necessary extensions");
+	logger::log(extensions.empty() ? EVENT_LOG : ERROR_LOG, extensions.empty() ? "Device supports necessary extensions" : "Device does not support necessary extensions");		// An if-statement would probably have done better, but I mean, if you can do it in style, why not? ;)
 
 	return extensions.empty();
 
@@ -1002,14 +1012,57 @@ VK_STATUS_CODE VKEngine::createRenderPasses() {
 	renderPassCreateInfo.pSubpasses							= &subpassDescription;
 
 	result = vkCreateRenderPass(
-		logicalDevice,
-		&renderPassCreateInfo, 
-		allocator, 
-		&renderPass
-		);
+				logicalDevice,
+				&renderPassCreateInfo, 
+				allocator, 
+				&renderPass
+				);
 	ASSERT(result, "Failed to create render pass", VK_SC_RENDER_PASS_CREATION_ERROR);
 
 	logger::log(EVENT_LOG, "Successfully created render pass");
+
+	return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::allocateSwapchainFramebuffers() {
+
+	logger::log(EVENT_LOG, "Allocating framebuffers...");
+
+	swapchainFramebuffers.resize(swapchainImageViews.size());
+
+	for (size_t i = 0; i < swapchainImageViews.size(); i++) {
+	
+		logger::log(EVENT_LOG, "Creating framebuffer...");
+
+		VkImageView attachments[] = {
+		
+			swapchainImageViews[i]
+		
+		};
+	
+		VkFramebufferCreateInfo framebufferCreateInfo		= {};
+		framebufferCreateInfo.sType							= VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferCreateInfo.renderPass					= renderPass;
+		framebufferCreateInfo.attachmentCount				= 1;
+		framebufferCreateInfo.pAttachments					= attachments;
+		framebufferCreateInfo.width							= swapchainImageExtent.width;
+		framebufferCreateInfo.height						= swapchainImageExtent.height;
+		framebufferCreateInfo.layers						= 1;
+
+		result = vkCreateFramebuffer(
+			logicalDevice,
+			&framebufferCreateInfo,
+			allocator,
+			&swapchainFramebuffers[i]
+			);
+		ASSERT(result, "Failed to create framebuffer", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
+
+		logger::log(EVENT_LOG, "Successfully allocated framebuffer");
+
+	}
+
+	logger::log(EVENT_LOG, "Successfully allocated framebuffers");
 
 	return VK_SC_SUCCESS;
 

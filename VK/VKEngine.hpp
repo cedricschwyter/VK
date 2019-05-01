@@ -76,6 +76,7 @@ private:
 	VkExtent2D								swapchainImageExtent;
 	std::vector< VkImage >					swapchainImages;
 	std::vector< VkImageView >				swapchainImageViews;
+	std::vector< VkFramebuffer >			swapchainFramebuffers;
 	VkRenderPass							renderPass;
 	VkPipelineLayout						pipelineLayout;
 	VkPipeline								graphicsPipeline;
@@ -292,5 +293,12 @@ private:
 		@return		Returns VK_SC_SUCCESS on success
 	*/
 	VK_STATUS_CODE createRenderPasses(void);
+
+	/**
+		Creates and allocates a framebuffer for every VkImageView in the swapchain
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE allocateSwapchainFramebuffers(void);
 
 };
