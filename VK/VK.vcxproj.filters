@@ -39,9 +39,6 @@
     <ClCompile Include="VK.hpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="QueueFamily.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LoadingScreen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -55,6 +52,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="VertFragShaderStages.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="QueueFamilies.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

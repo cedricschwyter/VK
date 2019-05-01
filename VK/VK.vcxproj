@@ -142,7 +142,7 @@
     <ClCompile Include="LOGGER_STATUS_CODE.cpp" />
     <ClCompile Include="LOG_TYPE.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="QueueFamily.cpp" />
+    <ClCompile Include="QueueFamilies.cpp" />
     <ClCompile Include="SDL_STATUS_CODE.cpp" />
     <ClCompile Include="VertFragShaderStages.cpp" />
     <ClCompile Include="SwapchainDetails.cpp" />

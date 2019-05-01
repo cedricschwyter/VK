@@ -27,7 +27,7 @@
 #include "VK_STATUS_CODE.hpp"
 #include "Logger.hpp"
 #include "ASSERT.cpp"
-#include "QueueFamily.cpp"
+#include "QueueFamilies.cpp"
 #include "LoadingScreen.hpp"
 #include "SwapchainDetails.cpp"
 #include "VertFragShaderStages.hpp"
@@ -80,6 +80,10 @@ private:
 	VkRenderPass							renderPass;
 	VkPipelineLayout						pipelineLayout;
 	VkPipeline								graphicsPipeline;
+	VkCommandPool							standardCommandPool;
+	std::vector< VkCommandBuffer >			standardCommandBuffers;
+	VkSemaphore								swapchainImageAvailable;
+	VkSemaphore								renderingCompleted;
 
 	/**
 		Initializes the logger
@@ -198,7 +202,7 @@ private:
 
 		@return		Returns a QueueFamily struct
 	*/
-	QueueFamily findSuitableQueueFamilies(VkPhysicalDevice device_);
+	QueueFamilies findSuitableQueueFamilies(VkPhysicalDevice device_);
 
 	/**
 		Creates a VkDevice handle from a VkPhysicalDevice (class member)
@@ -300,5 +304,33 @@ private:
 		@return		Returns VK_SC_SUCCESS on success
 	*/
 	VK_STATUS_CODE allocateSwapchainFramebuffers(void);
+
+	/**
+		Creates and allocates command pools for later use
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE allocateCommandPools(void);
+
+	/**
+		Creates, allocates and recordes command buffers for later submission onto the queues
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE allocateCommandBuffers(void);
+
+	/**
+		Displays the swapchain image, that is up next to be displayed
+
+		@return		Return VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE showNextSwapchainImage(void);
+
+	/**
+		Creates and initializes sync-objects such as semaphores and fences
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE initializeSynchronizationObjects(void);
 
 };

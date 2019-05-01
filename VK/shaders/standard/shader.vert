@@ -30,7 +30,7 @@ vec3 colors[3] = vec3[](
 
 void main() {
 
-    gl_Position = vec4(positions[gl_VertexIndex], 0.0, 1.0);		// ignore intellisense error: Extensions required
+    gl_Position = vec4(positions[gl_VertexIndex], 0.0, 1.0);
     fragColor = colors[gl_VertexIndex];
 
 }
