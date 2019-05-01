@@ -100,6 +100,8 @@ VK_STATUS_CODE VKEngine::loop() {
 
 VK_STATUS_CODE VKEngine::clean() {
 
+	vkDestroyPipelineLayout(logicalDevice, pipelineLayout, allocator);
+
 	for (auto imageView : swapchainImageViews) {
 
 		vkDestroyImageView(logicalDevice, imageView, allocator);
@@ -785,9 +787,13 @@ VK_STATUS_CODE VKEngine::createSwapchain() {
 
 VK_STATUS_CODE VKEngine::createSwapchainImageViews() {
 
+	logger::log(EVENT_LOG, "Creating image views...");
+
 	swapchainImageViews.resize(swapchainImages.size());
 
 	for (size_t i = 0; i < swapchainImages.size(); i++) {
+
+		logger::log(EVENT_LOG, "Creating image view...");
 	
 		VkImageViewCreateInfo imageViewCreateInfo				= {};
 		imageViewCreateInfo.sType								= VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -812,7 +818,11 @@ VK_STATUS_CODE VKEngine::createSwapchainImageViews() {
 			);
 		ASSERT(result, "Failed to create VkImageView", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
 
+		logger::log(EVENT_LOG, "Successfully created image view");
+
 	}
+
+	logger::log(EVENT_LOG, "Successfully created image views");
 
 	return VK_SC_SUCCESS;
 
@@ -820,9 +830,100 @@ VK_STATUS_CODE VKEngine::createSwapchainImageViews() {
 
 VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 
+	logger::log(EVENT_LOG, "Creating graphics pipeline...");
 	VertFragShaderStages stages("shaders/standard/vert.spv", "shaders/standard/frag.spv");
+	
+	// Vertex data is hardcoded in the vertex shader, no need to upload anything to the shaders (yet)
+	VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo				= {};
+	vertexInputStateCreateInfo.sType											= VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	vertexInputStateCreateInfo.vertexBindingDescriptionCount					= 0;
+	vertexInputStateCreateInfo.vertexAttributeDescriptionCount					= 0;
 
+	VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo			= {};
+	inputAssemblyStateCreateInfo.sType											= VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+	inputAssemblyStateCreateInfo.topology										= VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;		// Draw triangles
+	inputAssemblyStateCreateInfo.primitiveRestartEnable							= VK_FALSE;
 
+	VkViewport viewport															= {};
+	viewport.x																	= 0.0f;
+	viewport.y																	= 0.0f;
+	viewport.width																= static_cast< float >(swapchainImageExtent.width);
+	viewport.height																= static_cast< float >(swapchainImageExtent.height);
+	viewport.minDepth															= 0.0f;
+	viewport.maxDepth															= 1.0f;
+
+	VkRect2D scissors															= {};
+	scissors.offset																= {0, 0};
+	scissors.extent																= swapchainImageExtent;
+
+	VkPipelineViewportStateCreateInfo viewportStateCreateInfo					= {};
+	viewportStateCreateInfo.sType												= VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+	viewportStateCreateInfo.viewportCount										= 1;
+	viewportStateCreateInfo.pViewports											= &viewport;
+	viewportStateCreateInfo.scissorCount										= 1;
+	viewportStateCreateInfo.pScissors											= &scissors;
+
+	VkPipelineRasterizationStateCreateInfo rasterizationStateCreateInfo			= {};
+	rasterizationStateCreateInfo.sType											= VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+	rasterizationStateCreateInfo.depthClampEnable								= VK_FALSE;
+	rasterizationStateCreateInfo.rasterizerDiscardEnable						= VK_FALSE;
+	rasterizationStateCreateInfo.polygonMode									= VK_POLYGON_MODE_FILL;
+	rasterizationStateCreateInfo.lineWidth										= 1.0f;
+	rasterizationStateCreateInfo.cullMode										= VK_CULL_MODE_BACK_BIT;
+	rasterizationStateCreateInfo.frontFace										= VK_FRONT_FACE_COUNTER_CLOCKWISE;
+	rasterizationStateCreateInfo.depthBiasEnable								= VK_FALSE;
+
+	// No multisampling (yet)
+	VkPipelineMultisampleStateCreateInfo multisampleStateCreateInfo				= {};
+	multisampleStateCreateInfo.sType											= VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+	multisampleStateCreateInfo.sampleShadingEnable								= VK_FALSE;
+	multisampleStateCreateInfo.rasterizationSamples								= VK_SAMPLE_COUNT_1_BIT;
+
+	// No depth/stencil buffering (yet) \\
+
+	VkPipelineColorBlendAttachmentState colorBlendAttachmentState				= {};
+	colorBlendAttachmentState.colorWriteMask									= VK_COLOR_COMPONENT_R_BIT
+																				| VK_COLOR_COMPONENT_G_BIT
+																				| VK_COLOR_COMPONENT_B_BIT
+																				| VK_COLOR_COMPONENT_A_BIT;
+	colorBlendAttachmentState.blendEnable										= VK_TRUE;		// Implement alpha-blending
+	colorBlendAttachmentState.srcColorBlendFactor								= VK_BLEND_FACTOR_SRC_ALPHA;
+	colorBlendAttachmentState.dstColorBlendFactor								= VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+	colorBlendAttachmentState.colorBlendOp										= VK_BLEND_OP_ADD;
+	colorBlendAttachmentState.srcAlphaBlendFactor								= VK_BLEND_FACTOR_ONE;
+	colorBlendAttachmentState.dstAlphaBlendFactor								= VK_BLEND_FACTOR_ZERO;
+	colorBlendAttachmentState.alphaBlendOp										= VK_BLEND_OP_ADD;
+
+	VkPipelineColorBlendStateCreateInfo colorBlendStateCreateInfo				= {};
+	colorBlendStateCreateInfo.sType												= VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+	colorBlendStateCreateInfo.logicOpEnable										= VK_FALSE;
+	colorBlendStateCreateInfo.attachmentCount									= 1;
+	colorBlendStateCreateInfo.pAttachments										= &colorBlendAttachmentState;
+
+	std::vector< VkDynamicState > dynamicStates									= {
+	
+		VK_DYNAMIC_STATE_VIEWPORT,
+		VK_DYNAMIC_STATE_SCISSOR
+
+	};
+
+	VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo						= {};
+	dynamicStateCreateInfo.sType												= VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+	dynamicStateCreateInfo.dynamicStateCount									= dynamicStates.size();
+	dynamicStateCreateInfo.pDynamicStates										= dynamicStates.data();
+	
+	// No uniform variables (yet), that would need to be specified in the pipeline layout
+	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo							= {};
+	pipelineLayoutCreateInfo.sType												= VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+
+	result = vkCreatePipelineLayout(
+		logicalDevice,
+		&pipelineLayoutCreateInfo,
+		allocator,
+		&pipelineLayout
+		);
+	ASSERT(result, "Failed to create pipeline layout", VK_SC_PIPELINE_LAYOUT_CREATION_ERROR);
+	logger::log(EVENT_LOG, "Successfully created pipeline layout");
 
 	stages.destroyModules();
 

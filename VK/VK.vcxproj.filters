@@ -51,10 +51,10 @@
     <ClCompile Include="SwapchainDetails.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ShaderStage.cpp">
+    <ClCompile Include="GraphicsPipeline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicsPipeline.cpp">
+    <ClCompile Include="VertFragShaderStages.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -74,10 +74,10 @@
     <ClInclude Include="LoadingScreen.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ShaderStage.hpp">
+    <ClInclude Include="GraphicsPipeline.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsPipeline.hpp">
+    <ClInclude Include="VertFragShaderStages.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -18,9 +18,9 @@
 #define NOMINMAX		// Fixes std::min/std::max/std::clamp error
 #include <Windows.h>
 
+#include "VK.hpp"
 #include "VKEngine.hpp"
 #include "VK_STATUS_CODE.hpp"
-#include "VK.hpp"
 
 namespace vk {
 
@@ -115,7 +115,7 @@ namespace vk {
 	
 	}
 
-	const std::vector< char >& loadFile(const std::string& filePath_) {
+	const std::vector< char > loadFile(const std::string& filePath_) {
 	
 		logger::log(EVENT_LOG, "Loading file at '" + filePath_ + "'");
 
@@ -134,7 +134,7 @@ namespace vk {
 		file.read(buffer.data(), bufferSize);
 		file.close();
 
-		return &buffer;
+		return buffer;
 	
 	}
 

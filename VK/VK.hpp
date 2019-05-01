@@ -1,3 +1,12 @@
+/**
+	Prototypes the vk namespace
+
+	@author		D3PSI
+	@version	0.0.1 02.12.2019
+
+	@file		VK.hpp
+	@brief		Prototype of the vk namespace
+*/
 #pragma once
 #include <vulkan/vulkan.h>
 
@@ -77,8 +86,10 @@ namespace vk {
 	/**
 		Loads a file from disc and returns its contents in a char array
 
+		@param		filePath_		The (relative) file path to the desired file
+
 		@return		Returns an std::vector< char > containing the binary content of the specified input file
 	*/
-	static const std::vector< char >& loadFile(const std::string& filePath_);
+	const std::vector< char > loadFile(const std::string& filePath_);
 
 }

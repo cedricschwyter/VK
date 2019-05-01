@@ -35,9 +35,9 @@
 class VKEngine {
 public:
 
-	static VkResult							result;
-	static VkDevice							logicalDevice;
-	static VkAllocationCallbacks*			allocator;
+	VkResult								result;
+	VkDevice								logicalDevice;
+	VkAllocationCallbacks*					allocator;
 
 	/**
 		Initializes VKEngine and loads dependencies
@@ -76,6 +76,7 @@ private:
 	VkExtent2D								swapchainImageExtent;
 	std::vector< VkImage >					swapchainImages;
 	std::vector< VkImageView >				swapchainImageViews;
+	VkPipelineLayout						pipelineLayout;
 
 	/**
 		Initializes the logger

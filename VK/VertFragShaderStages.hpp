@@ -1,19 +1,20 @@
 /**
-	Defines the ShaderStage wrapper for a Vulkan shader stage
+	Defines the VertFragShaderStages wrapper for a Vulkan shader stage
 
 	@author		D3PSI
 	@version	0.0.1 02.12.2019
 
-	@file		ShaderStage.hpp
-	@brief		Definition of the ShaderStage for a Vulkan shader stage
+	@file		VertFragShaderStages.hpp
+	@brief		Definition of the VertFragShaderStages for a Vulkan shader stage
 */
 #pragma once
 #include <vulkan/vulkan.h>
 
+#include <vector>
 #include <array>
 
 #include "Logger.hpp"
-#include "VK.hpp"
+#include "VK_STATUS_CODE.hpp"
 
 class VertFragShaderStages
 {
@@ -51,9 +52,11 @@ private:
 	/**
 		Creates a VkShaderModule handle from binary code
 
+		@param		code_		A pointer to an array containing the bytecode
+
 		@return		Returns a VkShaderModule handle
 	*/
-	VkShaderModule createShaderModuleFromBinary(const std::vector< char >& code_);
+	VkShaderModule createShaderModuleFromBinary(const std::vector< char >* code_);
 
 };
 
