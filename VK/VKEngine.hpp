@@ -48,7 +48,7 @@ public:
 
 private:
 
-	GLFWwindow*								window								= nullptr;
+	GLFWwindow*								window;
 	VkInstance								instance							= VK_NULL_HANDLE;
 	const std::vector< const char* >		validationLayers					= {
 	
@@ -86,6 +86,7 @@ private:
 	std::vector< VkSemaphore >				renderingCompletedSemaphores;
 	std::vector< VkFence >					inFlightFences;
 	size_t									currentSwapchainImage				= 0;
+	bool									hasFramebufferBeenResized			= false;
 
 	/**
 		Initializes the logger
@@ -348,5 +349,14 @@ private:
 		@return		Returns VK_SC_SUCCESS on success
 	*/
 	VK_STATUS_CODE cleanSwapchain(void);
+
+	/**
+		Framebuffer resize callback function for GLFW
+
+		@param		window_		A pointer to a GLFWwindow
+		@param		width_		The new width of the GLFWwindow
+		@param		height_		The new height of the GLFWwindow
+	*/
+	static void framebufferResizeCallback(GLFWwindow* window_, int width_, int height_);
 
 };

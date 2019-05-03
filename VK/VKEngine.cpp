@@ -40,7 +40,7 @@ VK_STATUS_CODE VKEngine::initWindow() {
 	glfwInit();
 
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 	glfwWindowHint(GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	glfwWindowHint(GLFW_FOCUSED, GLFW_TRUE);
 	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
@@ -53,6 +53,12 @@ VK_STATUS_CODE VKEngine::initWindow() {
 		nullptr
 		);
 	logger::log(EVENT_LOG, "Successfully initialized window");
+
+	glfwSetWindowUserPointer(window, this);
+	logger::log(EVENT_LOG, "Successfully set GLFW window user pointer");
+
+	glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
+	logger::log(EVENT_LOG, "Successfully set framebuffer resize callback");
 
 	return VK_SC_SUCCESS;
 
@@ -699,13 +705,22 @@ VkPresentModeKHR VKEngine::evaluateBestSwapchainSurfacePresentMode(const std::ve
 
 VkExtent2D VKEngine::evaluateSwapchainExtent(const VkSurfaceCapabilitiesKHR& capabilities_) {
 
-	if (capabilities_.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
+	if (capabilities_.currentExtent.width != std::numeric_limits< uint32_t >::max()) {
 
 		return capabilities_.currentExtent;
 
 	}
 	else {
-		VkExtent2D preferredExtent		= { vk::WIDTH, vk::HEIGHT };
+
+		int width, height;
+		glfwGetFramebufferSize(window, &width, &height);
+
+		VkExtent2D preferredExtent = {
+
+			static_cast< uint32_t >(width),
+			static_cast< uint32_t >(height)
+
+		};
 
 		preferredExtent.width			= std::clamp(preferredExtent.width, capabilities_.minImageExtent.width, capabilities_.maxImageExtent.width);
 		preferredExtent.height			= std::clamp(preferredExtent.height, capabilities_.minImageExtent.height, capabilities_.maxImageExtent.height);
@@ -1187,6 +1202,12 @@ VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
 		VK_NULL_HANDLE,
 		&swapchainImageIndex
 		);
+	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || hasFramebufferBeenResized) {
+	
+		hasFramebufferBeenResized = false;
+		recreateSwapchain();
+	
+	}
 	ASSERT(result, "Failed to acquire swapchain image", VK_SC_SWAPCHAIN_IMAGE_ACQUIRE_ERROR);
 
 	VkSubmitInfo submitInfo							= {};
@@ -1343,5 +1364,12 @@ VK_STATUS_CODE VKEngine::cleanSwapchain() {
 	logger::log(EVENT_LOG, "Successfully cleaned swapchain");
 
 	return VK_SC_SUCCESS;
+
+}
+
+void VKEngine::framebufferResizeCallback(GLFWwindow* window_, int width_, int height_) {
+
+	auto vkengine = reinterpret_cast< VKEngine* >(glfwGetWindowUserPointer(window_));
+	vkengine->hasFramebufferBeenResized = true;
 
 }
