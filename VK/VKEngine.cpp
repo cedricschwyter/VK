@@ -108,40 +108,18 @@ VK_STATUS_CODE VKEngine::loop() {
 
 VK_STATUS_CODE VKEngine::clean() {
 
-	vkDestroySemaphore(logicalDevice, renderingCompleted, allocator);
-	vkDestroySemaphore(logicalDevice, swapchainImageAvailable, allocator);
+	ASSERT(cleanSwapchain(), "Failed to clean swapchain", VK_SC_SWAPCHAIN_CLEAN_ERROR);
+
+	for (size_t i = 0; i < vk::MAX_IN_FLIGHT_FRAMES; i++) {
+
+		vkDestroySemaphore(logicalDevice, renderingCompletedSemaphores[i], allocator);
+		vkDestroySemaphore(logicalDevice, swapchainImageAvailableSemaphores[i], allocator);
+		vkDestroyFence(logicalDevice, inFlightFences[i], allocator);
+	}
 	logger::log(EVENT_LOG, "Successfully destroyed sync-objects");
 
 	vkDestroyCommandPool(logicalDevice, standardCommandPool, allocator);
 	logger::log(EVENT_LOG, "Successfully destroyed command pool");
-
-	logger::log(EVENT_LOG, "Destroying framebuffers...");
-	for (auto framebuffer : swapchainFramebuffers) {
-	
-		vkDestroyFramebuffer(logicalDevice, framebuffer, allocator);
-		logger::log(EVENT_LOG, "Successfully destroyed framebuffer");
-
-	}
-	logger::log(EVENT_LOG, "Successfully destroyed framebuffers");
-
-	vkDestroyPipeline(logicalDevice, graphicsPipeline, allocator);
-	logger::log(EVENT_LOG, "Successfully destroyed graphics pipeline");
-
-	vkDestroyPipelineLayout(logicalDevice, pipelineLayout, allocator);
-	logger::log(EVENT_LOG, "Successfully destroyed pipeline layout");
-
-	vkDestroyRenderPass(logicalDevice, renderPass, allocator);
-	logger::log(EVENT_LOG, "Successfully destroyed render pass");
-
-	for (auto imageView : swapchainImageViews) {
-
-		vkDestroyImageView(logicalDevice, imageView, allocator);
-		logger::log(EVENT_LOG, "Successfully destroyed image view");
-
-	}
-
-	vkDestroySwapchainKHR(logicalDevice, swapchain, allocator);
-	logger::log(EVENT_LOG, "Successfully destroyed swapchain");
 
 	vkDestroyDevice(logicalDevice, allocator);
 	logger::log(EVENT_LOG, "Successfully destroyed device");
@@ -1191,12 +1169,21 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
 VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
 
+	vkWaitForFences(
+		logicalDevice,
+		1,
+		&inFlightFences[currentSwapchainImage],
+		VK_TRUE,
+		std::numeric_limits< uint64_t >::max()
+		);
+	vkResetFences(logicalDevice, 1, &inFlightFences[currentSwapchainImage]);
+
 	uint32_t swapchainImageIndex;
 	result = vkAcquireNextImageKHR(
 		logicalDevice,
 		swapchain,
-		std::numeric_limits< uint64_t >::max(),		// numeric limit of 64-bit unsigned interger disables timeout
-		swapchainImageAvailable,					// signal this semaphore once operation is complete
+		std::numeric_limits< uint64_t >::max(),							// numeric limit of 64-bit unsigned interger disables timeout
+		swapchainImageAvailableSemaphores[currentSwapchainImage],		// signal this semaphore once operation is complete
 		VK_NULL_HANDLE,
 		&swapchainImageIndex
 		);
@@ -1205,7 +1192,7 @@ VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
 	VkSubmitInfo submitInfo							= {};
 	submitInfo.sType								= VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-	VkSemaphore waitSemaphores[]					= {swapchainImageAvailable};
+	VkSemaphore waitSemaphores[]					= {swapchainImageAvailableSemaphores[currentSwapchainImage]};
 	VkPipelineStageFlags waitStages[]				= {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 	submitInfo.waitSemaphoreCount					= 1;
 	submitInfo.pWaitSemaphores						= waitSemaphores;
@@ -1213,7 +1200,7 @@ VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
 	submitInfo.commandBufferCount					= 1;
 	submitInfo.pCommandBuffers						= &standardCommandBuffers[swapchainImageIndex];
 
-	VkSemaphore signalSemaphores[]					= {renderingCompleted};
+	VkSemaphore signalSemaphores[]					= {renderingCompletedSemaphores[currentSwapchainImage]};
 	submitInfo.signalSemaphoreCount					= 1;
 	submitInfo.pSignalSemaphores					= signalSemaphores;
 
@@ -1221,7 +1208,7 @@ VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
 		graphicsQueue,
 		1,
 		&submitInfo,
-		VK_NULL_HANDLE
+		inFlightFences[currentSwapchainImage]
 		);
 	ASSERT(result, "Draw buffer submission failed", VK_SC_QUEUE_SUBMISSION_ERROR);
 
@@ -1238,6 +1225,8 @@ VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
 	result = vkQueuePresentKHR(presentationQueue, &presentationInfo);
 	ASSERT(result, "Failed to present swapchain image", VK_SC_PRESENTATION_ERROR);
 
+	currentSwapchainImage = (currentSwapchainImage + 1) % vk::MAX_IN_FLIGHT_FRAMES;
+
 	return VK_SC_SUCCESS;
 
 }
@@ -1246,28 +1235,112 @@ VK_STATUS_CODE VKEngine::initializeSynchronizationObjects() {
 
 	logger::log(EVENT_LOG, "Initializing sync-objects...");
 
+	swapchainImageAvailableSemaphores.resize(vk::MAX_IN_FLIGHT_FRAMES);
+	renderingCompletedSemaphores.resize(vk::MAX_IN_FLIGHT_FRAMES);
+	inFlightFences.resize(vk::MAX_IN_FLIGHT_FRAMES);
+
 	VkSemaphoreCreateInfo semaphoreCreateInfo		= {};
 	semaphoreCreateInfo.sType						= VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-	result = vkCreateSemaphore(
-		logicalDevice,
-		&semaphoreCreateInfo,
-		allocator,
-		&swapchainImageAvailable
+	VkFenceCreateInfo fenceCreateInfo				= {};
+	fenceCreateInfo.sType							= VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fenceCreateInfo.flags							= VK_FENCE_CREATE_SIGNALED_BIT;
+
+	for (size_t i = 0; i < vk::MAX_IN_FLIGHT_FRAMES; i++) {
+
+		result = vkCreateSemaphore(
+			logicalDevice,
+			&semaphoreCreateInfo,
+			allocator,
+			&swapchainImageAvailableSemaphores[i]
 		);
-	ASSERT(result, "Failed to create semaphore", VK_SC_SEMAPHORE_CREATION_ERROR);
-	logger::log(EVENT_LOG, "Successfully initialized semaphore");
-	
-	result = vkCreateSemaphore(
-		logicalDevice,
-		&semaphoreCreateInfo,
-		allocator,
-		&renderingCompleted
-	);
-	ASSERT(result, "Failed to create semaphore", VK_SC_SEMAPHORE_CREATION_ERROR);
-	logger::log(EVENT_LOG, "Successfully initialized semaphore");
+		ASSERT(result, "Failed to create semaphore", VK_SC_SEMAPHORE_CREATION_ERROR);
+		logger::log(EVENT_LOG, "Successfully initialized semaphore");
+
+		result = vkCreateSemaphore(
+			logicalDevice,
+			&semaphoreCreateInfo,
+			allocator,
+			&renderingCompletedSemaphores[i]
+		);
+		ASSERT(result, "Failed to create semaphore", VK_SC_SEMAPHORE_CREATION_ERROR);
+		logger::log(EVENT_LOG, "Successfully initialized semaphore");
+
+		result = vkCreateFence(
+			logicalDevice,
+			&fenceCreateInfo,
+			allocator,
+			&inFlightFences[i]
+			);
+		ASSERT(result, "Failed to create fence", VK_SC_FENCE_CREATION_ERROR);
+		logger::log(EVENT_LOG, "Successfully initialized fence");
+
+	}
 
 	logger::log(EVENT_LOG, "Successfully initialized sync-objects");
+
+	return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::recreateSwapchain() {
+
+	vkDeviceWaitIdle(logicalDevice);
+
+	cleanSwapchain();
+
+	ASSERT(createSwapchain(), "Failed to create a swapchain with the given parameters", VK_SC_SWAPCHAIN_CREATION_ERROR);
+	ASSERT(createSwapchainImageViews(), "Failed to create swapchain image views", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
+	ASSERT(createRenderPasses(), "Failed to create render passes", VK_SC_RENDER_PASS_CREATION_ERROR);
+	ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
+	ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
+	ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
+
+	return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::cleanSwapchain() {
+
+	logger::log(EVENT_LOG, "Cleaning swapchain...");
+
+	logger::log(EVENT_LOG, "Destroying framebuffers...");
+	for (auto framebuffer : swapchainFramebuffers) {
+
+		vkDestroyFramebuffer(logicalDevice, framebuffer, allocator);
+		logger::log(EVENT_LOG, "Successfully destroyed framebuffer");
+
+	}
+	logger::log(EVENT_LOG, "Successfully destroyed framebuffers");
+
+	vkFreeCommandBuffers(
+		logicalDevice,
+		standardCommandPool,
+		static_cast< uint32_t >(standardCommandBuffers.size()),
+		standardCommandBuffers.data()
+		);
+	logger::log(EVENT_LOG, "Successfully freed command buffers");
+
+	vkDestroyPipeline(logicalDevice, graphicsPipeline, allocator);
+	logger::log(EVENT_LOG, "Successfully destroyed graphics pipeline");
+
+	vkDestroyPipelineLayout(logicalDevice, pipelineLayout, allocator);
+	logger::log(EVENT_LOG, "Successfully destroyed pipeline layout");
+
+	vkDestroyRenderPass(logicalDevice, renderPass, allocator);
+	logger::log(EVENT_LOG, "Successfully destroyed render pass");
+
+	for (auto imageView : swapchainImageViews) {
+
+		vkDestroyImageView(logicalDevice, imageView, allocator);
+		logger::log(EVENT_LOG, "Successfully destroyed image view");
+
+	}
+
+	vkDestroySwapchainKHR(logicalDevice, swapchain, allocator);
+	logger::log(EVENT_LOG, "Successfully destroyed swapchain");
+
+	logger::log(EVENT_LOG, "Successfully cleaned swapchain");
 
 	return VK_SC_SUCCESS;
 

@@ -22,6 +22,7 @@ namespace vk {
 	extern const unsigned int		HEIGHT;
 	extern const unsigned int		WIDTH;
 	extern const char*				TITLE;
+	extern const unsigned int		MAX_IN_FLIGHT_FRAMES;
 
 	/**
 		Handles main initialization of everything

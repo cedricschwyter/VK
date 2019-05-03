@@ -82,8 +82,10 @@ private:
 	VkPipeline								graphicsPipeline;
 	VkCommandPool							standardCommandPool;
 	std::vector< VkCommandBuffer >			standardCommandBuffers;
-	VkSemaphore								swapchainImageAvailable;
-	VkSemaphore								renderingCompleted;
+	std::vector< VkSemaphore >				swapchainImageAvailableSemaphores;
+	std::vector< VkSemaphore >				renderingCompletedSemaphores;
+	std::vector< VkFence >					inFlightFences;
+	size_t									currentSwapchainImage				= 0;
 
 	/**
 		Initializes the logger
@@ -332,5 +334,19 @@ private:
 		@return		Returns VK_SC_SUCCESS on success
 	*/
 	VK_STATUS_CODE initializeSynchronizationObjects(void);
+
+	/**
+		Recreates the swapchain on window resize and/or other events
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE recreateSwapchain(void);
+
+	/**
+		Cleans resources from the swapchain
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE cleanSwapchain(void);
 
 };
