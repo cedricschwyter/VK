@@ -21,17 +21,23 @@
 #include <map>
 #include <thread>
 #include <algorithm>
+#include <fstream>
 #include <string>
 
 #include "VK_STATUS_CODE.hpp"
 #include "Logger.hpp"
 #include "ASSERT.cpp"
-#include "QueueFamily.cpp"
+#include "QueueFamilies.cpp"
 #include "LoadingScreen.hpp"
 #include "SwapchainDetails.cpp"
+#include "VertFragShaderStages.hpp"
 
 class VKEngine {
 public:
+
+	VkResult								result;
+	VkDevice								logicalDevice;
+	VkAllocationCallbacks*					allocator;
 
 	/**
 		Initializes VKEngine and loads dependencies
@@ -42,9 +48,7 @@ public:
 
 private:
 
-	VkResult								result								= VK_SUCCESS;
 	GLFWwindow*								window								= nullptr;
-	VkAllocationCallbacks*					allocator							= nullptr;
 	VkInstance								instance							= VK_NULL_HANDLE;
 	const std::vector< const char* >		validationLayers					= {
 	
@@ -58,7 +62,6 @@ private:
 #endif
 	VkDebugUtilsMessengerEXT				validationLayerDebugMessenger		= VK_NULL_HANDLE;
 	VkPhysicalDevice						physicalDevice						= VK_NULL_HANDLE;
-	VkDevice								logicalDevice						= VK_NULL_HANDLE;
 	VkQueue									graphicsQueue						= VK_NULL_HANDLE;
 	VkQueue									presentationQueue					= VK_NULL_HANDLE;
 	VkSurfaceKHR							surface								= VK_NULL_HANDLE;
@@ -73,6 +76,14 @@ private:
 	VkExtent2D								swapchainImageExtent;
 	std::vector< VkImage >					swapchainImages;
 	std::vector< VkImageView >				swapchainImageViews;
+	std::vector< VkFramebuffer >			swapchainFramebuffers;
+	VkRenderPass							renderPass;
+	VkPipelineLayout						pipelineLayout;
+	VkPipeline								graphicsPipeline;
+	VkCommandPool							standardCommandPool;
+	std::vector< VkCommandBuffer >			standardCommandBuffers;
+	VkSemaphore								swapchainImageAvailable;
+	VkSemaphore								renderingCompleted;
 
 	/**
 		Initializes the logger
@@ -191,7 +202,7 @@ private:
 
 		@return		Returns a QueueFamily struct
 	*/
-	QueueFamily findSuitableQueueFamilies(VkPhysicalDevice device_);
+	QueueFamilies findSuitableQueueFamilies(VkPhysicalDevice device_);
 
 	/**
 		Creates a VkDevice handle from a VkPhysicalDevice (class member)
@@ -272,5 +283,54 @@ private:
 		@return		Returns VK_SC_SUCCESS on success
 	*/
 	VK_STATUS_CODE createSwapchainImageViews(void);
+
+	/**
+		Creates the necessary graphics pipelines
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE createGraphicsPipelines(void);
+	
+	/**
+		Creates the necessary render pass(es)
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE createRenderPasses(void);
+
+	/**
+		Creates and allocates a framebuffer for every VkImageView in the swapchain
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE allocateSwapchainFramebuffers(void);
+
+	/**
+		Creates and allocates command pools for later use
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE allocateCommandPools(void);
+
+	/**
+		Creates, allocates and recordes command buffers for later submission onto the queues
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE allocateCommandBuffers(void);
+
+	/**
+		Displays the swapchain image, that is up next to be displayed
+
+		@return		Return VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE showNextSwapchainImage(void);
+
+	/**
+		Creates and initializes sync-objects such as semaphores and fences
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE initializeSynchronizationObjects(void);
 
 };

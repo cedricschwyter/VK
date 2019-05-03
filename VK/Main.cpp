@@ -18,9 +18,9 @@
 #define NOMINMAX		// Fixes std::min/std::max/std::clamp error
 #include <Windows.h>
 
+#include "VK.hpp"
 #include "VKEngine.hpp"
 #include "VK_STATUS_CODE.hpp"
-#include "VK.hpp"
 
 namespace vk {
 
@@ -112,6 +112,29 @@ namespace vk {
 	bool isConsoleVisible() {
 
 		return ::IsWindowVisible(::GetConsoleWindow()) != FALSE;
+	
+	}
+
+	const std::vector< char > loadFile(const std::string& filePath_) {
+	
+		logger::log(EVENT_LOG, "Loading file at '" + filePath_ + "'");
+
+		std::ifstream file(filePath_, std::ios::ate | std::ios::binary);		// Start reading at end of file --> determine the buffer size needed
+
+		if (!file.is_open()) {
+		
+			logger::log(ERROR_LOG, "Failed to load file at '" + filePath_ + "'");
+
+		}
+
+		size_t bufferSize = (size_t)file.tellg();		// Find read position and thus necessary buffer size
+		std::vector< char > buffer(bufferSize);
+
+		file.seekg(0);		// Translate back to the beginning of the file
+		file.read(buffer.data(), bufferSize);
+		file.close();
+
+		return buffer;
 	
 	}
 

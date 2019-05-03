@@ -60,13 +60,21 @@ VK_STATUS_CODE VKEngine::initWindow() {
 
 VK_STATUS_CODE VKEngine::initVulkan() {
 
-	ASSERT(createInstance(), "Instance creation error", VK_SC_INSTANCE_CREATON_ERROR);
-	ASSERT(debugUtilsMessenger(), "Debug utils messenger creation error", VK_SC_DEBUG_UTILS_MESSENGER_CREATION_ERROR);
-	ASSERT(createSurfaceGLFW(), "Surface creation error", VK_SC_SURFACE_CREATION_ERROR);
-	ASSERT(selectBestPhysicalDevice(), "Failed to find a suitable GPU that supports Vulkan", VK_SC_PHYSICAL_DEVICE_ERROR);
-	ASSERT(createLogicalDeviceFromPhysicalDevice(), "Failed to create a logical device from the selected physical device", VK_SC_LOGICAL_DEVICE_ERROR);
+	allocator = nullptr;
+
+	ASSERT(createInstance(), "Failed to create instance", VK_SC_INSTANCE_CREATON_ERROR);
+	ASSERT(debugUtilsMessenger(), "Failed to create debug utils messenger", VK_SC_DEBUG_UTILS_MESSENGER_CREATION_ERROR);
+	ASSERT(createSurfaceGLFW(), "Failed to create GLFW surface", VK_SC_SURFACE_CREATION_ERROR);
+	ASSERT(selectBestPhysicalDevice(), "Failed to find a suitable GPU that supports Vulkan", VK_SC_PHYSICAL_DEVICE_CREATION_ERROR);
+	ASSERT(createLogicalDeviceFromPhysicalDevice(), "Failed to create a logical device from the selected physical device", VK_SC_LOGICAL_DEVICE_CREATION_ERROR);
 	ASSERT(createSwapchain(), "Failed to create a swapchain with the given parameters", VK_SC_SWAPCHAIN_CREATION_ERROR);
 	ASSERT(createSwapchainImageViews(), "Failed to create swapchain image views", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
+	ASSERT(createRenderPasses(), "Failed to create render passes", VK_SC_RENDER_PASS_CREATION_ERROR);
+	ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
+	ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
+	ASSERT(allocateCommandPools(), "Failed to allocate command pools", VK_SC_COMMAND_POOL_ALLOCATION_ERROR);
+	ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
+	ASSERT(initializeSynchronizationObjects(), "Failed to initialize sync-objects", VK_SC_SYNCHRONIZATION_OBJECT_INITIALIZATION_ERROR);
 
 	glfwShowWindow(window);
 	glfwFocusWindow(window);
@@ -86,8 +94,11 @@ VK_STATUS_CODE VKEngine::loop() {
 	while (!glfwWindowShouldClose(window)) {
 	
 		glfwPollEvents();
+		showNextSwapchainImage();
 	
 	}
+
+	vkDeviceWaitIdle(logicalDevice);
 
 	logger::log(EVENT_LOG, "Terminating...");
 
@@ -97,9 +108,35 @@ VK_STATUS_CODE VKEngine::loop() {
 
 VK_STATUS_CODE VKEngine::clean() {
 
+	vkDestroySemaphore(logicalDevice, renderingCompleted, allocator);
+	vkDestroySemaphore(logicalDevice, swapchainImageAvailable, allocator);
+	logger::log(EVENT_LOG, "Successfully destroyed sync-objects");
+
+	vkDestroyCommandPool(logicalDevice, standardCommandPool, allocator);
+	logger::log(EVENT_LOG, "Successfully destroyed command pool");
+
+	logger::log(EVENT_LOG, "Destroying framebuffers...");
+	for (auto framebuffer : swapchainFramebuffers) {
+	
+		vkDestroyFramebuffer(logicalDevice, framebuffer, allocator);
+		logger::log(EVENT_LOG, "Successfully destroyed framebuffer");
+
+	}
+	logger::log(EVENT_LOG, "Successfully destroyed framebuffers");
+
+	vkDestroyPipeline(logicalDevice, graphicsPipeline, allocator);
+	logger::log(EVENT_LOG, "Successfully destroyed graphics pipeline");
+
+	vkDestroyPipelineLayout(logicalDevice, pipelineLayout, allocator);
+	logger::log(EVENT_LOG, "Successfully destroyed pipeline layout");
+
+	vkDestroyRenderPass(logicalDevice, renderPass, allocator);
+	logger::log(EVENT_LOG, "Successfully destroyed render pass");
+
 	for (auto imageView : swapchainImageViews) {
 
 		vkDestroyImageView(logicalDevice, imageView, allocator);
+		logger::log(EVENT_LOG, "Successfully destroyed image view");
 
 	}
 
@@ -320,7 +357,7 @@ VK_STATUS_CODE VKEngine::selectBestPhysicalDevice() {
 	if (physicalDeviceCount == 0) {
 	
 		logger::log(ERROR_LOG, "Failed to find a suitable GPU");
-		return VK_SC_PHYSICAL_DEVICE_ERROR;
+		return VK_SC_PHYSICAL_DEVICE_CREATION_ERROR;
 	
 	}
 
@@ -359,7 +396,7 @@ VK_STATUS_CODE VKEngine::selectBestPhysicalDevice() {
 
 int VKEngine::evaluateDeviceSuitabilityScore(VkPhysicalDevice device_) {
 
-	QueueFamily				families				= findSuitableQueueFamilies(device_);
+	QueueFamilies				families				= findSuitableQueueFamilies(device_);
 	SwapchainDetails		swapchainDetails		= querySwapchainDetails(device_);
 
 	VkPhysicalDeviceProperties physicalDeviceProperties;
@@ -407,9 +444,9 @@ VK_STATUS_CODE VKEngine::printPhysicalDevicePropertiesAndFeatures(VkPhysicalDevi
 
 }
 
-QueueFamily VKEngine::findSuitableQueueFamilies(VkPhysicalDevice device_) {
+QueueFamilies VKEngine::findSuitableQueueFamilies(VkPhysicalDevice device_) {
 
-	QueueFamily families;
+	QueueFamilies families;
 
 	uint32_t queueFamilyCount = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties(device_, &queueFamilyCount, nullptr);
@@ -458,7 +495,7 @@ QueueFamily VKEngine::findSuitableQueueFamilies(VkPhysicalDevice device_) {
 VK_STATUS_CODE VKEngine::createLogicalDeviceFromPhysicalDevice() {
 
 	logger::log(EVENT_LOG, "Creating logical device...");
-	QueueFamily families = findSuitableQueueFamilies(physicalDevice);
+	QueueFamilies families = findSuitableQueueFamilies(physicalDevice);
 
 	std::vector< VkDeviceQueueCreateInfo > deviceQueueCreateInfos;
 	std::set< uint32_t > uniqueQueueFamilies = { families.graphicsFamilyIndex.value(), families.presentationFamilyIndex.value() };
@@ -504,7 +541,7 @@ VK_STATUS_CODE VKEngine::createLogicalDeviceFromPhysicalDevice() {
 		allocator, 
 		&logicalDevice
 		);
-	ASSERT(result, "Failed to create a logical device", VK_SC_LOGICAL_DEVICE_ERROR);
+	ASSERT(result, "Failed to create a logical device", VK_SC_LOGICAL_DEVICE_CREATION_ERROR);
 	logger::log(EVENT_LOG, "Successfully created logical device");
 
 	logger::log(EVENT_LOG, "Retrieving queue handle for graphics queue...");
@@ -571,7 +608,7 @@ bool VKEngine::checkDeviceSwapchainExtensionSupport(VkPhysicalDevice device_) {
 	
 	}
 	
-	logger::log(extensions.empty() ? EVENT_LOG : ERROR_LOG, extensions.empty() ? "Device supports necessary extensions" : "Device does not support necessary extensions");
+	logger::log(extensions.empty() ? EVENT_LOG : ERROR_LOG, extensions.empty() ? "Device supports necessary extensions" : "Device does not support necessary extensions");		// An if-statement would probably have done better, but I mean, if you can do it in style, why not? ;)
 
 	return extensions.empty();
 
@@ -729,7 +766,7 @@ VK_STATUS_CODE VKEngine::createSwapchain() {
 	swapchainCreateInfo.imageArrayLayers				= 1;										// Amount of layers in an image, always 1, unless doing stereoscopic stuff
 	swapchainCreateInfo.imageUsage						= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;		// Render directly to swapchain
 
-	QueueFamily families								= findSuitableQueueFamilies(physicalDevice);
+	QueueFamilies families								= findSuitableQueueFamilies(physicalDevice);
 	uint32_t queueFamilyIndices[]						= { families.graphicsFamilyIndex.value(), families.presentationFamilyIndex.value() };
 
 	if (families.graphicsFamilyIndex != families.presentationFamilyIndex) {		// If presentation queue and graphics queue are in the same queue family, exclusive ownership is not necessary
@@ -782,9 +819,13 @@ VK_STATUS_CODE VKEngine::createSwapchain() {
 
 VK_STATUS_CODE VKEngine::createSwapchainImageViews() {
 
+	logger::log(EVENT_LOG, "Creating image views...");
+
 	swapchainImageViews.resize(swapchainImages.size());
 
 	for (size_t i = 0; i < swapchainImages.size(); i++) {
+
+		logger::log(EVENT_LOG, "Creating image view...");
 	
 		VkImageViewCreateInfo imageViewCreateInfo				= {};
 		imageViewCreateInfo.sType								= VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -809,7 +850,424 @@ VK_STATUS_CODE VKEngine::createSwapchainImageViews() {
 			);
 		ASSERT(result, "Failed to create VkImageView", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
 
+		logger::log(EVENT_LOG, "Successfully created image view");
+
 	}
+
+	logger::log(EVENT_LOG, "Successfully created image views");
+
+	return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
+
+	logger::log(EVENT_LOG, "Creating graphics pipeline...");
+	VertFragShaderStages stages("shaders/standard/vert.spv", "shaders/standard/frag.spv");
+	
+	// Vertex data is hardcoded in the vertex shader, no need to upload anything to the shaders (yet)
+	VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo				= {};
+	vertexInputStateCreateInfo.sType											= VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	vertexInputStateCreateInfo.vertexBindingDescriptionCount					= 0;
+	vertexInputStateCreateInfo.vertexAttributeDescriptionCount					= 0;
+
+	VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo			= {};
+	inputAssemblyStateCreateInfo.sType											= VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+	inputAssemblyStateCreateInfo.topology										= VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;		// Draw triangles
+	inputAssemblyStateCreateInfo.primitiveRestartEnable							= VK_FALSE;
+
+	VkViewport viewport															= {};
+	viewport.x																	= 0.0f;
+	viewport.y																	= 0.0f;
+	viewport.width																= static_cast< float >(swapchainImageExtent.width);
+	viewport.height																= static_cast< float >(swapchainImageExtent.height);
+	viewport.minDepth															= 0.0f;
+	viewport.maxDepth															= 1.0f;
+
+	VkRect2D scissors															= {};
+	scissors.offset																= {0, 0};
+	scissors.extent																= swapchainImageExtent;
+
+	VkPipelineViewportStateCreateInfo viewportStateCreateInfo					= {};
+	viewportStateCreateInfo.sType												= VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+	viewportStateCreateInfo.viewportCount										= 1;
+	viewportStateCreateInfo.pViewports											= &viewport;
+	viewportStateCreateInfo.scissorCount										= 1;
+	viewportStateCreateInfo.pScissors											= &scissors;
+
+	VkPipelineRasterizationStateCreateInfo rasterizationStateCreateInfo			= {};
+	rasterizationStateCreateInfo.sType											= VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+	rasterizationStateCreateInfo.depthClampEnable								= VK_FALSE;
+	rasterizationStateCreateInfo.rasterizerDiscardEnable						= VK_FALSE;
+	rasterizationStateCreateInfo.polygonMode									= VK_POLYGON_MODE_FILL;
+	rasterizationStateCreateInfo.lineWidth										= 1.0f;
+	rasterizationStateCreateInfo.cullMode										= VK_CULL_MODE_BACK_BIT;
+	rasterizationStateCreateInfo.frontFace										= VK_FRONT_FACE_CLOCKWISE;
+	rasterizationStateCreateInfo.depthBiasEnable								= VK_FALSE;
+
+	// No multisampling (yet)
+	VkPipelineMultisampleStateCreateInfo multisampleStateCreateInfo				= {};
+	multisampleStateCreateInfo.sType											= VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+	multisampleStateCreateInfo.sampleShadingEnable								= VK_FALSE;
+	multisampleStateCreateInfo.rasterizationSamples								= VK_SAMPLE_COUNT_1_BIT;
+
+	// No depth/stencil buffering (yet) \\
+
+	VkPipelineColorBlendAttachmentState colorBlendAttachmentState				= {};
+	colorBlendAttachmentState.colorWriteMask									= VK_COLOR_COMPONENT_R_BIT
+																				| VK_COLOR_COMPONENT_G_BIT
+																				| VK_COLOR_COMPONENT_B_BIT
+																				| VK_COLOR_COMPONENT_A_BIT;
+	colorBlendAttachmentState.blendEnable										= VK_TRUE;		// Implement alpha-blending
+	colorBlendAttachmentState.srcColorBlendFactor								= VK_BLEND_FACTOR_SRC_ALPHA;
+	colorBlendAttachmentState.dstColorBlendFactor								= VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+	colorBlendAttachmentState.colorBlendOp										= VK_BLEND_OP_ADD;
+	colorBlendAttachmentState.srcAlphaBlendFactor								= VK_BLEND_FACTOR_ONE;
+	colorBlendAttachmentState.dstAlphaBlendFactor								= VK_BLEND_FACTOR_ZERO;
+	colorBlendAttachmentState.alphaBlendOp										= VK_BLEND_OP_ADD;
+
+	VkPipelineColorBlendStateCreateInfo colorBlendStateCreateInfo				= {};
+	colorBlendStateCreateInfo.sType												= VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+	colorBlendStateCreateInfo.logicOpEnable										= VK_FALSE;
+	colorBlendStateCreateInfo.attachmentCount									= 1;
+	colorBlendStateCreateInfo.pAttachments										= &colorBlendAttachmentState;
+
+	std::vector< VkDynamicState > dynamicStates									= {
+	
+		VK_DYNAMIC_STATE_VIEWPORT,
+		VK_DYNAMIC_STATE_SCISSOR
+
+	};
+
+	// Dynamic states require GPU features that I do not want to activate just now, so I'll define this struct here but not reference it in the pipeline create info
+	VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo						= {};
+	dynamicStateCreateInfo.sType												= VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+	dynamicStateCreateInfo.dynamicStateCount									= static_cast< uint32_t >(dynamicStates.size());
+	dynamicStateCreateInfo.pDynamicStates										= dynamicStates.data();
+	
+	// No uniform variables (yet), that would need to be specified in the pipeline layout
+	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo							= {};
+	pipelineLayoutCreateInfo.sType												= VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+
+	result = vkCreatePipelineLayout(
+		logicalDevice,
+		&pipelineLayoutCreateInfo,
+		allocator,
+		&pipelineLayout
+		);
+	ASSERT(result, "Failed to create pipeline layout", VK_SC_PIPELINE_LAYOUT_CREATION_ERROR);
+	logger::log(EVENT_LOG, "Successfully created pipeline layout");
+
+	VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo						= {};
+	graphicsPipelineCreateInfo.sType											= VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	graphicsPipelineCreateInfo.stageCount										= 2;
+	graphicsPipelineCreateInfo.pStages											= stages.stages.data();
+	graphicsPipelineCreateInfo.pVertexInputState								= &vertexInputStateCreateInfo;
+	graphicsPipelineCreateInfo.pInputAssemblyState								= &inputAssemblyStateCreateInfo;
+	graphicsPipelineCreateInfo.pViewportState									= &viewportStateCreateInfo;
+	graphicsPipelineCreateInfo.pRasterizationState								= &rasterizationStateCreateInfo;
+	graphicsPipelineCreateInfo.pMultisampleState								= &multisampleStateCreateInfo;
+	graphicsPipelineCreateInfo.pDepthStencilState								= nullptr;						// Still no depth/stencil buffering
+	graphicsPipelineCreateInfo.pColorBlendState									= &colorBlendStateCreateInfo;
+	graphicsPipelineCreateInfo.pDynamicState									= nullptr;						// Defined, but not referenced
+	graphicsPipelineCreateInfo.layout											= pipelineLayout;				// Reference fixed-function stage
+	graphicsPipelineCreateInfo.renderPass										= renderPass;
+	graphicsPipelineCreateInfo.subpass											= 0;
+	graphicsPipelineCreateInfo.basePipelineHandle								= VK_NULL_HANDLE;				// No base pipeline
+	graphicsPipelineCreateInfo.basePipelineIndex								= -1;
+
+	result = vkCreateGraphicsPipelines(
+		logicalDevice,
+		VK_NULL_HANDLE,						// No pipeline cache will be used
+		1,									// Create only one pipeline, might change in the future
+		&graphicsPipelineCreateInfo,
+		allocator,
+		&graphicsPipeline
+		);
+	ASSERT(result, "Failed to create graphics pipeline", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
+
+	logger::log(EVENT_LOG, "Successfully created graphics pipeline");
+
+	stages.destroyModules();
+
+	return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::createRenderPasses() {
+
+	logger::log(EVENT_LOG, "Creating render pass...");
+
+	VkAttachmentDescription colorAttachmentDescription		= {};
+	colorAttachmentDescription.format						= swapchainImageFormat;
+	colorAttachmentDescription.samples						= VK_SAMPLE_COUNT_1_BIT;		// Still no multisampling (yet)
+	colorAttachmentDescription.loadOp						= VK_ATTACHMENT_LOAD_OP_CLEAR;
+	colorAttachmentDescription.storeOp						= VK_ATTACHMENT_STORE_OP_STORE;
+	colorAttachmentDescription.stencilLoadOp				= VK_ATTACHMENT_LOAD_OP_DONT_CARE;		// No stencil buffering, so nobody cares about stencil operations
+	colorAttachmentDescription.stencilStoreOp				= VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	colorAttachmentDescription.initialLayout				= VK_IMAGE_LAYOUT_UNDEFINED;
+	colorAttachmentDescription.finalLayout					= VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;		// Render the image to screen, so layout should be presentable in the swapchain
+
+	VkAttachmentReference colorAttachmentReference			= {};
+	colorAttachmentReference.attachment						= 0;
+	colorAttachmentReference.layout							= VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+	VkSubpassDescription subpassDescription					= {};
+	subpassDescription.pipelineBindPoint					= VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpassDescription.colorAttachmentCount					= 1;
+	subpassDescription.pColorAttachments					= &colorAttachmentReference;
+
+	VkRenderPassCreateInfo renderPassCreateInfo				= {};
+	renderPassCreateInfo.sType								= VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	renderPassCreateInfo.attachmentCount					= 1;
+	renderPassCreateInfo.pAttachments						= &colorAttachmentDescription;
+	renderPassCreateInfo.subpassCount						= 1;
+	renderPassCreateInfo.pSubpasses							= &subpassDescription;
+
+	VkSubpassDependency subpassDependency					= {};
+	subpassDependency.srcSubpass							= VK_SUBPASS_EXTERNAL;
+	subpassDependency.dstSubpass							= 0;
+	subpassDependency.srcStageMask							= VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	subpassDependency.srcAccessMask							= 0;
+	subpassDependency.dstStageMask							= VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	subpassDependency.dstAccessMask							= VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+															| VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+	renderPassCreateInfo.dependencyCount					= 1;
+	renderPassCreateInfo.pDependencies						= &subpassDependency;
+
+	result = vkCreateRenderPass(
+				logicalDevice,
+				&renderPassCreateInfo, 
+				allocator, 
+				&renderPass
+				);
+	ASSERT(result, "Failed to create render pass", VK_SC_RENDER_PASS_CREATION_ERROR);
+
+	logger::log(EVENT_LOG, "Successfully created render pass");
+
+	return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::allocateSwapchainFramebuffers() {
+
+	logger::log(EVENT_LOG, "Allocating framebuffers...");
+
+	swapchainFramebuffers.resize(swapchainImageViews.size());
+
+	for (size_t i = 0; i < swapchainImageViews.size(); i++) {
+	
+		logger::log(EVENT_LOG, "Creating framebuffer...");
+
+		VkImageView attachments[] = {
+		
+			swapchainImageViews[i]
+		
+		};
+	
+		VkFramebufferCreateInfo framebufferCreateInfo		= {};
+		framebufferCreateInfo.sType							= VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferCreateInfo.renderPass					= renderPass;
+		framebufferCreateInfo.attachmentCount				= 1;
+		framebufferCreateInfo.pAttachments					= attachments;
+		framebufferCreateInfo.width							= swapchainImageExtent.width;
+		framebufferCreateInfo.height						= swapchainImageExtent.height;
+		framebufferCreateInfo.layers						= 1;
+
+		result = vkCreateFramebuffer(
+			logicalDevice,
+			&framebufferCreateInfo,
+			allocator,
+			&swapchainFramebuffers[i]
+			);
+		ASSERT(result, "Failed to create framebuffer", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
+
+		logger::log(EVENT_LOG, "Successfully allocated framebuffer");
+
+	}
+
+	logger::log(EVENT_LOG, "Successfully allocated framebuffers");
+
+	return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::allocateCommandPools() {
+
+	logger::log(EVENT_LOG, "Allocating command pool...");
+
+	QueueFamilies families = findSuitableQueueFamilies(physicalDevice);
+
+	VkCommandPoolCreateInfo commandPoolCreateInfo		= {};
+	commandPoolCreateInfo.sType							= VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	commandPoolCreateInfo.queueFamilyIndex				= families.graphicsFamilyIndex.value();
+
+	result = vkCreateCommandPool(
+		logicalDevice,
+		&commandPoolCreateInfo,
+		allocator,
+		&standardCommandPool
+		);
+	ASSERT(result, "Failed to create command pool", VK_SC_COMMAND_POOL_ALLOCATION_ERROR);
+
+	logger::log(EVENT_LOG, "Successfully allocated command pool");
+
+	return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
+
+	logger::log(EVENT_LOG, "Allocating command buffers...");
+
+	standardCommandBuffers.resize(swapchainFramebuffers.size());		// For every frame in the swapchain, create a command buffer
+
+	VkCommandBufferAllocateInfo commandBufferAllocateInfo		= {};
+	commandBufferAllocateInfo.sType								= VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	commandBufferAllocateInfo.commandPool						= standardCommandPool;
+	commandBufferAllocateInfo.level								= VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	commandBufferAllocateInfo.commandBufferCount				= static_cast< uint32_t >(standardCommandBuffers.size());
+
+	result = vkAllocateCommandBuffers(
+		logicalDevice,
+		&commandBufferAllocateInfo,
+		standardCommandBuffers.data()
+		);
+	ASSERT(result, "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
+	logger::log(EVENT_LOG, "Successfully allocated command buffers");
+
+	logger::log(EVENT_LOG, "Recording command buffers...");
+	for (size_t i = 0; i < standardCommandBuffers.size(); i++) {
+	
+		logger::log(EVENT_LOG, "Recording command buffer...");
+		VkCommandBufferBeginInfo commandBufferBeginInfo			= {};
+		commandBufferBeginInfo.sType							= VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		commandBufferBeginInfo.flags							= VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+
+		result = vkBeginCommandBuffer(
+			standardCommandBuffers[i],
+			&commandBufferBeginInfo
+			);
+		ASSERT(result, "Failed to allocate command buffer", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
+
+		VkRenderPassBeginInfo renderPassBeginInfo				= {};
+		renderPassBeginInfo.sType								= VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassBeginInfo.renderPass							= renderPass;
+		renderPassBeginInfo.framebuffer							= swapchainFramebuffers[i];
+		renderPassBeginInfo.renderArea.offset					= {0, 0};
+		renderPassBeginInfo.renderArea.extent					= swapchainImageExtent;
+		
+		VkClearValue clearColor									= {0.0f, 0.0f, 0.0f, 1.0f};
+		
+		renderPassBeginInfo.clearValueCount						= 1;
+		renderPassBeginInfo.pClearValues						= &clearColor;
+
+		vkCmdBeginRenderPass(standardCommandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);		// Rendering commands will be embedded in the primary command buffer
+
+			vkCmdBindPipeline(standardCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+
+				vkCmdDraw(
+					standardCommandBuffers[i], 
+					3,
+					1,
+					0,
+					0
+					);
+
+		vkCmdEndRenderPass(standardCommandBuffers[i]);
+
+		result = vkEndCommandBuffer(standardCommandBuffers[i]);
+		ASSERT(result, "Failed to record command buffer", VK_SC_COMMAND_BUFFER_RECORDING_ERROR);
+
+		logger::log(EVENT_LOG, "Successfully recorded command buffer");
+
+	}
+	logger::log(EVENT_LOG, "Successfully recorded command buffers");
+
+	return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
+
+	uint32_t swapchainImageIndex;
+	result = vkAcquireNextImageKHR(
+		logicalDevice,
+		swapchain,
+		std::numeric_limits< uint64_t >::max(),		// numeric limit of 64-bit unsigned interger disables timeout
+		swapchainImageAvailable,					// signal this semaphore once operation is complete
+		VK_NULL_HANDLE,
+		&swapchainImageIndex
+		);
+	ASSERT(result, "Failed to acquire swapchain image", VK_SC_SWAPCHAIN_IMAGE_ACQUIRE_ERROR);
+
+	VkSubmitInfo submitInfo							= {};
+	submitInfo.sType								= VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+	VkSemaphore waitSemaphores[]					= {swapchainImageAvailable};
+	VkPipelineStageFlags waitStages[]				= {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+	submitInfo.waitSemaphoreCount					= 1;
+	submitInfo.pWaitSemaphores						= waitSemaphores;
+	submitInfo.pWaitDstStageMask					= waitStages;
+	submitInfo.commandBufferCount					= 1;
+	submitInfo.pCommandBuffers						= &standardCommandBuffers[swapchainImageIndex];
+
+	VkSemaphore signalSemaphores[]					= {renderingCompleted};
+	submitInfo.signalSemaphoreCount					= 1;
+	submitInfo.pSignalSemaphores					= signalSemaphores;
+
+	result = vkQueueSubmit(
+		graphicsQueue,
+		1,
+		&submitInfo,
+		VK_NULL_HANDLE
+		);
+	ASSERT(result, "Draw buffer submission failed", VK_SC_QUEUE_SUBMISSION_ERROR);
+
+	VkPresentInfoKHR presentationInfo				= {};
+	presentationInfo.sType							= VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	presentationInfo.waitSemaphoreCount				= 1;
+	presentationInfo.pWaitSemaphores				= signalSemaphores;
+
+	VkSwapchainKHR swapchains[]						= {swapchain};
+	presentationInfo.swapchainCount					= 1;
+	presentationInfo.pSwapchains					= swapchains;
+	presentationInfo.pImageIndices					= &swapchainImageIndex;
+
+	result = vkQueuePresentKHR(presentationQueue, &presentationInfo);
+	ASSERT(result, "Failed to present swapchain image", VK_SC_PRESENTATION_ERROR);
+
+	return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::initializeSynchronizationObjects() {
+
+	logger::log(EVENT_LOG, "Initializing sync-objects...");
+
+	VkSemaphoreCreateInfo semaphoreCreateInfo		= {};
+	semaphoreCreateInfo.sType						= VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+	result = vkCreateSemaphore(
+		logicalDevice,
+		&semaphoreCreateInfo,
+		allocator,
+		&swapchainImageAvailable
+		);
+	ASSERT(result, "Failed to create semaphore", VK_SC_SEMAPHORE_CREATION_ERROR);
+	logger::log(EVENT_LOG, "Successfully initialized semaphore");
+	
+	result = vkCreateSemaphore(
+		logicalDevice,
+		&semaphoreCreateInfo,
+		allocator,
+		&renderingCompleted
+	);
+	ASSERT(result, "Failed to create semaphore", VK_SC_SEMAPHORE_CREATION_ERROR);
+	logger::log(EVENT_LOG, "Successfully initialized semaphore");
+
+	logger::log(EVENT_LOG, "Successfully initialized sync-objects");
 
 	return VK_SC_SUCCESS;
 
