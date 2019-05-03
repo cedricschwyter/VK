@@ -942,7 +942,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 	// Dynamic states require GPU features that I do not want to activate just now, so I'll define this struct here but not reference it in the pipeline create info
 	VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo						= {};
 	dynamicStateCreateInfo.sType												= VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-	dynamicStateCreateInfo.dynamicStateCount									= dynamicStates.size();
+	dynamicStateCreateInfo.dynamicStateCount									= static_cast< uint32_t >(dynamicStates.size());
 	dynamicStateCreateInfo.pDynamicStates										= dynamicStates.data();
 	
 	// No uniform variables (yet), that would need to be specified in the pipeline layout

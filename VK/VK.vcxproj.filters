@@ -87,5 +87,6 @@
     <None Include="shaders\standard\compile.bat">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="SDL2.dll" />
   </ItemGroup>
 </Project>
