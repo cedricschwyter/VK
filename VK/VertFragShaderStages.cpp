@@ -8,9 +8,13 @@
 	@brief		Implementation of the VertFragShaderStages wrapper for a Vulkan shader stage
 */
 #include "VertFragShaderStages.hpp"
-#include "VKEngine.hpp"
 #include "VK.hpp"
 
+VertFragShaderStages::VertFragShaderStages() {
+
+
+
+}
 
 VertFragShaderStages::VertFragShaderStages(const char* vertPath_, const char* fragPath_) {
 
