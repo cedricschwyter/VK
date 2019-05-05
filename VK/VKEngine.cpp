@@ -1306,6 +1306,15 @@ VK_STATUS_CODE VKEngine::initializeSynchronizationObjects() {
 
 VK_STATUS_CODE VKEngine::recreateSwapchain() {
 
+	int width = 0;
+	int height = 0;
+	while (width == 0 || height == 0) {
+
+		glfwGetFramebufferSize(window, &width, &height);
+		glfwWaitEvents();
+
+	}
+
 	vkDeviceWaitIdle(logicalDevice);
 
 	cleanSwapchain();

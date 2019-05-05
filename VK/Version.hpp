@@ -11,7 +11,7 @@
 
 // Edit configuration here
 //#define VK_DEVELOPMENT		// enable this for verbose output
-#define VK_RELEASE			// enable this for performance
+//#define VK_RELEASE			// enable this for performance
 
 // Default values
 #if !defined VK_DEVELOPMENT && !defined VK_RELEASE
