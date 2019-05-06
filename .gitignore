@@ -266,6 +266,3 @@ __pycache__/
 # Dependency directory
 VK/ext/
 ext/
-
-# Dynamic link libraries
-*.dll

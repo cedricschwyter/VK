@@ -11,6 +11,8 @@
 #include <SDL.h>
 #undef main		// fixes SDL2 error: Entry point not defined
 
+#include <SDL_image.h>
+
 #include <iostream>
 #include <mutex>
 

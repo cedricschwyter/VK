@@ -15,7 +15,9 @@
 #include <string>
 
 #include "Logger.hpp"
-#include "ConsoleColor.hpp"
+#if defined WIN_64 || defined WIN_32
+	#include "ConsoleColor.hpp"
+#endif
 
 namespace logger {
 
@@ -72,17 +74,17 @@ namespace logger {
 				stream.open(ERROR_LOG_PATH, std::ios::trunc);
 				countError++;
 
-				stream << green << Day << white << ":"
-					<< green << Month << white << ":"
-					<< green << Year << white << "   "
-					<< green << Hour << white << ":"
-					<< green << Min << white << ":"
-					<< green << Sec << white << "		===		"
-					<< red << "CRITICAL: "
-					<< blue << msg_ << white << std::endl;
+				stream << Day << ":"
+				<< Month << ":"
+				<< Year << "   "
+				<< Hour << ":"
+				<< Min << ":"
+				<< Sec << "		===		"
+				<< "CRITICAL: "
+				<< msg_ << std::endl;
 
 				stream.close();
-#ifdef VK_DEVELOPMENT
+#if defined VK_DEVELOPMENT && (defined WIN_64 || WIN_32)
 				std::cerr << green << Day << white << ":"
 					<< green << Month << white << ":"
 					<< green << Year << white << "   "
@@ -91,23 +93,32 @@ namespace logger {
 					<< green << Sec << white << "		===		"
 					<< red << "CRITICAL: "
 					<< blue << msg_ << white << std::endl;
+#else
+				std::cerr << Day << ":"
+					<< Month << ":"
+					<< Year << "   "
+					<< Hour << ":"
+					<< Min << ":"
+					<< Sec << "		===		"
+					<< "CRITICAL: "
+					<< msg_ << std::endl;
 #endif
 			}
 			else {
 
 				stream.open(ERROR_LOG_PATH, std::ios::app);
 
-				stream << green << Day << white << ":"
-					<< green << Month << white << ":"
-					<< green << Year << white << "   "
-					<< green << Hour << white << ":"
-					<< green << Min << white << ":"
-					<< green << Sec << white << "		===		"
-					<< red << "CRITICAL: "
-					<< blue << msg_ << white << std::endl;
+				stream << Day << ":"
+					<< Month << ":"
+					<< Year << "   "
+					<< Hour << ":"
+					<< Min << ":"
+					<< Sec << "		===		"
+					<< "CRITICAL: "
+					<< msg_ << std::endl;
 
 				stream.close();
-#ifdef VK_DEVELOPMENT
+#if defined VK_DEVELOPMENT && (defined WIN_64 || WIN_32)
 				std::cerr << green << Day << white << ":"
 					<< green << Month << white << ":"
 					<< green << Year << white << "   "
@@ -116,18 +127,28 @@ namespace logger {
 					<< green << Sec << white << "		===		"
 					<< red << "CRITICAL: "
 					<< blue << msg_ << white << std::endl;
+#else
+				std::cerr << Day << ":"
+					<< Month << ":"
+					<< Year << "   "
+					<< Hour << ":"
+					<< Min << ":"
+					<< Sec << "		===		"
+					<< "CRITICAL: "
+					<< msg_ << std::endl;
 #endif
 			}
+
 		case START_LOG:
 			stream.open(START_LOG_PATH, std::ios::app);
 
-			stream << green << Day << white << ":"
-				<< green << Month << white << ":"
-				<< green << Year << white << "   "
-				<< green << Hour << white << ":"
-				<< green << Min << white << ":"
-				<< green << Sec << white << "		===		"
-				<< blue << msg_ << white << std::endl;
+			stream << Day << ":"
+				<< Month << ":"
+				<< Year << "   "
+				<< Hour << ":"
+				<< Min << ":"
+				<< Sec << "		===		"
+				<< msg_ << std::endl;
 
 			stream.close();
 
@@ -137,16 +158,16 @@ namespace logger {
 				stream.open(EVENT_LOG_PATH, std::ios::trunc);
 				countEvent++;
 
-				stream << green << Day << white << ":"
-					<< green << Month << white << ":"
-					<< green << Year << white << "   "
-					<< green << Hour << white << ":"
-					<< green << Min << white << ":"
-					<< green << Sec << white << "		===		"
-					<< blue << msg_ << white << std::endl;
+				stream << Day << ":"
+					<< Month << ":"
+					<< Year << "   "
+					<< Hour << ":"
+					<< Min << ":"
+					<< Sec << "		===		"
+					<< msg_ << std::endl;
 
 				stream.close();
-#ifdef VK_DEVELOPMENT
+#if defined VK_DEVELOPMENT && (defined WIN_64 || WIN_32)
 				std::cout << green << Day << white << ":"
 					<< green << Month << white << ":"
 					<< green << Year << white << "   "
@@ -154,22 +175,30 @@ namespace logger {
 					<< green << Min << white << ":"
 					<< green << Sec << white << "		===		"
 					<< blue << msg_ << white << std::endl;
+#else
+				std::cout << Day << ":"
+					<< Month << ":"
+					<< Year << "   "
+					<< Hour << ":"
+					<< Min << ":"
+					<< Sec << "		===		"
+					<< msg_ << std::endl;
 #endif
 			}
 			else {
 
 				stream.open(EVENT_LOG_PATH, std::ios::app);
 
-				stream << green << Day << white << ":"
-					<< green << Month << white << ":"
-					<< green << Year << white << "   "
-					<< green << Hour << white << ":"
-					<< green << Min << white << ":"
-					<< green << Sec << white << "		===		"
-					<< blue << msg_ << white << std::endl;
+				stream << Day << ":"
+					<< Month << ":"
+					<< Year << "   "
+					<< Hour << ":"
+					<< Min << ":"
+					<< Sec << "		===		"
+					<< msg_ << std::endl;
 
 				stream.close();
-#ifdef VK_DEVELOPMENT
+#if defined VK_DEVELOPMENT && (defined WIN_64 || WIN_32)
 				std::cout << green << Day << white << ":"
 					<< green << Month << white << ":"
 					<< green << Year << white << "   "
@@ -177,6 +206,14 @@ namespace logger {
 					<< green << Min << white << ":"
 					<< green << Sec << white << "		===		"
 					<< blue << msg_ << white << std::endl;
+#else
+				std::cout << Day << ":"
+					<< Month << ":"
+					<< Year << "   "
+					<< Hour << ":"
+					<< Min << ":"
+					<< Sec << "		===		"
+					<< msg_ << std::endl;
 #endif
 			}
 			break;

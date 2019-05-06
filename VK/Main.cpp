@@ -10,13 +10,15 @@
 
 #include "Version.hpp"
 
-#if !defined VK_DEVELOPMENT && defined VK_RELEASE
+#if !defined VK_DEVELOPMENT && defined VK_RELEASE && (defined WIN_64 || defined WIN_32)
 	#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 #endif
 
 #include <iostream>
-#define NOMINMAX		// Fixes std::min/std::max/std::clamp error
-#include <Windows.h>
+#if defined WIN_64 || defined WIN_32
+	#define NOMINMAX		// Fixes std::min/std::max/std::clamp error
+	#include <Windows.h>
+#endif
 
 #include "VK.hpp"
 #include "VKEngine.hpp"
@@ -99,21 +101,22 @@ namespace vk {
 	}
 
 	void hideConsole() {
-
+#if defined WIN_64 || defined WIN_32
 		::ShowWindow(::GetConsoleWindow(), SW_HIDE);
+#endif
 	
 	}
 
 	void showConsole() {
-
+#if defined WIN_64 || defined WIN_32
 		::ShowWindow(::GetConsoleWindow(), SW_SHOW);
-	
+#endif
 	}
 
 	bool isConsoleVisible() {
-
+#if defined WIN_64 || defined WIN_32
 		return ::IsWindowVisible(::GetConsoleWindow()) != FALSE;
-	
+#endif
 	}
 
 	const std::vector< char > loadFile(const std::string& filePath_) {

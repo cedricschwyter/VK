@@ -124,14 +124,14 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\VK\ext\SDL\include;C:\VulkanSDK\1.1.85.0\Include;$(SolutionDir)\VK\ext\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\VK\ext\stbimage;$(SolutionDir)\VK\ext\SDL\include;C:\VulkanSDK\1.1.85.0\Include;$(SolutionDir)\VK\ext\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)\VK\ext\SDL\lib\x64;$(SolutionDir)\VK\ext\glfw\lib-vc2019;C:\VulkanSDK\1.1.85.0\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;glfw3.lib;vulkan-1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2_image.lib;SDL2.lib;SDL2main.lib;glfw3.lib;vulkan-1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -160,10 +160,18 @@
     <ClInclude Include="VK_STATUS_CODE.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="libjpeg-9.dll" />
+    <None Include="libpng16-16.dll" />
+    <None Include="libtiff-5.dll" />
+    <None Include="libwebp-7.dll" />
     <None Include="SDL2.dll" />
+    <None Include="SDL2_image.dll" />
     <None Include="shaders\standard\compile.bat" />
+    <None Include="shaders\standard\frag.spv" />
     <None Include="shaders\standard\shader.frag" />
     <None Include="shaders\standard\shader.vert" />
+    <None Include="shaders\standard\vert.spv" />
+    <None Include="zlib1.dll" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

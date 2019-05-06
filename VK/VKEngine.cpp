@@ -7,9 +7,11 @@
 	@file		VKEngine.cpp
 	@brief		Implementation of the VKEngine class
 */
-
 #include "VKEngine.hpp"
 #include "VK.hpp"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 
 VK_STATUS_CODE VKEngine::init() {
@@ -52,6 +54,17 @@ VK_STATUS_CODE VKEngine::initWindow() {
 		nullptr,
 		nullptr
 		);
+
+	GLFWimage windowIcon[1];
+	windowIcon[0].pixels = stbi_load(
+		"res/textures/loading_screen/vulkan.png",
+		&windowIcon[0].width,
+		&windowIcon[0].height,
+		0,
+		STBI_rgb_alpha
+	);
+	glfwSetWindowIcon(window, 1, windowIcon);
+	stbi_image_free(windowIcon[0].pixels);
 	logger::log(EVENT_LOG, "Successfully initialized window");
 
 	glfwSetWindowUserPointer(window, this);

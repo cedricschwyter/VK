@@ -81,7 +81,7 @@ LoadingScreen::LoadingScreen() {
 
 	}
 
-	imageSurface = SDL_LoadBMP("res/textures/loading_screen/vulkan.bmp");
+	imageSurface = IMG_Load("res/textures/loading_screen/vulkan.png");
 	if (imageSurface == NULL) {
 
 		std::string error = SDL_GetError();
@@ -104,6 +104,7 @@ SDL_STATUS_CODE LoadingScreen::clean() {
 	imageSurface = nullptr;
 
 	SDL_DestroyWindow(window);
+	IMG_Quit();
 	SDL_Quit();
 
 	return SDL_SC_SUCCESS;
