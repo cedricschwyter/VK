@@ -72,7 +72,7 @@ GraphicsPipeline::GraphicsPipeline(
 	);
 	ASSERT(vk::engine.result, "Failed to create graphics pipeline", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
 
-	//destroyShaderModules();
+	destroyShaderModules();
 
 }
 

@@ -1178,9 +1178,8 @@ VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
 		VK_NULL_HANDLE,
 		&swapchainImageIndex
 		);
-	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || hasFramebufferBeenResized) {
+	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
 	
-		hasFramebufferBeenResized = false;
 		recreateSwapchain();
 	
 	}
@@ -1220,6 +1219,12 @@ VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
 	presentationInfo.pImageIndices					= &swapchainImageIndex;
 
 	result = vkQueuePresentKHR(presentationQueue, &presentationInfo);
+	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || hasFramebufferBeenResized) {
+
+		hasFramebufferBeenResized = false;
+		recreateSwapchain();
+
+	}
 	ASSERT(result, "Failed to present swapchain image", VK_SC_PRESENTATION_ERROR);
 
 	currentSwapchainImage = (currentSwapchainImage + 1) % vk::MAX_IN_FLIGHT_FRAMES;
