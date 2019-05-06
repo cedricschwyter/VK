@@ -24,11 +24,13 @@ VertFragShaderStages::VertFragShaderStages(const char* vertPath_, const char* fr
 	vertModule											= createShaderModuleFromBinary(&vertCode);
 	fragModule											= createShaderModuleFromBinary(&fragCode);
 
+	vertStageInfo										= {};
 	vertStageInfo.sType									= VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	vertStageInfo.stage									= VK_SHADER_STAGE_VERTEX_BIT;
 	vertStageInfo.module								= vertModule;
 	vertStageInfo.pName									= "main";
 
+	fragStageInfo										= {};
 	fragStageInfo.sType									= VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	fragStageInfo.stage									= VK_SHADER_STAGE_FRAGMENT_BIT;
 	fragStageInfo.module								= fragModule;
