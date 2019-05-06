@@ -8,6 +8,10 @@
 	@brief		Definition of the GraphicsPipeline wrapper for a Vulkan graphics pipeline
 */
 #pragma once
+#include <vulkan/vulkan.h>
+
+#include "VertFragShaderStages.hpp"
+
 class GraphicsPipeline
 {
 public:
@@ -16,5 +20,66 @@ public:
 		Default constructor
 	*/
 	GraphicsPipeline(void);
+
+	/**
+		Constructor
+
+		@param		vertPath_							(Relative) file path to the SPIR-V compiled vertex shader file
+		@param		fragPath_							(Relative) file path to the SPIR-V compiled fragment shader file
+		@param		vertexInputStateCreateInfo_			A pointer to a vertex input state create info structure
+		@param		inputAssemblyStateCreateInfo_		A pointer to a input assembly state create info structure
+		@param		viewportStateCreateInfo_			A pointer to a viewport state create info structure
+		@param		rasterizationStateCreateInfo_		A pointer to a rasterization state create info structure
+		@param		multisampleStateCreateInfo_			A pointer to a multisample state create info structure
+		@param		depthStencilStateCreateInfo_		A pointer to a depth stencil state create info structure
+		@param		colorBlendAttachmentState_			A pointer to a color blend attachment state structure
+		@param		colorBlendStateCreateInfo_			A pointer to a color blend state create info structure
+		@param		dynamicStateCreateInfo_				A pointer to a dynamic state create info structure
+		@param		pipelineLayoutCreateInfo_			A pointer to a pipeline layout create info structure
+		@param		renderPass_							A valid VkRenderPass handle
+	*/
+	GraphicsPipeline(
+		const char*											vertPath_, 
+		const char*											fragPath_,
+		const VkPipelineVertexInputStateCreateInfo*			vertexInputStateCreateInfo_,
+		const VkPipelineInputAssemblyStateCreateInfo*		inputAssemblyStateCreateInfo_,
+		const VkPipelineViewportStateCreateInfo*			viewportStateCreateInfo_,
+		const VkPipelineRasterizationStateCreateInfo*		rasterizationStateCreateInfo_,
+		const VkPipelineMultisampleStateCreateInfo*			multisampleStateCreateInfo_,
+		const VkPipelineDepthStencilStateCreateInfo*		depthStencilStateCreateInfo_,
+		const VkPipelineColorBlendAttachmentState*			colorBlendAttachmentState_,
+		const VkPipelineColorBlendStateCreateInfo*			colorBlendStateCreateInfo_,
+		const VkPipelineDynamicStateCreateInfo*				dynamicStateCreateInfo_,
+		const VkPipelineLayoutCreateInfo*					pipelineLayoutCreateInfo_,
+		VkRenderPass										renderPass_
+		);
+
+	/**
+		Returns the pipeline
+
+		@return		Returns the VkPipeline
+	*/
+	VkPipeline get(void);
+
+	/**
+		Destroys the VkShaderModules
+		
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE destroyShaderModules(void);
+
+	/**
+		Destroys all other allocated resources of the graphics pipeline
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE destroy(void);
+
+private:
+
+	VertFragShaderStages		stages;
+	VkPipelineLayout			pipelineLayout		= VK_NULL_HANDLE;
+	VkPipeline					pipeline			= VK_NULL_HANDLE;
+
 };
 

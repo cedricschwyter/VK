@@ -97,8 +97,41 @@ VK_STATUS_CODE VKEngine::loop() {
 
 	logger::log(EVENT_LOG, "Entering application loop...");
 
+	double					lastTime			= glfwGetTime();
+
 	while (!glfwWindowShouldClose(window)) {
-	
+
+		static double		pastTime			= 0;
+		static float		nbFrames			= 0;
+		static float		maxfps				= 0;
+		double				currentTime			= glfwGetTime();
+		double				deltaTime			= currentTime - pastTime;
+
+		pastTime = currentTime;
+
+		nbFrames++;
+		float seconds = 10.0f;
+
+		if (currentTime - lastTime >= 1.0 && nbFrames > maxfps) {
+
+			maxfps = nbFrames;
+
+		}
+
+		if (currentTime - lastTime >= seconds) {
+
+			std::string fps				= "Average FPS (last " + std::to_string(seconds) + " seconds):	%f\t";
+			std::string frametime		= "Average Frametime (last " + std::to_string(seconds) + " seconds):	%f ms\t";
+			std::string maxFPS			= "Max FPS:	%f\n";
+
+			printf(fps.c_str(), double(nbFrames / seconds));
+			printf(frametime.c_str(), double((1000.0 * seconds) / nbFrames));
+			printf(maxFPS.c_str(), double(maxfps / seconds));
+			nbFrames = 0;
+			lastTime += seconds;
+
+		}
+
 		glfwPollEvents();
 		showNextSwapchainImage();
 	
@@ -856,7 +889,6 @@ VK_STATUS_CODE VKEngine::createSwapchainImageViews() {
 VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 
 	logger::log(EVENT_LOG, "Creating graphics pipeline...");
-	VertFragShaderStages stages("shaders/standard/vert.spv", "shaders/standard/frag.spv");
 	
 	// Vertex data is hardcoded in the vertex shader, no need to upload anything to the shaders (yet)
 	VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo				= {};
@@ -942,46 +974,23 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo							= {};
 	pipelineLayoutCreateInfo.sType												= VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
-	result = vkCreatePipelineLayout(
-		logicalDevice,
+	pipeline = GraphicsPipeline(
+		"shaders/standard/vert.spv", 
+		"shaders/standard/frag.spv",
+		&vertexInputStateCreateInfo,
+		&inputAssemblyStateCreateInfo,
+		&viewportStateCreateInfo,
+		&rasterizationStateCreateInfo,
+		&multisampleStateCreateInfo,
+		nullptr,						// Still no depth/stencil buffering
+		&colorBlendAttachmentState,
+		&colorBlendStateCreateInfo,
+		nullptr,						// Defined, but not referenced
 		&pipelineLayoutCreateInfo,
-		allocator,
-		&pipelineLayout
+		renderPass
 		);
-	ASSERT(result, "Failed to create pipeline layout", VK_SC_PIPELINE_LAYOUT_CREATION_ERROR);
-	logger::log(EVENT_LOG, "Successfully created pipeline layout");
-
-	VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo						= {};
-	graphicsPipelineCreateInfo.sType											= VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-	graphicsPipelineCreateInfo.stageCount										= 2;
-	graphicsPipelineCreateInfo.pStages											= stages.stages.data();
-	graphicsPipelineCreateInfo.pVertexInputState								= &vertexInputStateCreateInfo;
-	graphicsPipelineCreateInfo.pInputAssemblyState								= &inputAssemblyStateCreateInfo;
-	graphicsPipelineCreateInfo.pViewportState									= &viewportStateCreateInfo;
-	graphicsPipelineCreateInfo.pRasterizationState								= &rasterizationStateCreateInfo;
-	graphicsPipelineCreateInfo.pMultisampleState								= &multisampleStateCreateInfo;
-	graphicsPipelineCreateInfo.pDepthStencilState								= nullptr;						// Still no depth/stencil buffering
-	graphicsPipelineCreateInfo.pColorBlendState									= &colorBlendStateCreateInfo;
-	graphicsPipelineCreateInfo.pDynamicState									= nullptr;						// Defined, but not referenced
-	graphicsPipelineCreateInfo.layout											= pipelineLayout;				// Reference fixed-function stage
-	graphicsPipelineCreateInfo.renderPass										= renderPass;
-	graphicsPipelineCreateInfo.subpass											= 0;
-	graphicsPipelineCreateInfo.basePipelineHandle								= VK_NULL_HANDLE;				// No base pipeline
-	graphicsPipelineCreateInfo.basePipelineIndex								= -1;
-
-	result = vkCreateGraphicsPipelines(
-		logicalDevice,
-		VK_NULL_HANDLE,						// No pipeline cache will be used
-		1,									// Create only one pipeline, might change in the future
-		&graphicsPipelineCreateInfo,
-		allocator,
-		&graphicsPipeline
-		);
-	ASSERT(result, "Failed to create graphics pipeline", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
 
 	logger::log(EVENT_LOG, "Successfully created graphics pipeline");
-
-	stages.destroyModules();
 
 	return VK_SC_SUCCESS;
 
@@ -1158,7 +1167,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
 		vkCmdBeginRenderPass(standardCommandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);		// Rendering commands will be embedded in the primary command buffer
 
-			vkCmdBindPipeline(standardCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+			vkCmdBindPipeline(standardCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.get());
 
 				vkCmdDraw(
 					standardCommandBuffers[i], 
@@ -1356,11 +1365,7 @@ VK_STATUS_CODE VKEngine::cleanSwapchain() {
 		);
 	logger::log(EVENT_LOG, "Successfully freed command buffers");
 
-	vkDestroyPipeline(logicalDevice, graphicsPipeline, allocator);
-	logger::log(EVENT_LOG, "Successfully destroyed graphics pipeline");
-
-	vkDestroyPipelineLayout(logicalDevice, pipelineLayout, allocator);
-	logger::log(EVENT_LOG, "Successfully destroyed pipeline layout");
+	pipeline.destroy();
 
 	vkDestroyRenderPass(logicalDevice, renderPass, allocator);
 	logger::log(EVENT_LOG, "Successfully destroyed render pass");

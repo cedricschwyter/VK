@@ -24,6 +24,11 @@ public:
 
 	/**
 		Default constructor
+	*/
+	VertFragShaderStages(void);
+
+	/**
+		Constructor
 
 		@param		vertPath_		(Relative) path to the SPIR-V-compiled vertex shader file
 		@param		fragPath_		(Relative) path to the SPIR-V-compile fragment shader file

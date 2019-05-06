@@ -31,6 +31,7 @@
 #include "LoadingScreen.hpp"
 #include "SwapchainDetails.cpp"
 #include "VertFragShaderStages.hpp"
+#include "GraphicsPipeline.hpp"
 
 class VKEngine {
 public:
@@ -78,8 +79,7 @@ private:
 	std::vector< VkImageView >				swapchainImageViews;
 	std::vector< VkFramebuffer >			swapchainFramebuffers;
 	VkRenderPass							renderPass;
-	VkPipelineLayout						pipelineLayout;
-	VkPipeline								graphicsPipeline;
+	GraphicsPipeline						pipeline;
 	VkCommandPool							standardCommandPool;
 	std::vector< VkCommandBuffer >			standardCommandBuffers;
 	std::vector< VkSemaphore >				swapchainImageAvailableSemaphores;
