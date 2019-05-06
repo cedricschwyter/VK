@@ -1213,7 +1213,7 @@ VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
 		);
 	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
 	
-		recreateSwapchain();
+		return recreateSwapchain();
 	
 	}
 	ASSERT(result, "Failed to acquire swapchain image", VK_SC_SWAPCHAIN_IMAGE_ACQUIRE_ERROR);
@@ -1319,6 +1319,15 @@ VK_STATUS_CODE VKEngine::initializeSynchronizationObjects() {
 }
 
 VK_STATUS_CODE VKEngine::recreateSwapchain() {
+
+	int width = 0;
+	int height = 0;
+	while (width == 0 || height == 0) {
+
+		glfwGetFramebufferSize(window, &width, &height);
+		glfwWaitEvents();
+
+	}
 
 	vkDeviceWaitIdle(logicalDevice);
 
