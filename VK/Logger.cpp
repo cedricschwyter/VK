@@ -8,7 +8,7 @@
 	@brief		Implementation of the Logger namespace
 */
 #pragma once
-#include <direct.h>
+#include <filesystem>
 #include <fstream>
 #include <time.h>
 #include <iostream>
@@ -31,7 +31,7 @@ namespace logger {
 
 	LOGGER_STATUS_CODE init() {
 	
-		if(_mkdir(LOG_DIR) >= 0) return LOGGER_SC_DIRECTORY_CREATION_ERROR;
+		std::experimental::filesystem::create_directory(LOG_DIR);
 		std::ofstream error;
 		std::ofstream start;
 		std::ofstream event;
