@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<link rel="icon" href="vulkan_lunarg_icon.png">
+<link rel="stylesheet" href="github-markdown.css">
+<style>
+    body {
+        box-sizing: border-box;
+        min-width: 200px;
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 45px;
+    }
+</style>
+</head>
+<body>
+<article class="markdown-body">
+<h1>
+<a id="user-content-vulkan-sdk-for-windows-release-notes" class="anchor" href="#user-content-vulkan-sdk-for-windows-release-notes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Vulkan SDK for Windows Release Notes</h1>
+<h2>
+<a id="user-content-vulkan-sdk-11850-release-notes" class="anchor" href="#user-content-vulkan-sdk-11850-release-notes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Vulkan SDK 1.1.85.0 Release Notes</h2>
+<h5>
+<a id="user-content-version-11850-for-windows" class="anchor" href="#user-content-version-11850-for-windows" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Version 1.1.85.0 for Windows</h5>
+<h6>
+<a id="user-content-october-4-2018" class="anchor" href="#user-content-october-4-2018" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>October 4, 2018</h6>
+<p>This SDK supports Vulkan API revision 1.1.85. The prior SDK supported Vulkan API revision 1.1.82.</p>
+<p>Much of the documentation for this SDK is contained in the Getting Started Guide, found in the <code>Documentation</code> directory in this SDK and on the <a href="https://vulkan.lunarg.com" TARGET="_blank" rel="nofollow">LunarXchange website</a>.</p>
+<p><strong>Drivers:</strong> LunarG recommends updating Vulkan-capable hardware drivers to the latest recommended version from the hardware vendor. A list of <a href="#user-content-known-issues">Known Issues</a> appears at the end of this document with more information.</p>
+<h3>
+<a id="user-content-overview-of-new-features-in-sdk-11850" class="anchor" href="#user-content-overview-of-new-features-in-sdk-11850" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Overview of new features in SDK 1.1.85.0</h3>
+<ul>
+<li>On September 19, 2018, NVIDIA released new Vulkan extensions to support their Turing architecture. These new extensions are supported and covered by Vulkan validation layers and the SPIR-V toolchain.</li>
+<li>Since the release of SDK 1.1.82.1, the following extensions have been added to the Vulkan spec and may be supported by a Vulkan device. To query the extensions available to a given physical device, call <code>vkEnumerateDeviceExtensionProperties()</code> or contact the hardware vendor.</li>
+</ul>
+<pre><code>    VK_EXT_astc_decode_mode
+    VK_EXT_inline_uniform_block
+    VK_KHR_vulkan_memory_model
+    VK_NV_compute_shader_derivatives
+    VK_NV_corner_sampled_image
+    VK_NV_fragment_shader_barycentric
+    VK_NV_mesh_shader
+    VK_NV_representative_fragment_test
+    VK_NV_scissor_exclusive
+    VK_NV_shader_image_footprint
+    VK_NV_shading_rate_image
+    VK_NVX_raytracing
+</code></pre>
+<ul>
+<li>VUID validation coverage documentation is now included in the LunarG Vulkan SDK. This documentation (<code>validation_error_database.csv</code> and an HTML version) has been updated to represent the validation layer VUID coverage status as of this 1.1.85.0 SDK. <code>validation_error_database.csv</code> can be found locally in the SDK <code>Documentation</code> directory once the SDK is installed on the system. A spreadsheet editor can be used to sort and view the data. Additionally, an HTML version of the validation error database can be found <a href="./validation_error_database.html">here</a>.</li>
+<li>Bug fixes (see the <a href="#user-content-sdk-components">SDK Components</a> section below)</li>
+<li>Improved validation coverage</li>
+</ul>
+<h3>
+<a id="user-content-outside-contributors" class="anchor" href="#user-content-outside-contributors" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Outside Contributors</h3>
+<p>LunarG would like to thank the following Vulkan Ecosystem Developers for their contributions to this SDK:</p>
+<ul>
+<li>Zhirnov Andrey</li>
+<li>Pat Brown</li>
+<li>Bill Hollings</li>
+<li>Petr Kraus</li>
+<li>Justus Wang</li>
+</ul>
+<h3>
+<a id="user-content-sdk-components" class="anchor" href="#user-content-sdk-components" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>SDK Components</h3>
+<p>This version of the SDK is based on the following specifications, source code repositories, commits, and issue resolutions:</p>
+<ul>
+<li>
+<a href="https://www.khronos.org/registry/vulkan" TARGET="_blank" rel="nofollow">Vulkan Specification</a> including extensions</li>
+<li>
+<a href="https://www.khronos.org/registry/spir-v/" TARGET="_blank" rel="nofollow">SPIR-V Specification</a> version 1.3</li>
+<li>GitHub Repo: <a href="https://github.com/KhronosGroup/glslang/commit/e99a26810f65314183163c07664a40e05647c15f" TARGET="_blank">Glslang library and tools</a>
+</li>
+<li>GitHub Repo: <a href="https://github.com/KhronosGroup/Vulkan-Headers/tree/sdk-1.1.85" TARGET="_blank">KhronosGroup/Vulkan-Headers</a>, Version Tag: sdk-1.1.85.0</li>
+<li>GitHub Repo: <a href="https://github.com/KhronosGroup/Vulkan-Loader/tree/sdk-1.1.85" TARGET="_blank">KhronosGroup/Vulkan-Loader</a>, Version Tag: sdk-1.1.85.0</li>
+<li>GitHub Repo: <a href="https://github.com/KhronosGroup/Vulkan-Tools/tree/sdk-1.1.85" TARGET="_blank">KhronosGroup/Vulkan-Tools</a>, Version Tag: sdk-1.1.85.0</li>
+<li>GitHub Repo: <a href="https://github.com/KhronosGroup/Vulkan-ValidationLayers/tree/sdk-1.1.85" TARGET="_blank">KhronosGroup/Vulkan-ValidationLayers</a>, Version Tag: sdk-1.1.85.0</li>
+<li>GitHub Repo: <a href="https://github.com/LunarG/VulkanSamples/tree/sdk-1.1.85" TARGET="_blank">LunarG/VulkanSamples</a>, Version Tag: sdk-1.1.85.0</li>
+<li>GitHub Repo: <a href="https://github.com/LunarG/VulkanTools/tree/sdk-1.1.85" TARGET="_blank">LunarG/VulkanTools</a>, Version Tag: sdk-1.1.85.0</li>
+</ul>
+<h4>
+<a id="user-content-sdk-component-change-and-issue-information" class="anchor" href="#user-content-sdk-component-change-and-issue-information" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>SDK Component Change and Issue Information</h4>
+<ul>
+<li>GitHub Repo: <a href="https://github.com/KhronosGroup/Vulkan-Loader/tree/sdk-1.1.85" TARGET="_blank">KhronosGroup/Vulkan-Loader</a>: <a href="https://github.com/KhronosGroup/Vulkan-Loader/issues?utf8=%E2%9C%93&amp;q=is%3Aissue+is%3Aclosed+milestone%3Asdk-1.1.85.0" TARGET="_blank">Fixed Github Issues</a>, <a href="https://github.com/KhronosGroup/Vulkan-Loader/issues" TARGET="_blank">Known Issues</a>
+</li>
+<li>GitHub Repo: <a href="https://github.com/KhronosGroup/Vulkan-Tools/tree/sdk-1.1.85" TARGET="_blank">KhronosGroup/Vulkan-Tools</a>: <a href="https://github.com/KhronosGroup/Vulkan-Tools/issues?q=is%3Aissue+is%3Aclosed+closed%3A%3E2018-04-18+milestone%3Asdk-1.1.85.0" TARGET="_blank">Fixed Github Issues</a>, <a href="https://github.com/KhronosGroup/Vulkan-Tools/issues" TARGET="_blank">Known Issues</a>
+</li>
+<li>GitHub Repo: <a href="https://github.com/KhronosGroup/Vulkan-ValidationLayers/tree/sdk-1.1.85" TARGET="_blank">KhronosGroup/Vulkan-ValidationLayers</a>: <a href="https://github.com/KhronosGroup/Vulkan-ValidationLayers/issues?q=is%3Aissue+is%3Aclosed+milestone%3Asdk-1.1.85.0" TARGET="_blank">Fixed Github Issues</a>, <a href="https://github.com/KhronosGroup/Vulkan-ValidationLayers/issues" TARGET="_blank">Known Issues</a>
+</li>
+<li>GitHub Repo: <a href="https://github.com/LunarG/VulkanSamples/tree/sdk-1.1.85" TARGET="_blank">LunarG/VulkanSamples</a>: <a href="https://github.com/LunarG/VulkanSamples/issues?utf8=%E2%9C%93&amp;q=is%3Aissue+is%3Aclosed+milestone%3Asdk-1.1.85.0" TARGET="_blank">Fixed Github Issues</a>, <a href="https://github.com/LunarG/VulkanSamples/issues" TARGET="_blank">Known Issues</a>
+</li>
+<li>GitHub Repo: <a href="https://github.com/LunarG/VulkanTools/tree/sdk-1.1.85" TARGET="_blank">LunarG/VulkanTools</a>: <a href="https://github.com/LunarG/VulkanTools/issues?utf8=%E2%9C%93&amp;q=is%3Aissue+is%3Aclosed+milestone%3Asdk-1.1.85.0" TARGET="_blank">Fixed Github Issues</a>, <a href="https://github.com/LunarG/VulkanTools/issues" TARGET="_blank">Known Issues</a>
+</li>
+</ul>
+<h3>
+<a id="user-content-developer-notes" class="anchor" href="#user-content-developer-notes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Developer Notes</h3>
+<ul>
+<li>In the next Vulkan SDK release, <code>cube</code> and <code>via</code> will be renamed <code>vkcube</code> and <code>vkvia</code> respectively. SDK 1.1.85.0 will be the final Vulkan SDK to employ the names <code>cube</code> and <code>via</code>.</li>
+<li>
+<code>via</code> has been updated to look for Implicit Layers installed along with drivers placed in the Windows Driver Store.</li>
+<li>The standard Khronos validation layers have been migrated to use the canonical Vulkan VUID values, which are strings in the form of "<code>VUID-vkCmdBlitImage-filter-00236</code>". In doing so, the old integer-based enumerated values have been phased out and are no longer returned by <code>log_msg()</code> calls.
+<ul>
+<li>Developers keying on these returned values for their development should use the map in the <code>vk_validation_error_messages.h</code> file to obtain the matching Vulkan VUIDs when performing their updates. This file can be found in the the SDK in the <code>VulkanSDK\&lt;</code><em><code>SDK version</code></em><code>&gt;\Source\layers\</code> directory and in the <a href="https://github.com/KhronosGroup/Vulkan-ValidationLayers/tree/master/layers" TARGET="_blank">layers directory of the Vulkan-ValidationLayers</a> GitHub repository.</li>
+</ul>
+</li>
+</ul>
+<h3>
+<a id="user-content-known-issues" class="anchor" href="#user-content-known-issues" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Known Issues</h3>
+<ul>
+<li>Applications, such as <code>vulkaninfo</code> or <code>via</code>, may produce a warning to inform the user the <code>VK_LAYER_RENDERDOC_Capture</code> layer is using the deprecated <code>vkGetDeviceProcAddr</code> tag. This tag was deprecated starting with JSON file version 1.1.0. The presentation of this warning can manifest in a variety of ways. This issue has been reported to the RenderDoc team.</li>
+<li>SDK applications might not appear in the Start Menu if another version of the SDK is currently installed on the system. This can be corrected by uninstalling all other versions of the SDK.</li>
+<li>Prior to the August 3, 2018 Steam update, applications such as <code>cube</code> and <code>cubepp</code> could experience a crash in <code>VkCreateSwapChainKHR()</code> if the Steam Overlay Layer (<code>VK_LAYER_VALVE_steam_overlay</code>) was enabled. If this error occurs, first try updating the Steam client by clicking the "Steam" menu and selecting "Check for Steam Client Updates...". If the Steam client cannot be updated or the error persists, the behavior can be avoided by disabling the Steam Overlay Layer in one of the following ways:
+<ol>
+<li>Set the <code>DISABLE_VK_LAYER_VALVE_steam_overlay_1</code> environment variable equal to <code>1</code>. This can be accomplished by editing the user environment variables under the Advanced System Properties menu or if a command prompt is utilized to execute the application, run the following command from the command prompt (<strong>Note:</strong> This change will only persist for a single command prompt session):</li>
+</ol>
+<pre><code>set DISABLE_VK_LAYER_VALVE_steam_overlay_1=1
+</code></pre>
+<ol start="2">
+<li>Edit the Windows registry. To open the Windows registry, navigate to the Start Menu and either in the Run box or the Search box type <code>regedit</code> and press Enter. Navigate to <code>Computer -&gt; HKEY_LOCAL_MACHINE_SOFTWARE -&gt; SOFTWARE -&gt; Khronos -&gt; Vulkan -&gt; ImplicitLayers</code>. The <code>SteamOverlayVulkanLayer64.json</code> entry should be found here. Double click the file name and change the value in the "Value Data" box to <code>1</code>. For 64-bit versions of Windows, an additional step must be performed by making the same change in the <code>WOW6432Node</code> directory. The registry entries found in the <code>WOW6432Node</code> directory are referenced when 32-bit programs are run on a 64-bit system. To make this change, navigate to <code>Computer -&gt; HKEY_LOCAL_MACHINE_SOFTWARE -&gt; SOFTWARE -&gt; WOW6432Node -&gt; Khronos -&gt; Vulkan -&gt; ImplicitLayers</code>. For the <code>SteamOverlayVulkanLayer.json</code> entry, double-click the file name and change the value in the "Value Data" box to <code>1</code>.</li>
+</ol>
+</li>
+</ul>
+</article>
+</body>
+</html>
