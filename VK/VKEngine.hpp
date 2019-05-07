@@ -16,13 +16,15 @@
 
 #include <iostream>
 #include <vector>
-#include <conio.h>
 #include <set>
 #include <map>
 #include <thread>
 #include <algorithm>
 #include <fstream>
 #include <string>
+#if defined WIN_64 || defined WIN_32
+#include <conio.h>
+#endif
 
 #include "VK_STATUS_CODE.hpp"
 #include "Logger.hpp"
