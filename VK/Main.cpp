@@ -115,9 +115,9 @@ namespace vk {
 
 	bool isConsoleVisible() {
 #if defined WIN_64 || defined WIN_32
-		return ::IsWindowVisible(::GetConsoleWindow()) != FALSE;
+		return ::IsWindowVisible(::GetConsoleWindow()) != FALSE; 
 #else
-		return false;
+			return false;
 #endif
 	}
 
