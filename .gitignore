@@ -262,3 +262,6 @@ __pycache__/
 
 # Application specific log files
 *.log
+
+# VulkanSDK
+VK/ext/VulkanSDK/
