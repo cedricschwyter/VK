@@ -92,6 +92,7 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 	ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
 	ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
 	ASSERT(allocateCommandPools(), "Failed to allocate command pools", VK_SC_COMMAND_POOL_ALLOCATION_ERROR);
+	ASSERT(allocateNecessaryBuffers(), "Failed to create necessary buffers", VK_SC_BUFFER_CREATION_ERROR);
 	ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 	ASSERT(initializeSynchronizationObjects(), "Failed to initialize sync-objects", VK_SC_SYNCHRONIZATION_OBJECT_INITIALIZATION_ERROR);
 
@@ -161,6 +162,8 @@ VK_STATUS_CODE VKEngine::loop() {
 VK_STATUS_CODE VKEngine::clean() {
 
 	ASSERT(cleanSwapchain(), "Failed to clean swapchain", VK_SC_SWAPCHAIN_CLEAN_ERROR);
+
+	vertexBuffer.destroy();
 
 	for (size_t i = 0; i < vk::MAX_IN_FLIGHT_FRAMES; i++) {
 
@@ -903,11 +906,16 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 
 	logger::log(EVENT_LOG, "Creating graphics pipeline...");
 	
+	auto bindingDesc		= BaseVertex::getBindingDescription();
+	auto attribDesc			= BaseVertex::getAttributeDescriptions();
+
 	// Vertex data is hardcoded in the vertex shader, no need to upload anything to the shaders (yet)
 	VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo				= {};
 	vertexInputStateCreateInfo.sType											= VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	vertexInputStateCreateInfo.vertexBindingDescriptionCount					= 0;
-	vertexInputStateCreateInfo.vertexAttributeDescriptionCount					= 0;
+	vertexInputStateCreateInfo.vertexBindingDescriptionCount					= 1;
+	vertexInputStateCreateInfo.pVertexBindingDescriptions						= &bindingDesc;
+	vertexInputStateCreateInfo.vertexAttributeDescriptionCount					= static_cast< uint32_t >(attribDesc.size());
+	vertexInputStateCreateInfo.pVertexAttributeDescriptions						= attribDesc.data();
 
 	VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo			= {};
 	inputAssemblyStateCreateInfo.sType											= VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -1182,9 +1190,19 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
 			vkCmdBindPipeline(standardCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.get());
 
+				VkBuffer vertexBuffers[]		= {vertexBuffer.get()};
+				VkDeviceSize offsets[]			= {0};
+				vkCmdBindVertexBuffers(
+					standardCommandBuffers[i],
+					0, 
+					1, 
+					vertexBuffers,
+					offsets
+					);
+
 				vkCmdDraw(
 					standardCommandBuffers[i], 
-					3,
+					static_cast< uint32_t >(vk::vertices.size()),
 					1,
 					0,
 					0
@@ -1403,5 +1421,21 @@ void VKEngine::framebufferResizeCallback(GLFWwindow* window_, int width_, int he
 
 	auto vkengine = reinterpret_cast< VKEngine* >(glfwGetWindowUserPointer(window_));
 	vkengine->hasFramebufferBeenResized = true;
+
+}
+
+VK_STATUS_CODE VKEngine::allocateNecessaryBuffers() {
+
+	VkBufferCreateInfo bufferCreateInfo		= {};
+	bufferCreateInfo.sType					= VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	bufferCreateInfo.size					= sizeof(vk::vertices[0]) * vk::vertices.size();
+	bufferCreateInfo.usage					= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+	bufferCreateInfo.sharingMode			= VK_SHARING_MODE_EXCLUSIVE;
+
+	vertexBuffer							= VertexBuffer(&bufferCreateInfo);
+	VK_STATUS_CODE res						= vertexBuffer.fill(vk::vertices);
+	ASSERT(res, "Failed to fill vertex buffer", VK_SC_VERTEX_BUFFER_MAP_ERROR);
+
+	return VK_SC_SUCCESS;
 
 }

@@ -18,11 +18,12 @@
 */
 namespace vk {
 
-	extern VKEngine					engine;
-	extern const unsigned int		HEIGHT;
-	extern const unsigned int		WIDTH;
-	extern const char*				TITLE;
-	extern const unsigned int		MAX_IN_FLIGHT_FRAMES;
+	extern VKEngine								engine;
+	extern const unsigned int					HEIGHT;
+	extern const unsigned int					WIDTH;
+	extern const char*							TITLE;
+	extern const unsigned int					MAX_IN_FLIGHT_FRAMES;
+	extern const std::vector< BaseVertex >		vertices;
 
 	/**
 		Handles main initialization of everything

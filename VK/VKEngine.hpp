@@ -7,7 +7,6 @@
 	@file		VKEngine.hpp
 	@brief		Declaration of the VKEngine class
 */
-
 #pragma once
 #include "Version.hpp"
 
@@ -34,11 +33,14 @@
 #include "SwapchainDetails.cpp"
 #include "VertFragShaderStages.hpp"
 #include "GraphicsPipeline.hpp"
+#include "BaseVertex.hpp"
+#include "VertexBuffer.hpp"
 
 class VKEngine {
 public:
 
 	VkResult								result;
+	VkPhysicalDevice						physicalDevice;
 	VkDevice								logicalDevice;
 	VkAllocationCallbacks*					allocator;
 
@@ -64,7 +66,6 @@ private:
 	const bool								validationLayersEnabled				= false;
 #endif
 	VkDebugUtilsMessengerEXT				validationLayerDebugMessenger		= VK_NULL_HANDLE;
-	VkPhysicalDevice						physicalDevice						= VK_NULL_HANDLE;
 	VkQueue									graphicsQueue						= VK_NULL_HANDLE;
 	VkQueue									presentationQueue					= VK_NULL_HANDLE;
 	VkSurfaceKHR							surface								= VK_NULL_HANDLE;
@@ -89,6 +90,7 @@ private:
 	std::vector< VkFence >					inFlightFences;
 	size_t									currentSwapchainImage				= 0;
 	bool									hasFramebufferBeenResized			= false;
+	BaseBuffer								vertexBuffer;
 
 	/**
 		Initializes the logger
@@ -360,5 +362,12 @@ private:
 		@param		height_		The new height of the GLFWwindow
 	*/
 	static void framebufferResizeCallback(GLFWwindow* window_, int width_, int height_);
+
+	/**
+		Allocates the necessary buffers (vertex data, index data, etc.)
+
+		@return		Returns VK_SC_SUCCESS on success
+	*/
+	VK_STATUS_CODE allocateNecessaryBuffers(void);
 
 };

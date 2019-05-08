@@ -32,6 +32,14 @@ namespace vk {
 	const char*							TITLE						= "VK by D3PSI";
 	const unsigned int					MAX_IN_FLIGHT_FRAMES		= 4;
 
+	const std::vector< BaseVertex >		vertices					= {
+	
+		{{ 0.0f, -0.5f}, { 1.0f,  0.0f,  0.0f}},
+		{{ 0.5f,  0.5f}, { 0.0f,  1.0f,  0.0f}},
+		{{-0.5f,  0.5f}, { 0.0f,  0.0f,  1.0f}}
+
+	};
+
 	VK_STATUS_CODE init() {
 	
 		try {

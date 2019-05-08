@@ -124,7 +124,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\VK\ext\stbimage;$(SolutionDir)\VK\ext\SDL\include;C:\VulkanSDK\1.1.85.0\Include;$(SolutionDir)\VK\ext\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\VK\ext\stbimage;$(SolutionDir)\VK\ext\SDL\include;$(SolutionDir)\VK\ext\glm;C:\VulkanSDK\1.1.85.0\Include;$(SolutionDir)\VK\ext\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -136,6 +136,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ASSERT.cpp" />
+    <ClCompile Include="BaseBuffer.cpp" />
     <ClCompile Include="GraphicsPipeline.cpp" />
     <ClCompile Include="LoadingScreen.cpp" />
     <ClCompile Include="Logger.cpp" />
@@ -144,6 +145,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="QueueFamilies.cpp" />
     <ClCompile Include="SDL_STATUS_CODE.cpp" />
+    <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="VertFragShaderStages.cpp" />
     <ClCompile Include="SwapchainDetails.cpp" />
     <ClCompile Include="Version.hpp" />
@@ -151,10 +153,13 @@
     <ClCompile Include="VKEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BaseBuffer.hpp" />
+    <ClInclude Include="BaseVertex.hpp" />
     <ClInclude Include="ConsoleColor.hpp" />
     <ClInclude Include="GraphicsPipeline.hpp" />
     <ClInclude Include="LoadingScreen.hpp" />
     <ClInclude Include="Logger.hpp" />
+    <ClInclude Include="VertexBuffer.hpp" />
     <ClInclude Include="VertFragShaderStages.hpp" />
     <ClInclude Include="VKEngine.hpp" />
     <ClInclude Include="VK_STATUS_CODE.hpp" />
