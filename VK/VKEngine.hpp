@@ -90,7 +90,7 @@ private:
 	std::vector< VkFence >					inFlightFences;
 	size_t									currentSwapchainImage				= 0;
 	bool									hasFramebufferBeenResized			= false;
-	BaseBuffer								vertexBuffer;
+	BaseBuffer*								vertexBuffer;
 
 	/**
 		Initializes the logger

@@ -33,12 +33,12 @@ struct BaseVertex {
 		std::array< VkVertexInputAttributeDescription, 2 > vertexInputAttributeDescriptions			= {};
 		vertexInputAttributeDescriptions[0].binding													= 0;
 		vertexInputAttributeDescriptions[0].location												= 0;
-		vertexInputAttributeDescriptions[0].format													= VK_FORMAT_R32G32_SFLOAT;			// TODO: Use 64-bit signed floating point precision (double)
+		vertexInputAttributeDescriptions[0].format													= VK_FORMAT_R32G32_SFLOAT;			
 		vertexInputAttributeDescriptions[0].offset													= offsetof(BaseVertex, pos);
 
 		vertexInputAttributeDescriptions[1].binding													= 0;
 		vertexInputAttributeDescriptions[1].location												= 1;
-		vertexInputAttributeDescriptions[1].format													= VK_FORMAT_R32G32B32_SFLOAT;		// TODO: Use 64-bit signed floating point precision (double)
+		vertexInputAttributeDescriptions[1].format													= VK_FORMAT_R32G32B32_SFLOAT;		
 		vertexInputAttributeDescriptions[1].offset													= offsetof(BaseVertex, col);
 
 		return vertexInputAttributeDescriptions;

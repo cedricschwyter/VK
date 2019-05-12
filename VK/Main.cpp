@@ -31,6 +31,8 @@ namespace vk {
 	const unsigned int					HEIGHT						= 720;
 	const char*							TITLE						= "VK by D3PSI";
 	const unsigned int					MAX_IN_FLIGHT_FRAMES		= 4;
+    VkQueue								transferQueue               = VK_NULL_HANDLE;
+    VkCommandPool						transferCommandPool;
 
 	const std::vector< BaseVertex >		vertices					= {
 	
@@ -151,6 +153,43 @@ namespace vk {
 		return buffer;
 	
 	}
+
+    void copyBuffer(VkBuffer srcBuf_, VkBuffer dstBuf_, VkDeviceSize size_) {
+    
+        VkCommandBufferAllocateInfo allocateInfo                = {};
+        allocateInfo.sType                                      = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocateInfo.level                                      = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocateInfo.commandPool                                = transferCommandPool;
+        allocateInfo.commandBufferCount                         = 1;
+
+        VkCommandBuffer commandBuffer;
+        vkAllocateCommandBuffers(engine.logicalDevice, &allocateInfo, &commandBuffer);
+
+        VkCommandBufferBeginInfo commandBufferBeginInfo         = {};
+        commandBufferBeginInfo.sType                            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        commandBufferBeginInfo.flags                            = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+        vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
+
+        VkBufferCopy copy                                       = {};
+        copy.srcOffset                                          = 0;
+        copy.dstOffset                                          = 0;
+        copy.size                                               = size_;
+        vkCmdCopyBuffer(commandBuffer, srcBuf_, dstBuf_, 1, &copy);
+
+        vkEndCommandBuffer(commandBuffer);
+
+        VkSubmitInfo submitInfo                                 = {};
+        submitInfo.sType                                        = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.commandBufferCount                           = 1;
+        submitInfo.pCommandBuffers                              = &commandBuffer;
+
+        vkQueueSubmit(transferQueue, 1, &submitInfo, VK_NULL_HANDLE);
+        vkQueueWaitIdle(transferQueue);
+
+        vkFreeCommandBuffers(engine.logicalDevice, transferCommandPool, 1, &commandBuffer);
+
+    }
 
 }
 

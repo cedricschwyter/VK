@@ -19,17 +19,21 @@ class BaseBuffer
 {
 public:
 
+    VkBuffer				buf             = VK_NULL_HANDLE;
+    VkDeviceMemory			mem             = VK_NULL_HANDLE;
+
 	/**
-		Default constructor
+		Explicit Default constructor
 	*/
-	BaseBuffer();
+	explicit BaseBuffer();
 
 	/**
 		Constructor
 
 		@param		bufferCreateInfo_		A pointer to a VkBufferCreateInfo structure
+        @param      properties_             Necessary memory properties
 	*/
-	BaseBuffer(const VkBufferCreateInfo* bufferCreateInfo_);
+	explicit BaseBuffer(const VkBufferCreateInfo* bufferCreateInfo_, VkMemoryPropertyFlags properties_);
 
 	/**
 		Maps data to a buffer
@@ -38,7 +42,7 @@ public:
 
 		@return		Returns VK_SC_SUCCESS on success
 	*/
-	VK_STATUS_CODE fill(std::vector< BaseVertex > bufData_);
+	virtual VK_STATUS_CODE fill(std::vector< BaseVertex > bufData_);
 
 	/**
 		Returns the VkBuffer handle
@@ -55,17 +59,15 @@ public:
 	virtual VK_STATUS_CODE bind(void);
 
 	/**
-		Handles destruction of allocated resources
+		Default destructor
 
 		@return Returns VK_SC_SUCCESS on success
 	*/
-	VK_STATUS_CODE destroy(void);
+	~BaseBuffer(void);
 
 protected:
 
-	VkBufferCreateInfo		bufferCreateInfo;
-	VkBuffer				buf;
-	VkDeviceMemory			mem;
+    VkBufferCreateInfo		bufferCreateInfo           = {};
 
 	/**
 		Finds the appropriate memory type to use for the specified operation

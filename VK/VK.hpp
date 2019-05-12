@@ -24,6 +24,8 @@ namespace vk {
 	extern const char*							TITLE;
 	extern const unsigned int					MAX_IN_FLIGHT_FRAMES;
 	extern const std::vector< BaseVertex >		vertices;
+    extern VkQueue                              transferQueue;
+    extern VkCommandPool                        transferCommandPool;
 
 	/**
 		Handles main initialization of everything
@@ -93,5 +95,14 @@ namespace vk {
 		@return		Returns an std::vector< char > containing the binary content of the specified input file
 	*/
 	const std::vector< char > loadFile(const std::string& filePath_);
+
+    /**
+        Copies one buffer into the memory of another
+
+        @param      srcBuf_     The source buffer
+        @param      dstBuf_     The destination buffer
+        @param      size_       The buffer size in bytes
+    */
+    void copyBuffer(VkBuffer srcBuf_, VkBuffer dstBuf_, VkDeviceSize size_);
 
 }

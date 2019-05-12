@@ -163,7 +163,7 @@ VK_STATUS_CODE VKEngine::clean() {
 
 	ASSERT(cleanSwapchain(), "Failed to clean swapchain", VK_SC_SWAPCHAIN_CLEAN_ERROR);
 
-	vertexBuffer.destroy();
+    delete vertexBuffer;
 
 	for (size_t i = 0; i < vk::MAX_IN_FLIGHT_FRAMES; i++) {
 
@@ -172,6 +172,9 @@ VK_STATUS_CODE VKEngine::clean() {
 		vkDestroyFence(logicalDevice, inFlightFences[i], allocator);
 	}
 	logger::log(EVENT_LOG, "Successfully destroyed sync-objects");
+
+    vkDestroyCommandPool(logicalDevice, vk::transferCommandPool, allocator);
+    logger::log(EVENT_LOG, "Successfully destroyed command pool");
 
 	vkDestroyCommandPool(logicalDevice, standardCommandPool, allocator);
 	logger::log(EVENT_LOG, "Successfully destroyed command pool");
@@ -510,6 +513,12 @@ QueueFamilies VKEngine::findSuitableQueueFamilies(VkPhysicalDevice device_) {
 		
 		}
 
+		if (qF.queueCount > 0 && (qF.queueFlags & VK_QUEUE_TRANSFER_BIT) && !(qF.queueFlags & VK_QUEUE_GRAPHICS_BIT)) {		// Transfer queue for memory operations
+		
+			families.transferFamilyIndex = i;
+		
+		}
+
 
 		if (families.isComplete()) {
 		
@@ -531,7 +540,7 @@ VK_STATUS_CODE VKEngine::createLogicalDeviceFromPhysicalDevice() {
 	QueueFamilies families = findSuitableQueueFamilies(physicalDevice);
 
 	std::vector< VkDeviceQueueCreateInfo > deviceQueueCreateInfos;
-	std::set< uint32_t > uniqueQueueFamilies = { families.graphicsFamilyIndex.value(), families.presentationFamilyIndex.value() };
+	std::set< uint32_t > uniqueQueueFamilies = { families.graphicsFamilyIndex.value(), families.presentationFamilyIndex.value(), families.transferFamilyIndex.value() };
 
 	float queuePriority = 1.0f;
 	for (uint32_t qF : uniqueQueueFamilies) {
@@ -594,6 +603,15 @@ VK_STATUS_CODE VKEngine::createLogicalDeviceFromPhysicalDevice() {
 		&presentationQueue
 	);
 	logger::log(EVENT_LOG, "Successfully retrieved queue handle for presentation queue");
+
+	logger::log(EVENT_LOG, "Retrieving queue handle for transfer queue...");
+	vkGetDeviceQueue(
+		logicalDevice,
+		families.transferFamilyIndex.value(),
+		0,
+		&vk::transferQueue
+		);
+	logger::log(EVENT_LOG, "Successfully retrieved queue handle for transfer queue");
 
 	return VK_SC_SUCCESS;
 
@@ -1136,6 +1154,21 @@ VK_STATUS_CODE VKEngine::allocateCommandPools() {
 
 	logger::log(EVENT_LOG, "Successfully allocated command pool");
 
+	logger::log(EVENT_LOG, "Allocating command pool...");
+
+	commandPoolCreateInfo								= {};
+	commandPoolCreateInfo.sType							= VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	commandPoolCreateInfo.queueFamilyIndex				= families.transferFamilyIndex.value();
+
+	result = vkCreateCommandPool(
+		logicalDevice,
+		&commandPoolCreateInfo,
+		allocator,
+		&vk::transferCommandPool
+		);
+
+	logger::log(EVENT_LOG, "Successfully allocated command pool");
+
 	return VK_SC_SUCCESS;
 
 }
@@ -1190,7 +1223,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
 			vkCmdBindPipeline(standardCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.get());
 
-				VkBuffer vertexBuffers[]		= {vertexBuffer.get()};
+				VkBuffer vertexBuffers[]		= {vertexBuffer->get()};
 				VkDeviceSize offsets[]			= {0};
 				vkCmdBindVertexBuffers(
 					standardCommandBuffers[i],
@@ -1426,14 +1459,20 @@ void VKEngine::framebufferResizeCallback(GLFWwindow* window_, int width_, int he
 
 VK_STATUS_CODE VKEngine::allocateNecessaryBuffers() {
 
-	VkBufferCreateInfo bufferCreateInfo		= {};
-	bufferCreateInfo.sType					= VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	bufferCreateInfo.size					= sizeof(vk::vertices[0]) * vk::vertices.size();
-	bufferCreateInfo.usage					= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-	bufferCreateInfo.sharingMode			= VK_SHARING_MODE_EXCLUSIVE;
+	QueueFamilies families						= findSuitableQueueFamilies(physicalDevice);
 
-	vertexBuffer							= VertexBuffer(&bufferCreateInfo);
-	VK_STATUS_CODE res						= vertexBuffer.fill(vk::vertices);
+	std::vector< uint32_t > indices				= {families.graphicsFamilyIndex.value(), families.transferFamilyIndex.value()};
+
+	VkBufferCreateInfo bufferCreateInfo			= {};
+	bufferCreateInfo.sType						= VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	bufferCreateInfo.size						= sizeof(vk::vertices[0]) * vk::vertices.size();
+	bufferCreateInfo.usage						= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+	bufferCreateInfo.sharingMode				= VK_SHARING_MODE_CONCURRENT;
+	bufferCreateInfo.queueFamilyIndexCount		= static_cast< uint32_t >(indices.size());
+	bufferCreateInfo.pQueueFamilyIndices		= indices.data();
+
+	vertexBuffer								= new VertexBuffer(&bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	VK_STATUS_CODE res							= vertexBuffer->fill(vk::vertices);
 	ASSERT(res, "Failed to fill vertex buffer", VK_SC_VERTEX_BUFFER_MAP_ERROR);
 
 	return VK_SC_SUCCESS;

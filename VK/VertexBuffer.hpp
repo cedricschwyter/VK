@@ -13,14 +13,17 @@
 class VertexBuffer :
 	public BaseBuffer
 {
+    using BaseBuffer::BaseBuffer;
 public:
+    
+    /**
+		Maps data to a buffer using a staging buffer
 
-	/**
-		Constructor
-		
-		@param		bufferCreateInfo_		A pointer to a VkBufferCreateInfo structure
+		@param		bufData_		Data of whatever sort which needs to be copied to the buffer
+
+		@return		Returns VK_SC_SUCCESS on success
 	*/
-	VertexBuffer(const VkBufferCreateInfo* bufferCreateInfo_);
+    VK_STATUS_CODE fill(std::vector< BaseVertex > bufData_);
 
 };
 

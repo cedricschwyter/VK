@@ -17,7 +17,7 @@ BaseBuffer::BaseBuffer() {
 
 }
 
-BaseBuffer::BaseBuffer(const VkBufferCreateInfo* bufferCreateInfo_) {
+BaseBuffer::BaseBuffer(const VkBufferCreateInfo* bufferCreateInfo_, VkMemoryPropertyFlags properties_) {
 
 	bufferCreateInfo = *bufferCreateInfo_;
 
@@ -37,7 +37,7 @@ BaseBuffer::BaseBuffer(const VkBufferCreateInfo* bufferCreateInfo_) {
 	VkMemoryAllocateInfo memoryAllocateInfo				= {};
 	memoryAllocateInfo.sType							= VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	memoryAllocateInfo.allocationSize					= memoryRequirements.size;
-	memoryAllocateInfo.memoryTypeIndex					= enumerateSuitableMemoryType(memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	memoryAllocateInfo.memoryTypeIndex					= enumerateSuitableMemoryType(memoryRequirements.memoryTypeBits, properties_);
 
 	vk::engine.result = vkAllocateMemory(
 		vk::engine.logicalDevice,
@@ -51,15 +51,13 @@ BaseBuffer::BaseBuffer(const VkBufferCreateInfo* bufferCreateInfo_) {
 
 }
 
-VK_STATUS_CODE BaseBuffer::destroy() {
+BaseBuffer::~BaseBuffer() {
 
 	vkDestroyBuffer(vk::engine.logicalDevice, buf, vk::engine.allocator);
 	logger::log(EVENT_LOG, "Successfully destroyed buffer");
 
 	vkFreeMemory(vk::engine.logicalDevice, mem, vk::engine.allocator);
 	logger::log(EVENT_LOG, "Successfully destroyed buffer memory");
-
-	return VK_SC_SUCCESS;
 
 }
 
