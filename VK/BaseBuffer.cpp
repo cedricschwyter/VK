@@ -96,7 +96,7 @@ VK_STATUS_CODE BaseBuffer::bind() {
 
 }
 
-VK_STATUS_CODE BaseBuffer::fill(std::vector< BaseVertex > bufData_) {
+VK_STATUS_CODE BaseBuffer::fill(const std::vector< BaseVertex >* bufData_) {
 
 	void* data;
 	vkMapMemory(
@@ -107,10 +107,28 @@ VK_STATUS_CODE BaseBuffer::fill(std::vector< BaseVertex > bufData_) {
 		0,
 		&data
 		);
-	memcpy(data, bufData_.data(), static_cast<size_t>(bufferCreateInfo.size));
+	memcpy(data, bufData_->data(), static_cast< size_t >(bufferCreateInfo.size));
 	vkUnmapMemory(vk::engine.logicalDevice, mem);
 
 	return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE BaseBuffer::fill(const std::vector< uint32_t >* bufData_) {
+
+    void* data;
+    vkMapMemory(
+        vk::engine.logicalDevice,
+        mem,
+        0,
+        bufferCreateInfo.size,
+        0,
+        &data
+    );
+    memcpy(data, bufData_->data(), static_cast< size_t >(bufferCreateInfo.size));
+    vkUnmapMemory(vk::engine.logicalDevice, mem);
+
+    return VK_SC_SUCCESS;
 
 }
 

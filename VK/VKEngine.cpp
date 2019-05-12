@@ -163,6 +163,7 @@ VK_STATUS_CODE VKEngine::clean() {
 
 	ASSERT(cleanSwapchain(), "Failed to clean swapchain", VK_SC_SWAPCHAIN_CLEAN_ERROR);
 
+    delete indexBuffer;
     delete vertexBuffer;
 
 	for (size_t i = 0; i < vk::MAX_IN_FLIGHT_FRAMES; i++) {
@@ -1233,12 +1234,20 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 					offsets
 					);
 
-				vkCmdDraw(
+                vkCmdBindIndexBuffer(
+                    standardCommandBuffers[i],
+                    indexBuffer->get(),
+                    0,
+                    VK_INDEX_TYPE_UINT32
+                    );
+
+				vkCmdDrawIndexed(
 					standardCommandBuffers[i], 
-					static_cast< uint32_t >(vk::vertices.size()),
+					static_cast< uint32_t >(vk::indices.size()),
 					1,
 					0,
-					0
+					0,
+                    0
 					);
 
 		vkCmdEndRenderPass(standardCommandBuffers[i]);
@@ -1471,11 +1480,21 @@ VK_STATUS_CODE VKEngine::allocateNecessaryBuffers() {
 	vertexBufferCreateInfo.queueFamilyIndexCount		    = static_cast< uint32_t >(queueFamilyIndices.size());
 	vertexBufferCreateInfo.pQueueFamilyIndices		        = queueFamilyIndices.data();
 
-	vertexBuffer								            = new VertexBuffer(&vertexBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-	VK_STATUS_CODE res							            = vertexBuffer->fill(vk::vertices);
+	vertexBuffer                                            = new VertexBuffer(&vertexBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	VK_STATUS_CODE res							            = vertexBuffer->fill(&vk::vertices);
 	ASSERT(res, "Failed to fill vertex buffer", VK_SC_VERTEX_BUFFER_MAP_ERROR);
 
+    VkBufferCreateInfo indexBufferCreateInfo                = {};
+    indexBufferCreateInfo.sType                             = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    indexBufferCreateInfo.size                              = sizeof(vk::indices[0]) * vk::indices.size();
+    indexBufferCreateInfo.usage                             = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    indexBufferCreateInfo.sharingMode                       = VK_SHARING_MODE_CONCURRENT;
+    indexBufferCreateInfo.queueFamilyIndexCount             = static_cast< uint32_t >(queueFamilyIndices.size());
+    indexBufferCreateInfo.pQueueFamilyIndices               = queueFamilyIndices.data();
 
+    indexBuffer                                             = new IndexBuffer(&indexBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    res                                                     = indexBuffer->fill(&vk::indices);
+    ASSERT(res, "Failed to fill index buffer", VK_SC_INDEX_BUFFER_MAP_ERROR);
 
 	return VK_SC_SUCCESS;
 

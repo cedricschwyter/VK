@@ -35,6 +35,7 @@
 #include "GraphicsPipeline.hpp"
 #include "BaseVertex.hpp"
 #include "VertexBuffer.hpp"
+#include "IndexBuffer.hpp"
 
 class VKEngine {
 public:
@@ -91,6 +92,7 @@ private:
 	size_t									currentSwapchainImage				= 0;
 	bool									hasFramebufferBeenResized			= false;
 	BaseBuffer*								vertexBuffer;
+    BaseBuffer*                             indexBuffer;
 
 	/**
 		Initializes the logger

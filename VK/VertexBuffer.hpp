@@ -19,11 +19,11 @@ public:
     /**
 		Maps data to a buffer using a staging buffer
 
-		@param		bufData_		Data of whatever sort which needs to be copied to the buffer
+		@param		bufData_		Pointer to the data that needs to be copied to the buffer
 
 		@return		Returns VK_SC_SUCCESS on success
 	*/
-    VK_STATUS_CODE fill(std::vector< BaseVertex > bufData_);
+    VK_STATUS_CODE fill(const std::vector< BaseVertex >* bufData_);
 
 };
 

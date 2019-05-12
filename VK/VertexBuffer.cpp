@@ -11,9 +11,9 @@
 #include "VK.hpp"
 
 
-VK_STATUS_CODE VertexBuffer::fill(std::vector< BaseVertex > bufData_) {
+VK_STATUS_CODE VertexBuffer::fill(const std::vector< BaseVertex >* bufData_) {
 
-    VkDeviceSize bufferSize = sizeof(vk::vertices[0]) * vk::vertices.size();
+    VkDeviceSize bufferSize = sizeof(bufData_[0]) * bufData_->size();
 
     VkBufferCreateInfo bufferCreateInfo         = {};
     bufferCreateInfo.sType                      = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -32,7 +32,7 @@ VK_STATUS_CODE VertexBuffer::fill(std::vector< BaseVertex > bufData_) {
         0,
         &data
     );
-    memcpy(data, bufData_.data(), static_cast< size_t >(bufferSize));
+    memcpy(data, bufData_->data(), static_cast< size_t >(bufferSize));
     vkUnmapMemory(vk::engine.logicalDevice, stagingBuffer->mem);
 
     vk::copyBuffer(stagingBuffer->buf, this->buf, bufferSize);

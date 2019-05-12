@@ -38,11 +38,20 @@ public:
 	/**
 		Maps data to a buffer
 
-		@param		bufData_		Data of whatever sort which needs to be copied to the buffer
+		@param		bufData_		Pointer to the data that needs to be copied to the buffer
 
 		@return		Returns VK_SC_SUCCESS on success
 	*/
-	virtual VK_STATUS_CODE fill(std::vector< BaseVertex > bufData_);
+	virtual VK_STATUS_CODE fill(const std::vector< BaseVertex >* bufData_);
+
+    /**
+        Maps data to a buffer (overload for different data type as I cant find any other solution just now)
+
+        @param      bufData_        Pointer to the data that needs to be copied to the buffer
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    virtual VK_STATUS_CODE fill(const std::vector< uint32_t >* bufData_);
 
 	/**
 		Returns the VkBuffer handle
