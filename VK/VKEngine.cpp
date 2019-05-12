@@ -432,7 +432,7 @@ VK_STATUS_CODE VKEngine::selectBestPhysicalDevice() {
 
 int VKEngine::evaluateDeviceSuitabilityScore(VkPhysicalDevice device_) {
 
-	QueueFamilies				families				= findSuitableQueueFamilies(device_);
+	QueueFamily				family				= findSuitableQueueFamily(device_);
 	SwapchainDetails		swapchainDetails		= querySwapchainDetails(device_);
 
 	VkPhysicalDeviceProperties physicalDeviceProperties;
@@ -449,7 +449,7 @@ int VKEngine::evaluateDeviceSuitabilityScore(VkPhysicalDevice device_) {
 
 	}
 
-	if (!families.isComplete() 
+	if (!family.isComplete() 
 		|| !checkDeviceSwapchainExtensionSupport(device_) 
 		|| swapchainDetails.supportedFormats.empty() 
 		|| swapchainDetails.presentationModes.empty()
@@ -480,22 +480,22 @@ VK_STATUS_CODE VKEngine::printPhysicalDevicePropertiesAndFeatures(VkPhysicalDevi
 
 }
 
-QueueFamilies VKEngine::findSuitableQueueFamilies(VkPhysicalDevice device_) {
+QueueFamily VKEngine::findSuitableQueueFamily(VkPhysicalDevice device_) {
 
-	QueueFamilies families;
+	QueueFamily family;
 
 	uint32_t queueFamilyCount = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties(device_, &queueFamilyCount, nullptr);
 
-	std::vector< VkQueueFamilyProperties > queueFamilies(queueFamilyCount);
-	vkGetPhysicalDeviceQueueFamilyProperties(device_, &queueFamilyCount, queueFamilies.data());
+	std::vector< VkQueueFamilyProperties > queueFamily(queueFamilyCount);
+	vkGetPhysicalDeviceQueueFamilyProperties(device_, &queueFamilyCount, queueFamily.data());
 
 	int i = 0;
-	for (const auto& qF : queueFamilies) {
+	for (const auto& qF : queueFamily) {
 	
 		if (qF.queueCount > 0 && (qF.queueFlags & VK_QUEUE_GRAPHICS_BIT)) {		// Does the queue family have at least one queue and does it support graphics-operations?
 		
-			families.graphicsFamilyIndex = i;
+			family.graphicsFamilyIndex = i;
 
 		}
 
@@ -509,18 +509,18 @@ QueueFamilies VKEngine::findSuitableQueueFamilies(VkPhysicalDevice device_) {
 
 		if (qF.queueCount > 0 && presentSupport) {		// Also a presentation queue family is needed to actually display to the surface
 
-			families.presentationFamilyIndex = i;
+			family.presentationFamilyIndex = i;
 		
 		}
 
 		if (qF.queueCount > 0 && (qF.queueFlags & VK_QUEUE_TRANSFER_BIT) && !(qF.queueFlags & VK_QUEUE_GRAPHICS_BIT)) {		// Transfer queue for memory operations
 		
-			families.transferFamilyIndex = i;
+			family.transferFamilyIndex = i;
 		
 		}
 
 
-		if (families.isComplete()) {
+		if (family.isComplete()) {
 		
 			break;
 
@@ -530,17 +530,17 @@ QueueFamilies VKEngine::findSuitableQueueFamilies(VkPhysicalDevice device_) {
 
 	}
 
-	return families;
+	return family;
 
 }
 
 VK_STATUS_CODE VKEngine::createLogicalDeviceFromPhysicalDevice() {
 
 	logger::log(EVENT_LOG, "Creating logical device...");
-	QueueFamilies families = findSuitableQueueFamilies(physicalDevice);
+	QueueFamily family = findSuitableQueueFamily(physicalDevice);
 
 	std::vector< VkDeviceQueueCreateInfo > deviceQueueCreateInfos;
-	std::set< uint32_t > uniqueQueueFamilies = { families.graphicsFamilyIndex.value(), families.presentationFamilyIndex.value(), families.transferFamilyIndex.value() };
+	std::set< uint32_t > uniqueQueueFamilies = { family.graphicsFamilyIndex.value(), family.presentationFamilyIndex.value(), family.transferFamilyIndex.value() };
 
 	float queuePriority = 1.0f;
 	for (uint32_t qF : uniqueQueueFamilies) {
@@ -589,7 +589,7 @@ VK_STATUS_CODE VKEngine::createLogicalDeviceFromPhysicalDevice() {
 	logger::log(EVENT_LOG, "Retrieving queue handle for graphics queue...");
 	vkGetDeviceQueue(
 		logicalDevice, 
-		families.graphicsFamilyIndex.value(), 
+		family.graphicsFamilyIndex.value(), 
 		0, 
 		&graphicsQueue
 		);
@@ -598,7 +598,7 @@ VK_STATUS_CODE VKEngine::createLogicalDeviceFromPhysicalDevice() {
 	logger::log(EVENT_LOG, "Retrieving queue handle for presentation queue...");
 	vkGetDeviceQueue(
 		logicalDevice,
-		families.presentationFamilyIndex.value(),
+		family.presentationFamilyIndex.value(),
 		0,
 		&presentationQueue
 	);
@@ -607,7 +607,7 @@ VK_STATUS_CODE VKEngine::createLogicalDeviceFromPhysicalDevice() {
 	logger::log(EVENT_LOG, "Retrieving queue handle for transfer queue...");
 	vkGetDeviceQueue(
 		logicalDevice,
-		families.transferFamilyIndex.value(),
+		family.transferFamilyIndex.value(),
 		0,
 		&vk::transferQueue
 		);
@@ -826,10 +826,10 @@ VK_STATUS_CODE VKEngine::createSwapchain() {
 	swapchainCreateInfo.imageArrayLayers				= 1;										// Amount of layers in an image, always 1, unless doing stereoscopic stuff
 	swapchainCreateInfo.imageUsage						= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;		// Render directly to swapchain
 
-	QueueFamilies families								= findSuitableQueueFamilies(physicalDevice);
-	uint32_t queueFamilyIndices[]						= { families.graphicsFamilyIndex.value(), families.presentationFamilyIndex.value() };
+	QueueFamily family								= findSuitableQueueFamily(physicalDevice);
+	uint32_t queueFamilyIndices[]						= { family.graphicsFamilyIndex.value(), family.presentationFamilyIndex.value() };
 
-	if (families.graphicsFamilyIndex != families.presentationFamilyIndex) {		// If presentation queue and graphics queue are in the same queue family, exclusive ownership is not necessary
+	if (family.graphicsFamilyIndex != family.presentationFamilyIndex) {		// If presentation queue and graphics queue are in the same queue family, exclusive ownership is not necessary
 
 		swapchainCreateInfo.imageSharingMode			= VK_SHARING_MODE_CONCURRENT;
 		swapchainCreateInfo.queueFamilyIndexCount		= 2;
@@ -1138,11 +1138,11 @@ VK_STATUS_CODE VKEngine::allocateCommandPools() {
 
 	logger::log(EVENT_LOG, "Allocating command pool...");
 
-	QueueFamilies families = findSuitableQueueFamilies(physicalDevice);
+	QueueFamily family = findSuitableQueueFamily(physicalDevice);
 
 	VkCommandPoolCreateInfo commandPoolCreateInfo		= {};
 	commandPoolCreateInfo.sType							= VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-	commandPoolCreateInfo.queueFamilyIndex				= families.graphicsFamilyIndex.value();
+	commandPoolCreateInfo.queueFamilyIndex				= family.graphicsFamilyIndex.value();
 
 	result = vkCreateCommandPool(
 		logicalDevice,
@@ -1158,7 +1158,7 @@ VK_STATUS_CODE VKEngine::allocateCommandPools() {
 
 	commandPoolCreateInfo								= {};
 	commandPoolCreateInfo.sType							= VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-	commandPoolCreateInfo.queueFamilyIndex				= families.transferFamilyIndex.value();
+	commandPoolCreateInfo.queueFamilyIndex				= family.transferFamilyIndex.value();
 
 	result = vkCreateCommandPool(
 		logicalDevice,
@@ -1459,21 +1459,23 @@ void VKEngine::framebufferResizeCallback(GLFWwindow* window_, int width_, int he
 
 VK_STATUS_CODE VKEngine::allocateNecessaryBuffers() {
 
-	QueueFamilies families						= findSuitableQueueFamilies(physicalDevice);
+	QueueFamily family						                = findSuitableQueueFamily(physicalDevice);
 
-	std::vector< uint32_t > indices				= {families.graphicsFamilyIndex.value(), families.transferFamilyIndex.value()};
+	std::vector< uint32_t > queueFamilyIndices				= {family.graphicsFamilyIndex.value(), family.transferFamilyIndex.value()};
 
-	VkBufferCreateInfo bufferCreateInfo			= {};
-	bufferCreateInfo.sType						= VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	bufferCreateInfo.size						= sizeof(vk::vertices[0]) * vk::vertices.size();
-	bufferCreateInfo.usage						= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-	bufferCreateInfo.sharingMode				= VK_SHARING_MODE_CONCURRENT;
-	bufferCreateInfo.queueFamilyIndexCount		= static_cast< uint32_t >(indices.size());
-	bufferCreateInfo.pQueueFamilyIndices		= indices.data();
+	VkBufferCreateInfo vertexBufferCreateInfo			    = {};
+	vertexBufferCreateInfo.sType						    = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	vertexBufferCreateInfo.size						        = sizeof(vk::vertices[0]) * vk::vertices.size();
+	vertexBufferCreateInfo.usage						    = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+	vertexBufferCreateInfo.sharingMode				        = VK_SHARING_MODE_CONCURRENT;
+	vertexBufferCreateInfo.queueFamilyIndexCount		    = static_cast< uint32_t >(queueFamilyIndices.size());
+	vertexBufferCreateInfo.pQueueFamilyIndices		        = queueFamilyIndices.data();
 
-	vertexBuffer								= new VertexBuffer(&bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-	VK_STATUS_CODE res							= vertexBuffer->fill(vk::vertices);
+	vertexBuffer								            = new VertexBuffer(&vertexBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	VK_STATUS_CODE res							            = vertexBuffer->fill(vk::vertices);
 	ASSERT(res, "Failed to fill vertex buffer", VK_SC_VERTEX_BUFFER_MAP_ERROR);
+
+
 
 	return VK_SC_SUCCESS;
 

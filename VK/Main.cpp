@@ -42,6 +42,12 @@ namespace vk {
 
 	};
 
+    const std::vector< uint32_t >       indices                     = {
+    
+        0, 1, 2, 2, 3, 0
+    
+    };
+
 	VK_STATUS_CODE init() {
 	
 		try {

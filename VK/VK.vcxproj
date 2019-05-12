@@ -138,12 +138,13 @@
     <ClCompile Include="ASSERT.cpp" />
     <ClCompile Include="BaseBuffer.cpp" />
     <ClCompile Include="GraphicsPipeline.cpp" />
+    <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="LoadingScreen.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="LOGGER_STATUS_CODE.cpp" />
     <ClCompile Include="LOG_TYPE.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="QueueFamilies.cpp" />
+    <ClCompile Include="QueueFamily.cpp" />
     <ClCompile Include="SDL_STATUS_CODE.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="VertFragShaderStages.cpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="BaseVertex.hpp" />
     <ClInclude Include="ConsoleColor.hpp" />
     <ClInclude Include="GraphicsPipeline.hpp" />
+    <ClInclude Include="IndexBuffer.hpp" />
     <ClInclude Include="LoadingScreen.hpp" />
     <ClInclude Include="Logger.hpp" />
     <ClInclude Include="VertexBuffer.hpp" />

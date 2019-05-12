@@ -13,7 +13,7 @@
 /**
 	Contains index to queue family
 */
-struct QueueFamilies {
+struct QueueFamily {
 
 	std::optional< uint32_t > graphicsFamilyIndex;		// using std::optional here allows to use one boolean variable less and is a neat C++17 feature
 	std::optional< uint32_t > presentationFamilyIndex;

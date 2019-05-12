@@ -28,7 +28,7 @@
 #include "VK_STATUS_CODE.hpp"
 #include "Logger.hpp"
 #include "ASSERT.cpp"
-#include "QueueFamilies.cpp"
+#include "QueueFamily.cpp"
 #include "LoadingScreen.hpp"
 #include "SwapchainDetails.cpp"
 #include "VertFragShaderStages.hpp"
@@ -209,7 +209,7 @@ private:
 
 		@return		Returns a QueueFamily struct
 	*/
-	QueueFamilies findSuitableQueueFamilies(VkPhysicalDevice device_);
+	QueueFamily findSuitableQueueFamily(VkPhysicalDevice device_);
 
 	/**
 		Creates a VkDevice handle from a VkPhysicalDevice (class member)
