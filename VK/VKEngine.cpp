@@ -89,11 +89,11 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 	ASSERT(createSwapchain(), "Failed to create a swapchain with the given parameters", VK_SC_SWAPCHAIN_CREATION_ERROR);
 	ASSERT(createSwapchainImageViews(), "Failed to create swapchain image views", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
 	ASSERT(createRenderPasses(), "Failed to create render passes", VK_SC_RENDER_PASS_CREATION_ERROR);
+    ASSERT(createDescriptors(), "Failed to create descriptors", VK_SC_DESCRIPTOR_ERROR);
 	ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
 	ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
 	ASSERT(allocateCommandPools(), "Failed to allocate command pools", VK_SC_COMMAND_POOL_ALLOCATION_ERROR);
 	ASSERT(allocateNecessaryBuffers(), "Failed to create necessary buffers", VK_SC_BUFFER_CREATION_ERROR);
-	ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 	ASSERT(initializeSynchronizationObjects(), "Failed to initialize sync-objects", VK_SC_SYNCHRONIZATION_OBJECT_INITIALIZATION_ERROR);
 
 	glfwShowWindow(window);
@@ -162,6 +162,9 @@ VK_STATUS_CODE VKEngine::loop() {
 VK_STATUS_CODE VKEngine::clean() {
 
 	ASSERT(cleanSwapchain(), "Failed to clean swapchain", VK_SC_SWAPCHAIN_CLEAN_ERROR);
+
+    vkDestroyDescriptorSetLayout(logicalDevice, descriptorSetLayout, allocator);
+    logger::log(EVENT_LOG, "Successfully destroyed descriptor set layout");
 
     delete indexBuffer;
     delete vertexBuffer;
@@ -1013,6 +1016,8 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 	// No uniform variables (yet), that would need to be specified in the pipeline layout
 	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo							= {};
 	pipelineLayoutCreateInfo.sType												= VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    pipelineLayoutCreateInfo.setLayoutCount                                     = 1;
+    pipelineLayoutCreateInfo.pSetLayouts                                        = &descriptorSetLayout;
 
 	pipeline = GraphicsPipeline(
 		"shaders/standard/vert.spv", 
@@ -1291,6 +1296,8 @@ VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
 	}
 	ASSERT(result, "Failed to acquire swapchain image", VK_SC_SWAPCHAIN_IMAGE_ACQUIRE_ERROR);
 
+    ASSERT(updateUniformBuffers(swapchainImageIndex), "Failed to update uniform buffers", VK_SC_UNIFORM_BUFFER_UPDATE_ERROR);
+
 	VkSubmitInfo submitInfo							= {};
 	submitInfo.sType								= VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
@@ -1411,6 +1418,7 @@ VK_STATUS_CODE VKEngine::recreateSwapchain() {
 	ASSERT(createRenderPasses(), "Failed to create render passes", VK_SC_RENDER_PASS_CREATION_ERROR);
 	ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
 	ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
+    ASSERT(createUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
 	ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 
 	return VK_SC_SUCCESS;
@@ -1420,6 +1428,15 @@ VK_STATUS_CODE VKEngine::recreateSwapchain() {
 VK_STATUS_CODE VKEngine::cleanSwapchain() {
 
 	logger::log(EVENT_LOG, "Cleaning swapchain...");
+
+    logger::log(EVENT_LOG, "Destroying uniform buffers..");
+    for (size_t i = 0; i < swapchainImages.size(); i++) {
+
+        delete uniformBuffers[i];
+        logger::log(EVENT_LOG, "Successfully destroyed uniform buffer");
+
+    }
+    logger::log(EVENT_LOG, "Successfully destroyed uniform buffers");
 
 	logger::log(EVENT_LOG, "Destroying framebuffers...");
 	for (auto framebuffer : swapchainFramebuffers) {
@@ -1468,6 +1485,7 @@ void VKEngine::framebufferResizeCallback(GLFWwindow* window_, int width_, int he
 
 VK_STATUS_CODE VKEngine::allocateNecessaryBuffers() {
 
+    logger::log(EVENT_LOG, "Creating buffers...");
 	QueueFamily family						                = findSuitableQueueFamily(physicalDevice);
 
 	std::vector< uint32_t > queueFamilyIndices				= {family.graphicsFamilyIndex.value(), family.transferFamilyIndex.value()};
@@ -1495,7 +1513,90 @@ VK_STATUS_CODE VKEngine::allocateNecessaryBuffers() {
     indexBuffer                                             = new IndexBuffer(&indexBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     res                                                     = indexBuffer->fill(&vk::indices);
     ASSERT(res, "Failed to fill index buffer", VK_SC_INDEX_BUFFER_MAP_ERROR);
+    ASSERT(createUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
+    ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 
 	return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::createDescriptors() {
+
+    logger::log(EVENT_LOG, "Creating descriptors...");
+    VkDescriptorSetLayoutBinding mvpLayoutBinding           = {};
+    mvpLayoutBinding.binding                                = 0;
+    mvpLayoutBinding.descriptorType                         = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    mvpLayoutBinding.descriptorCount                        = 1;
+    mvpLayoutBinding.stageFlags                             = VK_SHADER_STAGE_VERTEX_BIT;
+
+    VkDescriptorSetLayoutCreateInfo layoutCreateInfo        = {};
+    layoutCreateInfo.sType                                  = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layoutCreateInfo.bindingCount                           = 1;
+    layoutCreateInfo.pBindings                              = &mvpLayoutBinding;
+
+    result = vkCreateDescriptorSetLayout(
+        logicalDevice, 
+        &layoutCreateInfo,
+        allocator,
+        &descriptorSetLayout
+        );
+    ASSERT(result, "Failed to create descriptor set layout", VK_SC_DESCRIPTOR_SET_LAYOUT_CREATION_ERROR);
+
+    logger::log(EVENT_LOG, "Successfully created descriptors");
+
+    return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::createUniformBuffers() {
+
+    uniformBuffers.resize(swapchainImages.size());
+    
+    VkDeviceSize bufferSize = sizeof(MVPBufferObject);
+
+    VkBufferCreateInfo mvpBufferCreateInfo          = {};
+    mvpBufferCreateInfo.sType                       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    mvpBufferCreateInfo.size                        = bufferSize;
+    mvpBufferCreateInfo.usage                       = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+    mvpBufferCreateInfo.sharingMode                 = VK_SHARING_MODE_EXCLUSIVE;
+
+    for (size_t i = 0; i < swapchainImages.size(); i++) {
+
+        uniformBuffers[i] = new MVPBuffer(&mvpBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+    }
+
+    logger::log(EVENT_LOG, "Successfully created buffers");
+
+    return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::updateUniformBuffers(uint32_t imageIndex_) {
+
+    static auto            start                = std::chrono::high_resolution_clock::now();
+    auto                   current              = std::chrono::high_resolution_clock::now();
+                          
+    float                  delta                = std::chrono::duration< float, std::chrono::seconds::period >(current - start).count();        // Namespaces are a fricking mess in <chrono>
+                          
+    MVPBufferObject        mvp                  = {};
+    mvp.model                                   = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+    mvp.view                                    = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    mvp.proj                                    = glm::perspective(glm::radians(45.0f), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 10.0f);
+    mvp.proj[1][1]                              *= -1;      // GLM was designed for OpenGL where y-axis is inverted
+
+    void* data;
+    vkMapMemory(
+        logicalDevice,
+        uniformBuffers[imageIndex_]->mem,
+        0,
+        sizeof(mvp),
+        0,
+        &data
+        );
+    memcpy(data, &mvp, sizeof(mvp));
+    vkUnmapMemory(logicalDevice, uniformBuffers[imageIndex_]->mem);
+
+    return VK_SC_SUCCESS;
 
 }

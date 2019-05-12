@@ -15,6 +15,10 @@
 */
 typedef enum VK_STATUS_CODE {
 
+    VK_SC_UNIFORM_BUFFER_UPDATE_ERROR                       = -40,
+    VK_SC_UNIFORM_BUFFER_CREATION_ERROR                     = -39,
+    VK_SC_DESCRIPTOR_ERROR                                  = -38,
+    VK_SC_DESCRIPTOR_SET_LAYOUT_CREATION_ERROR              = -37,
     VK_SC_INDEX_BUFFER_MAP_ERROR                            = -36,
 	VK_SC_VERTEX_BUFFER_MAP_ERROR							= -35,
 	VK_SC_BUFFER_BINDING_ERROR								= -34,

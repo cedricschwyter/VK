@@ -12,6 +12,9 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#define GLM_FORCE_RADIANS
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <iostream>
 #include <vector>
@@ -24,6 +27,7 @@
 #if defined WIN_64 || defined WIN_32
 #include <conio.h>
 #endif
+#include <chrono>
 
 #include "VK_STATUS_CODE.hpp"
 #include "Logger.hpp"
@@ -36,6 +40,7 @@
 #include "BaseVertex.hpp"
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
+#include "MVPBuffer.hpp"
 
 class VKEngine {
 public:
@@ -93,6 +98,8 @@ private:
 	bool									hasFramebufferBeenResized			= false;
 	BaseBuffer*								vertexBuffer;
     BaseBuffer*                             indexBuffer;
+    std::vector< BaseBuffer* >              uniformBuffers;
+    VkDescriptorSetLayout                   descriptorSetLayout;
 
 	/**
 		Initializes the logger
@@ -371,5 +378,28 @@ private:
 		@return		Returns VK_SC_SUCCESS on success
 	*/
 	VK_STATUS_CODE allocateNecessaryBuffers(void);
+
+    /**
+        Creates the descriptor sets and layouts
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE createDescriptors(void);
+
+    /**
+        Creates uniform buffers
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE createUniformBuffers(void);
+
+    /**
+        Updates the uniform buffers in the shaders
+
+        @param      imageIndex_     The current swapchain image
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE updateUniformBuffers(uint32_t imageIndex_);
 
 };
