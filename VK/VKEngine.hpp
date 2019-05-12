@@ -380,6 +380,13 @@ private:
 	VK_STATUS_CODE allocateNecessaryBuffers(void);
 
     /**
+        Creates the descriptor pools
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE createDescriptorPools(void);
+
+    /**
         Creates the descriptor sets and layouts
 
         @return     Returns VK_SC_SUCCESS on success

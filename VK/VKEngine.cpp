@@ -1520,6 +1520,12 @@ VK_STATUS_CODE VKEngine::allocateNecessaryBuffers() {
 
 }
 
+VK_STATUS_CODE VKEngine::createDescriptorPools() {
+
+    return VK_SC_SUCCESS;
+
+}
+
 VK_STATUS_CODE VKEngine::createDescriptors() {
 
     logger::log(EVENT_LOG, "Creating descriptors...");
