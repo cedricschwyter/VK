@@ -61,6 +61,13 @@ public:
 	*/
 	VkPipeline get(void);
 
+    /**
+        Returns the pipeline layout
+
+        @return     Returns the pipeline layout
+    */
+    VkPipelineLayout getLayout(void);
+
 	/**
 		Destroys the VkShaderModules
 		

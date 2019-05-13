@@ -137,6 +137,7 @@
   <ItemGroup>
     <ClCompile Include="ASSERT.cpp" />
     <ClCompile Include="BaseBuffer.cpp" />
+    <ClCompile Include="DescriptorPool.cpp" />
     <ClCompile Include="DescriptorSet.cpp" />
     <ClCompile Include="GraphicsPipeline.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
@@ -160,6 +161,7 @@
     <ClInclude Include="BaseBuffer.hpp" />
     <ClInclude Include="BaseVertex.hpp" />
     <ClInclude Include="ConsoleColor.hpp" />
+    <ClInclude Include="DescriptorPool.hpp" />
     <ClInclude Include="DescriptorSet.hpp" />
     <ClInclude Include="GraphicsPipeline.hpp" />
     <ClInclude Include="IndexBuffer.hpp" />

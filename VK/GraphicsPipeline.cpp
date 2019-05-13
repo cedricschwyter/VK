@@ -99,3 +99,9 @@ VkPipeline GraphicsPipeline::get() {
 	return pipeline;
 
 }
+
+VkPipelineLayout GraphicsPipeline::getLayout() {
+
+    return pipelineLayout;
+
+}

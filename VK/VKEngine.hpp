@@ -98,8 +98,10 @@ private:
 	bool									hasFramebufferBeenResized			= false;
 	BaseBuffer*								vertexBuffer;
     BaseBuffer*                             indexBuffer;
-    std::vector< BaseBuffer* >              uniformBuffers;
+    std::vector< MVPBuffer* >               uniformBuffers;
     VkDescriptorSetLayout                   descriptorSetLayout;
+    VkDescriptorPool                        descriptorPool;
+    std::vector< VkDescriptorSet >          descriptorSets;
 
 	/**
 		Initializes the logger
@@ -387,18 +389,18 @@ private:
     VK_STATUS_CODE createDescriptorPools(void);
 
     /**
-        Creates the descriptor sets and layouts
+        Creates the descriptor set layouts
 
         @return     Returns VK_SC_SUCCESS on success
     */
-    VK_STATUS_CODE createDescriptors(void);
+    VK_STATUS_CODE createDescriptorSetLayouts(void);
 
     /**
         Creates uniform buffers
 
         @return     Returns VK_SC_SUCCESS on success
     */
-    VK_STATUS_CODE createUniformBuffers(void);
+    VK_STATUS_CODE allocateUniformBuffers(void);
 
     /**
         Updates the uniform buffers in the shaders
@@ -408,5 +410,12 @@ private:
         @return     Returns VK_SC_SUCCESS on success
     */
     VK_STATUS_CODE updateUniformBuffers(uint32_t imageIndex_);
+
+    /**
+        Creates DescriptorSet wrappers for VkDescriptorSets
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE createDescriptorSets(void);
 
 };

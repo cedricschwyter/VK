@@ -13,7 +13,6 @@
 
 VK_STATUS_CODE IndexBuffer::fill(const std::vector< uint32_t >* bufData_) {
 
-    std::cout << "Hello from index" << std::endl;
     VkDeviceSize bufferSize                         = sizeof(bufData_[0]) * bufData_->size();
 
     VkBufferCreateInfo bufferCreateInfo             = {};

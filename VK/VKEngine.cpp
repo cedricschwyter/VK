@@ -89,11 +89,15 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 	ASSERT(createSwapchain(), "Failed to create a swapchain with the given parameters", VK_SC_SWAPCHAIN_CREATION_ERROR);
 	ASSERT(createSwapchainImageViews(), "Failed to create swapchain image views", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
 	ASSERT(createRenderPasses(), "Failed to create render passes", VK_SC_RENDER_PASS_CREATION_ERROR);
-    ASSERT(createDescriptors(), "Failed to create descriptors", VK_SC_DESCRIPTOR_ERROR);
+    ASSERT(createDescriptorSetLayouts(), "Failed to create descriptors", VK_SC_DESCRIPTOR_ERROR);
 	ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
 	ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
 	ASSERT(allocateCommandPools(), "Failed to allocate command pools", VK_SC_COMMAND_POOL_ALLOCATION_ERROR);
 	ASSERT(allocateNecessaryBuffers(), "Failed to create necessary buffers", VK_SC_BUFFER_CREATION_ERROR);
+    ASSERT(allocateUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
+    ASSERT(createDescriptorPools(), "Failed to create descriptor pools", VK_SC_DESCRIPTOR_POOL_ERROR);
+    ASSERT(createDescriptorSets(), "Failed to create descriptor sets", VK_SC_DESCRIPTOR_SET_CREATION_ERROR);
+    ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 	ASSERT(initializeSynchronizationObjects(), "Failed to initialize sync-objects", VK_SC_SYNCHRONIZATION_OBJECT_INITIALIZATION_ERROR);
 
 	glfwShowWindow(window);
@@ -970,7 +974,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 	rasterizationStateCreateInfo.polygonMode									= VK_POLYGON_MODE_FILL;
 	rasterizationStateCreateInfo.lineWidth										= 1.0f;
 	rasterizationStateCreateInfo.cullMode										= VK_CULL_MODE_BACK_BIT;
-	rasterizationStateCreateInfo.frontFace										= VK_FRONT_FACE_CLOCKWISE;
+	rasterizationStateCreateInfo.frontFace										= VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rasterizationStateCreateInfo.depthBiasEnable								= VK_FALSE;
 
 	// No multisampling (yet)
@@ -1246,6 +1250,17 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
                     VK_INDEX_TYPE_UINT32
                     );
 
+                vkCmdBindDescriptorSets(
+                    standardCommandBuffers[i],
+                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    pipeline.getLayout(),
+                    0,
+                    1,
+                    &descriptorSets[i],
+                    0,
+                    nullptr
+                    );
+
 				vkCmdDrawIndexed(
 					standardCommandBuffers[i], 
 					static_cast< uint32_t >(vk::indices.size()),
@@ -1416,10 +1431,12 @@ VK_STATUS_CODE VKEngine::recreateSwapchain() {
 	ASSERT(createSwapchain(), "Failed to create a swapchain with the given parameters", VK_SC_SWAPCHAIN_CREATION_ERROR);
 	ASSERT(createSwapchainImageViews(), "Failed to create swapchain image views", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
 	ASSERT(createRenderPasses(), "Failed to create render passes", VK_SC_RENDER_PASS_CREATION_ERROR);
-	ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
-	ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
-    ASSERT(createUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
-	ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
+    ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
+    ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
+    ASSERT(allocateUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
+    ASSERT(createDescriptorPools(), "Failed to create descriptor pools", VK_SC_DESCRIPTOR_POOL_ERROR);
+    ASSERT(createDescriptorSets(), "Failed to create descriptor sets", VK_SC_DESCRIPTOR_SET_CREATION_ERROR);
+    ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 
 	return VK_SC_SUCCESS;
 
@@ -1437,6 +1454,9 @@ VK_STATUS_CODE VKEngine::cleanSwapchain() {
 
     }
     logger::log(EVENT_LOG, "Successfully destroyed uniform buffers");
+
+    vkDestroyDescriptorPool(logicalDevice, descriptorPool, allocator);
+    logger::log(EVENT_LOG, "Successfully destroyed descriptor pool");
 
 	logger::log(EVENT_LOG, "Destroying framebuffers...");
 	for (auto framebuffer : swapchainFramebuffers) {
@@ -1513,20 +1533,12 @@ VK_STATUS_CODE VKEngine::allocateNecessaryBuffers() {
     indexBuffer                                             = new IndexBuffer(&indexBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     res                                                     = indexBuffer->fill(&vk::indices);
     ASSERT(res, "Failed to fill index buffer", VK_SC_INDEX_BUFFER_MAP_ERROR);
-    ASSERT(createUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
-    ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 
 	return VK_SC_SUCCESS;
 
 }
 
-VK_STATUS_CODE VKEngine::createDescriptorPools() {
-
-    return VK_SC_SUCCESS;
-
-}
-
-VK_STATUS_CODE VKEngine::createDescriptors() {
+VK_STATUS_CODE VKEngine::createDescriptorSetLayouts() {
 
     logger::log(EVENT_LOG, "Creating descriptors...");
     VkDescriptorSetLayoutBinding mvpLayoutBinding           = {};
@@ -1554,7 +1566,7 @@ VK_STATUS_CODE VKEngine::createDescriptors() {
 
 }
 
-VK_STATUS_CODE VKEngine::createUniformBuffers() {
+VK_STATUS_CODE VKEngine::allocateUniformBuffers() {
 
     uniformBuffers.resize(swapchainImages.size());
     
@@ -1580,28 +1592,95 @@ VK_STATUS_CODE VKEngine::createUniformBuffers() {
 
 VK_STATUS_CODE VKEngine::updateUniformBuffers(uint32_t imageIndex_) {
 
-    static auto            start                = std::chrono::high_resolution_clock::now();
-    auto                   current              = std::chrono::high_resolution_clock::now();
+    static auto            start                    = std::chrono::high_resolution_clock::now();
+    auto                   current                  = std::chrono::high_resolution_clock::now();
                           
-    float                  delta                = std::chrono::duration< float, std::chrono::seconds::period >(current - start).count();        // Namespaces are a fricking mess in <chrono>
+    float                  delta                    = std::chrono::duration< float, std::chrono::seconds::period >(current - start).count();        // Namespaces are a fricking mess in <chrono>
                           
-    MVPBufferObject        mvp                  = {};
-    mvp.model                                   = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-    mvp.view                                    = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    mvp.proj                                    = glm::perspective(glm::radians(45.0f), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 10.0f);
-    mvp.proj[1][1]                              *= -1;      // GLM was designed for OpenGL where y-axis is inverted
+    uniformBuffers[imageIndex_]->mvp.model          = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+    uniformBuffers[imageIndex_]->mvp.view           = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    uniformBuffers[imageIndex_]->mvp.proj           = glm::perspective(glm::radians(45.0f), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 10.0f);
+    uniformBuffers[imageIndex_]->mvp.proj[1][1]     *= -1;      // GLM was designed for OpenGL where y-axis is inverted
 
     void* data;
     vkMapMemory(
         logicalDevice,
         uniformBuffers[imageIndex_]->mem,
         0,
-        sizeof(mvp),
+        sizeof(uniformBuffers[imageIndex_]->mvp),
         0,
         &data
         );
-    memcpy(data, &mvp, sizeof(mvp));
+    memcpy(data, &uniformBuffers[imageIndex_]->mvp, sizeof(uniformBuffers[imageIndex_]->mvp));
     vkUnmapMemory(logicalDevice, uniformBuffers[imageIndex_]->mem);
+
+    return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::createDescriptorPools() {
+
+    VkDescriptorPoolSize descriptorPoolSize                     = {};
+    descriptorPoolSize.type                                     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    descriptorPoolSize.descriptorCount                          = static_cast< uint32_t >(swapchainImages.size());
+
+    VkDescriptorPoolCreateInfo descriptorPoolCreateInfo         = {};
+    descriptorPoolCreateInfo.sType                              = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    descriptorPoolCreateInfo.poolSizeCount                      = 1;
+    descriptorPoolCreateInfo.pPoolSizes                         = &descriptorPoolSize;
+    descriptorPoolCreateInfo.maxSets                            = static_cast< uint32_t >(swapchainImages.size());
+
+    result = vkCreateDescriptorPool(
+        logicalDevice,
+        &descriptorPoolCreateInfo,
+        allocator,
+        &descriptorPool
+        );
+    ASSERT(result, "Failed to create descriptor pool", VK_SC_DESCRIPTOR_POOL_ERROR);
+
+    return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::createDescriptorSets() {
+
+    std::vector< VkDescriptorSetLayout > layouts(swapchainImages.size(), descriptorSetLayout);
+
+    VkDescriptorSetAllocateInfo allocateInfo        = {};
+    allocateInfo.sType                              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocateInfo.descriptorPool                     = descriptorPool;
+    allocateInfo.descriptorSetCount                 = static_cast< uint32_t >(swapchainImages.size());
+    allocateInfo.pSetLayouts                        = layouts.data();
+
+    descriptorSets.resize(swapchainImages.size());
+    result = vkAllocateDescriptorSets(logicalDevice, &allocateInfo, descriptorSets.data());
+    ASSERT(result, "Failed to allocate descriptor sets", VK_SC_DESCRIPTOR_SET_CREATION_ERROR);
+
+    for (size_t i = 0; i < swapchainImages.size(); i++) {
+    
+        VkDescriptorBufferInfo bufferInfo           = {};
+        bufferInfo.buffer                           = uniformBuffers[i]->buf;
+        bufferInfo.offset                           = 0;
+        bufferInfo.range                            = sizeof(MVPBufferObject);
+
+        VkWriteDescriptorSet writeDescriptorSet     = {};
+        writeDescriptorSet.sType                    = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        writeDescriptorSet.dstSet                   = descriptorSets[i];
+        writeDescriptorSet.dstBinding               = 0;
+        writeDescriptorSet.dstArrayElement          = 0;
+        writeDescriptorSet.descriptorType           = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        writeDescriptorSet.descriptorCount          = 1;
+        writeDescriptorSet.pBufferInfo              = &bufferInfo;
+
+        vkUpdateDescriptorSets(
+            logicalDevice, 
+            1, 
+            &writeDescriptorSet, 
+            0, 
+            nullptr
+            );
+
+    }
 
     return VK_SC_SUCCESS;
 
