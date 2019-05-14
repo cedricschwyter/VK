@@ -10,6 +10,7 @@
 #pragma once
 #include "BaseBuffer.hpp"
 #include "MVPBufferObject.cpp"
+#include "VK_STATUS_CODE.hpp"
 
 class MVPBuffer :
     public BaseBuffer
@@ -17,7 +18,14 @@ class MVPBuffer :
     using BaseBuffer::BaseBuffer;
 public:
 
-    MVPBufferObject mvp;
+    /**
+        Fills the buffer memory
+
+        @param      mvp_        The MVPBufferObject to upload to shader
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE fill(MVPBufferObject mvp_);
 
     /**
         Default destructor

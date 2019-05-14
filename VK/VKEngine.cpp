@@ -973,7 +973,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 	rasterizationStateCreateInfo.rasterizerDiscardEnable						= VK_FALSE;
 	rasterizationStateCreateInfo.polygonMode									= VK_POLYGON_MODE_FILL;
 	rasterizationStateCreateInfo.lineWidth										= 1.0f;
-	rasterizationStateCreateInfo.cullMode										= VK_CULL_MODE_BACK_BIT;
+	rasterizationStateCreateInfo.cullMode										= VK_CULL_MODE_NONE;
 	rasterizationStateCreateInfo.frontFace										= VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rasterizationStateCreateInfo.depthBiasEnable								= VK_FALSE;
 
@@ -1596,23 +1596,15 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers(uint32_t imageIndex_) {
     auto                   current                  = std::chrono::high_resolution_clock::now();
                           
     float                  delta                    = std::chrono::duration< float, std::chrono::seconds::period >(current - start).count();        // Namespaces are a fricking mess in <chrono>
-                          
-    uniformBuffers[imageIndex_]->mvp.model          = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-    uniformBuffers[imageIndex_]->mvp.view           = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    uniformBuffers[imageIndex_]->mvp.proj           = glm::perspective(glm::radians(45.0f), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 10.0f);
-    uniformBuffers[imageIndex_]->mvp.proj[1][1]     *= -1;      // GLM was designed for OpenGL where y-axis is inverted
+    
+    MVPBufferObject mvp                             = {};
 
-    void* data;
-    vkMapMemory(
-        logicalDevice,
-        uniformBuffers[imageIndex_]->mem,
-        0,
-        sizeof(uniformBuffers[imageIndex_]->mvp),
-        0,
-        &data
-        );
-    memcpy(data, &uniformBuffers[imageIndex_]->mvp, sizeof(uniformBuffers[imageIndex_]->mvp));
-    vkUnmapMemory(logicalDevice, uniformBuffers[imageIndex_]->mem);
+    mvp.model                                       = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+    mvp.view                                        = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    mvp.proj                                        = glm::perspective(glm::radians(45.0f), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 10.0f);
+    mvp.proj[1][1]                                  *= -1;      // GLM was designed for OpenGL where y-axis is inverted
+
+    uniformBuffers[imageIndex_]->fill(mvp);
 
     return VK_SC_SUCCESS;
 
