@@ -100,12 +100,16 @@ VK_STATUS_CODE VKEngine::initVulkan() {
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 	ASSERT(initializeSynchronizationObjects(), "Failed to initialize sync-objects", VK_SC_SYNCHRONIZATION_OBJECT_INITIALIZATION_ERROR);
 
-	glfwShowWindow(window);
-	glfwFocusWindow(window);
+    if (!initialized) {
 
-	loadingScreen->closeMutex.lock();
-	loadingScreen->close = true;
-	loadingScreen->closeMutex.unlock();
+        glfwShowWindow(window);
+        glfwFocusWindow(window);
+        loadingScreen->closeMutex.lock();
+        loadingScreen->close = true;
+        loadingScreen->closeMutex.unlock();
+        initialized = true;
+
+    }
 
 	return VK_SC_SUCCESS;
 
@@ -1599,7 +1603,7 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers(uint32_t imageIndex_) {
     
     MVPBufferObject mvp                             = {};
 
-    mvp.model                                       = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    mvp.model                                       = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(1.0f, -1.0f, 1.0f));
     mvp.view                                        = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     mvp.proj                                        = glm::perspective(glm::radians(45.0f), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 10.0f);
     mvp.proj[1][1]                                  *= -1;      // GLM was designed for OpenGL where y-axis is inverted

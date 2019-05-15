@@ -102,6 +102,7 @@ private:
     VkDescriptorSetLayout                   descriptorSetLayout;
     VkDescriptorPool                        descriptorPool;
     std::vector< VkDescriptorSet >          descriptorSets;
+    bool                                    initialized                         = false;
 
 	/**
 		Initializes the logger
