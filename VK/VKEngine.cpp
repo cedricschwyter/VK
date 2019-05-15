@@ -1231,9 +1231,9 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
 		vkCmdBeginRenderPass(standardCommandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);		// Rendering commands will be embedded in the primary command buffer
 
-			vkCmdBindPipeline(standardCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.get());
+			vkCmdBindPipeline(standardCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline);
 
-				VkBuffer vertexBuffers[]		= {vertexBuffer->get()};
+				VkBuffer vertexBuffers[]		= {vertexBuffer->buf};
 				VkDeviceSize offsets[]			= {0};
 				vkCmdBindVertexBuffers(
 					standardCommandBuffers[i],
@@ -1245,7 +1245,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
                 vkCmdBindIndexBuffer(
                     standardCommandBuffers[i],
-                    indexBuffer->get(),
+                    indexBuffer->buf,
                     0,
                     VK_INDEX_TYPE_UINT32
                     );
@@ -1253,7 +1253,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
                 vkCmdBindDescriptorSets(
                     standardCommandBuffers[i],
                     VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    pipeline.getLayout(),
+                    pipeline.pipelineLayout,
                     0,
                     1,
                     &descriptorSets[i],
@@ -1519,7 +1519,7 @@ VK_STATUS_CODE VKEngine::allocateNecessaryBuffers() {
 	vertexBufferCreateInfo.pQueueFamilyIndices		        = queueFamilyIndices.data();
 
 	vertexBuffer                                            = new VertexBuffer(&vertexBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-	VK_STATUS_CODE res							            = vertexBuffer->fill(&vk::vertices);
+	VK_STATUS_CODE res							            = vertexBuffer->fillS(vk::vertices.data(), sizeof(vk::vertices[0]) * vk::vertices.size());
 	ASSERT(res, "Failed to fill vertex buffer", VK_SC_VERTEX_BUFFER_MAP_ERROR);
 
     VkBufferCreateInfo indexBufferCreateInfo                = {};
@@ -1531,7 +1531,7 @@ VK_STATUS_CODE VKEngine::allocateNecessaryBuffers() {
     indexBufferCreateInfo.pQueueFamilyIndices               = queueFamilyIndices.data();
 
     indexBuffer                                             = new IndexBuffer(&indexBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    res                                                     = indexBuffer->fill(&vk::indices);
+    res                                                     = indexBuffer->fillS(vk::indices.data(), sizeof(vk::indices[0]) * vk::indices.size());
     ASSERT(res, "Failed to fill index buffer", VK_SC_INDEX_BUFFER_MAP_ERROR);
 
 	return VK_SC_SUCCESS;
@@ -1599,12 +1599,12 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers(uint32_t imageIndex_) {
     
     MVPBufferObject mvp                             = {};
 
-    mvp.model                                       = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+    mvp.model                                       = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     mvp.view                                        = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     mvp.proj                                        = glm::perspective(glm::radians(45.0f), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 10.0f);
     mvp.proj[1][1]                                  *= -1;      // GLM was designed for OpenGL where y-axis is inverted
 
-    uniformBuffers[imageIndex_]->fill(mvp);
+    uniformBuffers[imageIndex_]->fill(&mvp);
 
     return VK_SC_SUCCESS;
 

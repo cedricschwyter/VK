@@ -11,9 +11,7 @@
 #include "VK.hpp"
 
 
-VK_STATUS_CODE MVPBuffer::fill(MVPBufferObject mvp_) {
-
-    bind();
+/*VK_STATUS_CODE MVPBuffer::fill(MVPBufferObject mvp_) {
 
     void* data;
     vkMapMemory(
@@ -29,10 +27,4 @@ VK_STATUS_CODE MVPBuffer::fill(MVPBufferObject mvp_) {
 
     return VK_SC_SUCCESS;
 
-}
-
-MVPBuffer::~MVPBuffer() {
-
-
-
-}
+}*/

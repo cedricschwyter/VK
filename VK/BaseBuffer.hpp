@@ -42,23 +42,17 @@ public:
 
 		@return		Returns VK_SC_SUCCESS on success
 	*/
-	virtual VK_STATUS_CODE fill(const std::vector< BaseVertex >* bufData_);
+	VK_STATUS_CODE fill(const void* bufData_);
 
     /**
-        Maps data to a buffer (overload for different data type as I cant find any other solution just now)
+        Maps data to a buffer using a staging buffer
 
         @param      bufData_        Pointer to the data that needs to be copied to the buffer
+        @param      bufSize_        The size of the buffer in bytes
 
         @return     Returns VK_SC_SUCCESS on success
     */
-    virtual VK_STATUS_CODE fill(const std::vector< uint32_t >* bufData_);
-
-	/**
-		Returns the VkBuffer handle
-
-		@return		Returns the VkBuffer handle
-	*/
-	VkBuffer get(void);
+    VK_STATUS_CODE fillS(const void* bufData_, size_t bufSize_);
 
 	/**
 		Binds a buffer

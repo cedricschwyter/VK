@@ -16,6 +16,9 @@ class GraphicsPipeline
 {
 public:
 
+    VkPipelineLayout			pipelineLayout;
+    VkPipeline					pipeline;
+
 	/**
 		Default constructor
 	*/
@@ -55,20 +58,6 @@ public:
 		);
 
 	/**
-		Returns the pipeline
-
-		@return		Returns the VkPipeline
-	*/
-	VkPipeline get(void);
-
-    /**
-        Returns the pipeline layout
-
-        @return     Returns the pipeline layout
-    */
-    VkPipelineLayout getLayout(void);
-
-	/**
 		Destroys the VkShaderModules
 		
 		@return		Returns VK_SC_SUCCESS on success
@@ -85,8 +74,6 @@ public:
 private:
 
 	VertFragShaderStages		stages;
-	VkPipelineLayout			pipelineLayout		= VK_NULL_HANDLE;
-	VkPipeline					pipeline			= VK_NULL_HANDLE;
 
 };
 

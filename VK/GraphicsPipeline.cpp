@@ -93,15 +93,3 @@ VK_STATUS_CODE GraphicsPipeline::destroy() {
 	return VK_SC_SUCCESS;
 
 }
-
-VkPipeline GraphicsPipeline::get() {
-
-	return pipeline;
-
-}
-
-VkPipelineLayout GraphicsPipeline::getLayout() {
-
-    return pipelineLayout;
-
-}

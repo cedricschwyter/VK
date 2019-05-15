@@ -96,7 +96,7 @@ VK_STATUS_CODE BaseBuffer::bind() {
 
 }
 
-VK_STATUS_CODE BaseBuffer::fill(const std::vector< BaseVertex >* bufData_) {
+VK_STATUS_CODE BaseBuffer::fill(const void* bufData_) {
 
 	void* data;
 	vkMapMemory(
@@ -107,33 +107,39 @@ VK_STATUS_CODE BaseBuffer::fill(const std::vector< BaseVertex >* bufData_) {
 		0,
 		&data
 		);
-	memcpy(data, bufData_->data(), static_cast< size_t >(bufferCreateInfo.size));
+	memcpy(data, bufData_, static_cast< size_t >(bufferCreateInfo.size));
 	vkUnmapMemory(vk::engine.logicalDevice, mem);
 
 	return VK_SC_SUCCESS;
 
 }
 
-VK_STATUS_CODE BaseBuffer::fill(const std::vector< uint32_t >* bufData_) {
+VK_STATUS_CODE BaseBuffer::fillS(const void* bufData_, size_t bufSize_) {
+
+    VkBufferCreateInfo bufferCreateInfo     = {};
+    bufferCreateInfo.sType                  = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferCreateInfo.size                   = bufSize_;
+    bufferCreateInfo.usage                  = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+    bufferCreateInfo.sharingMode            = VK_SHARING_MODE_EXCLUSIVE;
+
+    BaseBuffer* stagingBuffer               = new BaseBuffer(&bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
     void* data;
     vkMapMemory(
         vk::engine.logicalDevice,
-        mem,
+        stagingBuffer->mem,
         0,
-        bufferCreateInfo.size,
+        bufSize_,
         0,
         &data
     );
-    memcpy(data, bufData_->data(), static_cast< size_t >(bufferCreateInfo.size));
-    vkUnmapMemory(vk::engine.logicalDevice, mem);
+    memcpy(data, bufData_, static_cast< size_t >(bufSize_));
+    vkUnmapMemory(vk::engine.logicalDevice, stagingBuffer->mem);
+
+    vk::copyBuffer(stagingBuffer->buf, buf, bufSize_);
+
+    delete stagingBuffer;
 
     return VK_SC_SUCCESS;
-
-}
-
-VkBuffer BaseBuffer::get() {
-
-	return buf;
 
 }

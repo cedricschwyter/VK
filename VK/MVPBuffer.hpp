@@ -25,12 +25,7 @@ public:
 
         @return     Returns VK_SC_SUCCESS on success
     */
-    VK_STATUS_CODE fill(MVPBufferObject mvp_);
-
-    /**
-        Default destructor
-    */
-    ~MVPBuffer(void);
+    //VK_STATUS_CODE fill(MVPBufferObject mvp_);
 
 };
 

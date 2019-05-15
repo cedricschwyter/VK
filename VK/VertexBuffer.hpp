@@ -14,16 +14,5 @@ class VertexBuffer :
 	public BaseBuffer
 {
     using BaseBuffer::BaseBuffer;
-public:
-    
-    /**
-		Maps data to a buffer using a staging buffer
-
-		@param		bufData_		Pointer to the data that needs to be copied to the buffer
-
-		@return		Returns VK_SC_SUCCESS on success
-	*/
-    VK_STATUS_CODE fill(const std::vector< BaseVertex >* bufData_);
-
 };
 
