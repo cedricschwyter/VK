@@ -29,18 +29,23 @@ GraphicsPipeline::GraphicsPipeline(
 	const VkPipelineColorBlendAttachmentState*			colorBlendAttachmentState_,
 	const VkPipelineColorBlendStateCreateInfo*			colorBlendStateCreateInfo_,
 	const VkPipelineDynamicStateCreateInfo*				dynamicStateCreateInfo_,
-	const VkPipelineLayoutCreateInfo*					pipelineLayoutCreateInfo_,
+	const DescriptorSet* 					            descriptorSets_,
 	VkRenderPass										renderPass_
 	) {
 
 	stages = VertFragShaderStages(vertPath_, fragPath_);
 
+    VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo         = {};
+    pipelineLayoutCreateInfo.sType                              = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    pipelineLayoutCreateInfo.setLayoutCount                     = 1;
+    pipelineLayoutCreateInfo.pSetLayouts                        = &(descriptorSets_->descriptorSetLayout);
+
 	vk::engine.result = vkCreatePipelineLayout(
 		vk::engine.logicalDevice,
-		pipelineLayoutCreateInfo_,
+		&pipelineLayoutCreateInfo,
 		vk::engine.allocator,
 		&pipelineLayout
-	);
+	    );
 	ASSERT(vk::engine.result, "Failed to create pipeline layout", VK_SC_PIPELINE_LAYOUT_CREATION_ERROR);
 	logger::log(EVENT_LOG, "Successfully created pipeline layout");
 

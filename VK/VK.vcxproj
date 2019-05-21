@@ -146,10 +146,11 @@
     <ClCompile Include="LOGGER_STATUS_CODE.cpp" />
     <ClCompile Include="LOG_TYPE.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="MVPBuffer.cpp" />
+    <ClCompile Include="UniformBuffer.cpp" />
     <ClCompile Include="QueueFamily.cpp" />
     <ClCompile Include="SDL_STATUS_CODE.cpp" />
     <ClCompile Include="MVPBufferObject.cpp" />
+    <ClCompile Include="UniformInfo.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="VertFragShaderStages.cpp" />
     <ClCompile Include="SwapchainDetails.cpp" />
@@ -167,7 +168,7 @@
     <ClInclude Include="IndexBuffer.hpp" />
     <ClInclude Include="LoadingScreen.hpp" />
     <ClInclude Include="Logger.hpp" />
-    <ClInclude Include="MVPBuffer.hpp" />
+    <ClInclude Include="UniformBuffer.hpp" />
     <ClInclude Include="VertexBuffer.hpp" />
     <ClInclude Include="VertFragShaderStages.hpp" />
     <ClInclude Include="VKEngine.hpp" />

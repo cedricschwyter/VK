@@ -40,7 +40,8 @@
 #include "BaseVertex.hpp"
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
-#include "MVPBuffer.hpp"
+#include "UniformBuffer.hpp"
+#include "MVPBufferObject.cpp"
 
 class VKEngine {
 public:
@@ -49,6 +50,7 @@ public:
 	VkPhysicalDevice						physicalDevice;
 	VkDevice								logicalDevice;
 	VkAllocationCallbacks*					allocator;
+    std::vector< VkImage >					swapchainImages;
 
 	/**
 		Initializes VKEngine and loads dependencies
@@ -84,7 +86,6 @@ private:
 	VkSwapchainKHR							swapchain							= VK_NULL_HANDLE;
 	VkFormat								swapchainImageFormat;
 	VkExtent2D								swapchainImageExtent;
-	std::vector< VkImage >					swapchainImages;
 	std::vector< VkImageView >				swapchainImageViews;
 	std::vector< VkFramebuffer >			swapchainFramebuffers;
 	VkRenderPass							renderPass;
@@ -98,10 +99,10 @@ private:
 	bool									hasFramebufferBeenResized			= false;
 	BaseBuffer*								vertexBuffer;
     BaseBuffer*                             indexBuffer;
-    std::vector< MVPBuffer* >               uniformBuffers;
+    std::vector< UniformBuffer* >           mvpBuffers;
     VkDescriptorSetLayout                   descriptorSetLayout;
     VkDescriptorPool                        descriptorPool;
-    std::vector< VkDescriptorSet >          descriptorSets;
+    DescriptorSet*                          descriptorSets;
     bool                                    initialized                         = false;
 
 	/**
@@ -381,20 +382,6 @@ private:
 		@return		Returns VK_SC_SUCCESS on success
 	*/
 	VK_STATUS_CODE allocateNecessaryBuffers(void);
-
-    /**
-        Creates the descriptor pools
-
-        @return     Returns VK_SC_SUCCESS on success
-    */
-    VK_STATUS_CODE createDescriptorPools(void);
-
-    /**
-        Creates the descriptor set layouts
-
-        @return     Returns VK_SC_SUCCESS on success
-    */
-    VK_STATUS_CODE createDescriptorSetLayouts(void);
 
     /**
         Creates uniform buffers

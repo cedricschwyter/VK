@@ -11,13 +11,14 @@
 #include <vulkan/vulkan.h>
 
 #include "VertFragShaderStages.hpp"
+#include "DescriptorSet.hpp"
 
 class GraphicsPipeline
 {
 public:
 
-    VkPipelineLayout			pipelineLayout;
-    VkPipeline					pipeline;
+    VkPipelineLayout			        pipelineLayout;
+    VkPipeline					        pipeline;
 
 	/**
 		Default constructor
@@ -38,7 +39,7 @@ public:
 		@param		colorBlendAttachmentState_			A pointer to a color blend attachment state structure
 		@param		colorBlendStateCreateInfo_			A pointer to a color blend state create info structure
 		@param		dynamicStateCreateInfo_				A pointer to a dynamic state create info structure
-		@param		pipelineLayoutCreateInfo_			A pointer to a pipeline layout create info structure
+		@param		descriptorSets_         			A pointer to some descriptors for uniforms in shaders
 		@param		renderPass_							A valid VkRenderPass handle
 	*/
 	GraphicsPipeline(
@@ -53,9 +54,9 @@ public:
 		const VkPipelineColorBlendAttachmentState*			colorBlendAttachmentState_,
 		const VkPipelineColorBlendStateCreateInfo*			colorBlendStateCreateInfo_,
 		const VkPipelineDynamicStateCreateInfo*				dynamicStateCreateInfo_,
-		const VkPipelineLayoutCreateInfo*					pipelineLayoutCreateInfo_,
+        const DescriptorSet*                                descriptorSets_,
 		VkRenderPass										renderPass_
-		);
+        );
 
 	/**
 		Destroys the VkShaderModules
@@ -74,6 +75,7 @@ public:
 private:
 
 	VertFragShaderStages		stages;
+    DescriptorSet               descriptorSets;
 
 };
 
