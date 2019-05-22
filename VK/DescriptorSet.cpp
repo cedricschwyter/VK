@@ -17,12 +17,12 @@ DescriptorSet::DescriptorSet() {
 
 }
 
-DescriptorSet::DescriptorSet(const std::vector< UniformInfo >& uniformBindings_) {
+DescriptorSet::DescriptorSet(const std::vector< UniformInfo >& uniformBindings_, uint32_t numUniforms_) {
 
     std::vector< VkDescriptorSetLayoutBinding > bindings;
-    bindings.resize(uniformBindings_.size());
+    bindings.resize(numUniforms_);
 
-    for (size_t i = 0; i < uniformBindings_.size(); i++) {
+    for (size_t i = 0; i < numUniforms_; i++) {
 
         VkDescriptorSetLayoutBinding binding                    = {};
         binding.binding                                         = uniformBindings_[i].binding;
@@ -82,7 +82,7 @@ DescriptorSet::DescriptorSet(const std::vector< UniformInfo >& uniformBindings_)
         VkWriteDescriptorSet writeDescriptorSet         = {};
         writeDescriptorSet.sType                        = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         writeDescriptorSet.dstSet                       = descriptorSets[i];
-        writeDescriptorSet.dstBinding                   = 0;
+        writeDescriptorSet.dstBinding                   = uniformBindings_[i].binding;
         writeDescriptorSet.dstArrayElement              = 0;
         writeDescriptorSet.descriptorType               = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         writeDescriptorSet.descriptorCount              = 1;
@@ -102,9 +102,14 @@ DescriptorSet::DescriptorSet(const std::vector< UniformInfo >& uniformBindings_)
 
 DescriptorSet::~DescriptorSet() {
 
-    vkDestroyDescriptorSetLayout(vk::engine.logicalDevice, descriptorSetLayout, vk::engine.allocator);
+    if (descriptorPool != VK_NULL_HANDLE && descriptorSetLayout != VK_NULL_HANDLE) {
 
-    vkDestroyDescriptorPool(vk::engine.logicalDevice, descriptorPool, vk::engine.allocator);
-    logger::log(EVENT_LOG, "Successfully destroyed descriptor pool");
+        vkDestroyDescriptorSetLayout(vk::engine.logicalDevice, descriptorSetLayout, vk::engine.allocator);
+        logger::log(EVENT_LOG, "Successfully destroyed descriptor set layout");
+
+        vkDestroyDescriptorPool(vk::engine.logicalDevice, descriptorPool, vk::engine.allocator);
+        logger::log(EVENT_LOG, "Successfully destroyed descriptor pool");
+
+    }
 
 }

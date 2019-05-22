@@ -16,8 +16,8 @@ class DescriptorSet
 {
 public:
 
-    VkDescriptorPool                        descriptorPool;
-    VkDescriptorSetLayout                   descriptorSetLayout;
+    VkDescriptorPool                        descriptorPool              = VK_NULL_HANDLE;
+    VkDescriptorSetLayout                   descriptorSetLayout         = VK_NULL_HANDLE;
     std::vector< VkDescriptorSet >          descriptorSets;
 
     /**
@@ -29,8 +29,9 @@ public:
         Constructor
 
         @param      uniformBindings_        A reference of an std::vector of UniformInfo structs defining an interface between application and shaders
+        @param      numUniforms_            Number of different bindings
     */
-    DescriptorSet(const std::vector< UniformInfo >& uniformBindings_);
+    DescriptorSet(const std::vector< UniformInfo >& uniformBindings_, uint32_t numUniforms_);
 
     /**
         Default destructor
