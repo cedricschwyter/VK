@@ -100,9 +100,6 @@ private:
 	BaseBuffer*								vertexBuffer;
     BaseBuffer*                             indexBuffer;
     std::vector< UniformBuffer* >           mvpBuffers;
-    VkDescriptorSetLayout                   descriptorSetLayout;
-    VkDescriptorPool                        descriptorPool;
-    DescriptorSet*                          descriptorSets;
     bool                                    initialized                         = false;
 
 	/**
@@ -398,12 +395,5 @@ private:
         @return     Returns VK_SC_SUCCESS on success
     */
     VK_STATUS_CODE updateUniformBuffers(uint32_t imageIndex_);
-
-    /**
-        Creates DescriptorSet wrappers for VkDescriptorSets
-
-        @return     Returns VK_SC_SUCCESS on success
-    */
-    VK_STATUS_CODE createDescriptorSets(void);
 
 };

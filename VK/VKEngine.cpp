@@ -90,7 +90,6 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 	ASSERT(createSwapchainImageViews(), "Failed to create swapchain image views", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
 	ASSERT(createRenderPasses(), "Failed to create render passes", VK_SC_RENDER_PASS_CREATION_ERROR);
     ASSERT(allocateUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
-    ASSERT(createDescriptorSets(), "Failed to create descriptor sets", VK_SC_DESCRIPTOR_SET_CREATION_ERROR);
 	ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
 	ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
 	ASSERT(allocateCommandPools(), "Failed to allocate command pools", VK_SC_COMMAND_POOL_ALLOCATION_ERROR);
@@ -1016,6 +1015,25 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 	dynamicStateCreateInfo.dynamicStateCount									= static_cast< uint32_t >(dynamicStates.size());
 	dynamicStateCreateInfo.pDynamicStates										= dynamicStates.data();
 
+    std::vector< UniformInfo > bindings;
+    bindings.resize(swapchainImages.size());
+
+    for (size_t i = 0; i < swapchainImages.size(); i++) {
+
+        VkDescriptorBufferInfo mvpBufferInfo        = {};
+        mvpBufferInfo.buffer                        = mvpBuffers[i]->buf;
+        mvpBufferInfo.offset                        = 0;
+        mvpBufferInfo.range                         = sizeof(MVPBufferObject);
+
+        UniformInfo mvpInfo                         = {};
+        mvpInfo.binding                             = 0;
+        mvpInfo.stageFlags                          = VK_SHADER_STAGE_VERTEX_BIT;
+        mvpInfo.bufferInfo                          = mvpBufferInfo;
+
+        bindings[i] = mvpInfo;
+
+    }
+
 	pipeline = GraphicsPipeline(
 		"shaders/standard/vert.spv", 
 		"shaders/standard/frag.spv",
@@ -1028,7 +1046,8 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 		&colorBlendAttachmentState,
 		&colorBlendStateCreateInfo,
 		nullptr,						// Defined, but not referenced
-		descriptorSets,
+		bindings,
+        1,
 		renderPass
 		);
 
@@ -1243,16 +1262,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
                     VK_INDEX_TYPE_UINT32
                     );
 
-                vkCmdBindDescriptorSets(
-                    standardCommandBuffers[i],
-                    VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    pipeline.pipelineLayout,
-                    0,
-                    1,
-                    &(descriptorSets->descriptorSets[i]),
-                    0,
-                    nullptr
-                    );
+                pipeline.bindDescriptors(standardCommandBuffers, i);
 
 				vkCmdDrawIndexed(
 					standardCommandBuffers[i], 
@@ -1425,7 +1435,6 @@ VK_STATUS_CODE VKEngine::recreateSwapchain() {
 	ASSERT(createSwapchainImageViews(), "Failed to create swapchain image views", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
 	ASSERT(createRenderPasses(), "Failed to create render passes", VK_SC_RENDER_PASS_CREATION_ERROR);
     ASSERT(allocateUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
-    ASSERT(createDescriptorSets(), "Failed to create descriptor sets", VK_SC_DESCRIPTOR_SET_CREATION_ERROR);
     ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
     ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
@@ -1446,8 +1455,6 @@ VK_STATUS_CODE VKEngine::cleanSwapchain() {
 
     }
     logger::log(EVENT_LOG, "Successfully destroyed uniform buffers");
-
-    delete descriptorSets;
 
 	logger::log(EVENT_LOG, "Destroying framebuffers...");
 	for (auto framebuffer : swapchainFramebuffers) {
@@ -1568,33 +1575,6 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers(uint32_t imageIndex_) {
     mvp.proj[1][1]                                  *= -1;      // GLM was designed for OpenGL where y-axis is inverted
 
     mvpBuffers[imageIndex_]->fill(&mvp);
-
-    return VK_SC_SUCCESS;
-
-}
-
-VK_STATUS_CODE VKEngine::createDescriptorSets() {
-
-    std::vector< UniformInfo > bindings;
-    bindings.resize(swapchainImages.size());
-
-    for (size_t i = 0; i < swapchainImages.size(); i++) {
-
-        VkDescriptorBufferInfo mvpBufferInfo        = {};
-        mvpBufferInfo.buffer                        = mvpBuffers[i]->buf;
-        mvpBufferInfo.offset                        = 0;
-        mvpBufferInfo.range                         = sizeof(MVPBufferObject);
-
-        UniformInfo mvpInfo                         = {};
-        mvpInfo.binding                             = 0;
-        mvpInfo.stageFlags                          = VK_SHADER_STAGE_VERTEX_BIT;
-        mvpInfo.bufferInfo                          = mvpBufferInfo;
-
-        bindings[i] = mvpInfo;
-
-    }
-
-    descriptorSets = new DescriptorSet(bindings, 1);
 
     return VK_SC_SUCCESS;
 
