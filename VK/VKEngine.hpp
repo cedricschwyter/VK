@@ -75,7 +75,7 @@ private:
 	const bool								validationLayersEnabled				= false;
 #endif
 	VkDebugUtilsMessengerEXT				validationLayerDebugMessenger		= VK_NULL_HANDLE;
-	VkQueue									graphicsQueue						= VK_NULL_HANDLE;
+    VkQueue									graphicsQueue                       = VK_NULL_HANDLE;
 	VkQueue									presentationQueue					= VK_NULL_HANDLE;
 	VkSurfaceKHR							surface								= VK_NULL_HANDLE;
 	const std::vector< const char* >		requiredExtensions					= {
@@ -91,7 +91,7 @@ private:
 	std::vector< VkFramebuffer >			swapchainFramebuffers;
 	VkRenderPass							renderPass;
 	GraphicsPipeline						pipeline;
-	VkCommandPool							standardCommandPool;
+    VkCommandPool							standardCommandPool;
 	std::vector< VkCommandBuffer >			standardCommandBuffers;
 	std::vector< VkSemaphore >				swapchainImageAvailableSemaphores;
 	std::vector< VkSemaphore >				renderingCompletedSemaphores;
@@ -102,6 +102,7 @@ private:
     BaseBuffer*                             indexBuffer;
     std::vector< UniformBuffer* >           mvpBuffers;
     bool                                    initialized                         = false;
+    ImageObject*                            image;
 
 	/**
 		Initializes the logger

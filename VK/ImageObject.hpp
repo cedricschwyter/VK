@@ -21,9 +21,19 @@ public:
     /**
         Constructor
 
-        @param      path_       (Relative) filepath to image resource
+        @param      path_           (Relative) filepath to image resource
+        @param      format_         The image format flags
+        @param      tiling_         Image tiling flags
+        @param      usage_          Image usage flags
+        @param      properties_     Memory properties, defaults to VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
     */
-    ImageObject(const char* path_);
+    ImageObject(
+        const char*                 path_,
+        VkFormat                    format_,
+        VkImageTiling               tiling_,
+        VkImageUsageFlags           usage_,
+        VkMemoryPropertyFlags       properties_      = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+        );
 
     /**
         Binds an image

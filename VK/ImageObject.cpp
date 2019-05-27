@@ -13,7 +13,13 @@
 
 #include "VK.hpp"
 
-ImageObject::ImageObject(const char* path_) {
+ImageObject::ImageObject(
+    const char*                 path_, 
+    VkFormat                    format_, 
+    VkImageTiling               tiling_, 
+    VkImageUsageFlags           usage_,
+    VkMemoryPropertyFlags       properties_
+    ) {
 
     stbi_uc* pix = stbi_load(
         "res/textures/application/vulkan.png",
@@ -40,16 +46,17 @@ ImageObject::ImageObject(const char* path_) {
     VkImageCreateInfo imageCreateInfo       = {};
     imageCreateInfo.sType                   = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageCreateInfo.imageType               = VK_IMAGE_TYPE_2D;
-    imageCreateInfo.extent.width            = static_cast< uint32_t >(w);
-    imageCreateInfo.extent.height           = static_cast< uint32_t >(h);
-    imageCreateInfo.extent.depth            = 1;                            // As I am only using 2D-textures...
-    imageCreateInfo.mipLevels               = 1;                            // No mipmapping yet
+    imageCreateInfo.extent.width            = w;
+    imageCreateInfo.extent.height           = h;
+    imageCreateInfo.extent.depth            = 1;
+    imageCreateInfo.mipLevels               = 1;
     imageCreateInfo.arrayLayers             = 1;
-    imageCreateInfo.format                  = VK_FORMAT_R8G8B8A8_UNORM;     // Should be supported in 99% of cases...
-    imageCreateInfo.tiling                  = VK_IMAGE_TILING_OPTIMAL;
+    imageCreateInfo.format                  = format_;
+    imageCreateInfo.tiling                  = tiling_;
     imageCreateInfo.initialLayout           = VK_IMAGE_LAYOUT_UNDEFINED;
-    imageCreateInfo.usage                   = VK_SHARING_MODE_EXCLUSIVE;
-    imageCreateInfo.samples                 = VK_SAMPLE_COUNT_1_BIT;        // No multisampling yet
+    imageCreateInfo.usage                   = usage_;
+    imageCreateInfo.samples                 = VK_SAMPLE_COUNT_1_BIT;
+    imageCreateInfo.sharingMode             = VK_SHARING_MODE_EXCLUSIVE;
    
     vk::engine.result = vkCreateImage(
         vk::engine.logicalDevice, 
@@ -65,7 +72,7 @@ ImageObject::ImageObject(const char* path_) {
     VkMemoryAllocateInfo memoryAllocateInfo             = {};
     memoryAllocateInfo.sType                            = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     memoryAllocateInfo.allocationSize                   = memoryRequirements.size;
-    memoryAllocateInfo.memoryTypeIndex                  = enumerateSuitableMemoryType(memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    memoryAllocateInfo.memoryTypeIndex                  = enumerateSuitableMemoryType(memoryRequirements.memoryTypeBits, properties_);
 
     vk::engine.result = vkAllocateMemory(
         vk::engine.logicalDevice,
@@ -76,6 +83,29 @@ ImageObject::ImageObject(const char* path_) {
     ASSERT(vk::engine.result, "Failed to allocate buffer memory", VK_SC_BUFFER_ALLOCATION_ERROR);
 
     bind();
+
+    vk::imageLayoutTransition(
+        img,
+        VK_FORMAT_R8G8B8A8_UNORM, 
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+        );
+
+    vk::copyBufferToImage(
+        stagingBuffer->buf,
+        img,
+        static_cast< uint32_t >(w),
+        static_cast< uint32_t >(h)
+        );
+
+    vk::imageLayoutTransition(
+        img,
+        VK_FORMAT_R8G8B8A8_UNORM, 
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+    delete stagingBuffer;
 
 }
 
@@ -95,6 +125,6 @@ VK_STATUS_CODE ImageObject::bind() {
 
 ImageObject::~ImageObject() {
 
-
+    vkDestroyImage(vk::engine.logicalDevice, img, vk::engine.allocator);
 
 }
