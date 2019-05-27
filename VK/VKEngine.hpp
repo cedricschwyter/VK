@@ -42,6 +42,7 @@
 #include "IndexBuffer.hpp"
 #include "UniformBuffer.hpp"
 #include "MVPBufferObject.cpp"
+#include "ImageObject.hpp"
 
 class VKEngine {
 public:
@@ -395,5 +396,12 @@ private:
         @return     Returns VK_SC_SUCCESS on success
     */
     VK_STATUS_CODE updateUniformBuffers(uint32_t imageIndex_);
+
+    /**
+        Loads and generates necessary textures
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE createTextureImages(void);
 
 };

@@ -93,6 +93,7 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 	ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
 	ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
 	ASSERT(allocateCommandPools(), "Failed to allocate command pools", VK_SC_COMMAND_POOL_ALLOCATION_ERROR);
+    ASSERT(createTextureImages(), "Failed to create texture images", VK_SC_TEXTURE_IMAGE_CREATION_ERROR);
 	ASSERT(allocateNecessaryBuffers(), "Failed to create necessary buffers", VK_SC_BUFFER_CREATION_ERROR);
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 	ASSERT(initializeSynchronizationObjects(), "Failed to initialize sync-objects", VK_SC_SYNCHRONIZATION_OBJECT_INITIALIZATION_ERROR);
@@ -1575,6 +1576,18 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers(uint32_t imageIndex_) {
     mvp.proj[1][1]                                  *= -1;      // GLM was designed for OpenGL where y-axis is inverted
 
     mvpBuffers[imageIndex_]->fill(&mvp);
+
+    return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::createTextureImages() {
+
+    logger::log(EVENT_LOG, "Loading textures...");
+    
+    ImageObject* image = new ImageObject("res/textures/application/vulkan.png");
+
+    logger::log(EVENT_LOG, "Successfully loaded textures");
 
     return VK_SC_SUCCESS;
 

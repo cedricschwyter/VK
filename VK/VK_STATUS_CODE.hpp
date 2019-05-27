@@ -15,6 +15,7 @@
 */
 typedef enum VK_STATUS_CODE {
 
+    VK_SC_TEXTURE_IMAGE_CREATION_ERROR                      = -43,
     VK_SC_DESCRIPTOR_SET_CREATION_ERROR                     = -42,
     VK_SC_DESCRIPTOR_POOL_ERROR                             = -41,
     VK_SC_UNIFORM_BUFFER_UPDATE_ERROR                       = -40,

@@ -51,6 +51,44 @@ BaseBuffer::BaseBuffer(const VkBufferCreateInfo* bufferCreateInfo_, VkMemoryProp
 
 }
 
+BaseBuffer::BaseBuffer(VkDeviceSize size_, VkBufferUsageFlags usage_, VkMemoryPropertyFlags properties_ ) {
+
+    logger::log(EVENT_LOG, "Creating buffer...");
+
+    bufferCreateInfo.sType                    = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferCreateInfo.size                     = size_;
+    bufferCreateInfo.usage                    = usage_;
+    bufferCreateInfo.sharingMode              = VK_SHARING_MODE_EXCLUSIVE;
+
+    vk::engine.result = vkCreateBuffer(
+        vk::engine.logicalDevice,
+        &bufferCreateInfo, 
+        vk::engine.allocator,
+        &buf
+        );
+    ASSERT(vk::engine.result, "Failed to create buffer", VK_SC_BUFFER_CREATION_ERROR);
+    logger::log(EVENT_LOG, "Successfully created buffer");
+
+    VkMemoryRequirements memoryRequirements;
+    vkGetBufferMemoryRequirements(vk::engine.logicalDevice, buf, &memoryRequirements);
+
+    VkMemoryAllocateInfo memoryAllocateInfo         = {};
+    memoryAllocateInfo.sType                        = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    memoryAllocateInfo.allocationSize               = memoryRequirements.size;
+    memoryAllocateInfo.memoryTypeIndex              = enumerateSuitableMemoryType(memoryRequirements.memoryTypeBits, properties_);
+
+    vk::engine.result = vkAllocateMemory(
+        vk::engine.logicalDevice,
+        &memoryAllocateInfo,
+        vk::engine.allocator,
+        &mem
+        );
+    ASSERT(vk::engine.result, "Failed to allocate buffer memory", VK_SC_BUFFER_ALLOCATION_ERROR);
+
+    bind();
+
+}
+
 BaseBuffer::~BaseBuffer() {
 
 	vkDestroyBuffer(vk::engine.logicalDevice, buf, vk::engine.allocator);
@@ -111,6 +149,24 @@ VK_STATUS_CODE BaseBuffer::fill(const void* bufData_) {
 	vkUnmapMemory(vk::engine.logicalDevice, mem);
 
 	return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE BaseBuffer::fill(const unsigned char* bufData_) {
+
+    void* data;
+    vkMapMemory(
+        vk::engine.logicalDevice,
+        mem,
+        0,
+        bufferCreateInfo.size,
+        0,
+        &data
+        );
+    memcpy(data, bufData_, static_cast<size_t>(bufferCreateInfo.size));
+    vkUnmapMemory(vk::engine.logicalDevice, mem);
+
+    return VK_SC_SUCCESS;
 
 }
 
