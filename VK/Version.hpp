@@ -11,7 +11,7 @@
 
 // Edit configuration here
 //#define VK_DEVELOPMENT		// enable this for verbose output
-//#define VK_RELEASE			// enable this for performance
+#define VK_RELEASE			// enable this for performance
 
 #define WIN_64				// Windows 64-bit
 //#define WIN_32				// Windows 32-bit

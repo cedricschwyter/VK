@@ -1262,7 +1262,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
                     VK_INDEX_TYPE_UINT32
                     );
 
-                pipeline.bindDescriptors(standardCommandBuffers, i);
+                pipeline.bindDescriptors(standardCommandBuffers, static_cast< uint32_t >(i));
 
 				vkCmdDrawIndexed(
 					standardCommandBuffers[i], 
