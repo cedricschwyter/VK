@@ -29,18 +29,26 @@ GraphicsPipeline::GraphicsPipeline(
 	const VkPipelineColorBlendAttachmentState*			colorBlendAttachmentState_,
 	const VkPipelineColorBlendStateCreateInfo*			colorBlendStateCreateInfo_,
 	const VkPipelineDynamicStateCreateInfo*				dynamicStateCreateInfo_,
-	const VkPipelineLayoutCreateInfo*					pipelineLayoutCreateInfo_,
+    const std::vector< UniformInfo >&                   uniformBindings_,
+    uint32_t                                            numUniforms_,
 	VkRenderPass										renderPass_
 	) {
 
 	stages = VertFragShaderStages(vertPath_, fragPath_);
 
+    descriptorSets = new DescriptorSet(uniformBindings_, numUniforms_);
+
+    VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo         = {};
+    pipelineLayoutCreateInfo.sType                              = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    pipelineLayoutCreateInfo.setLayoutCount                     = 1;
+    pipelineLayoutCreateInfo.pSetLayouts                        = &(descriptorSets->descriptorSetLayout);
+
 	vk::engine.result = vkCreatePipelineLayout(
 		vk::engine.logicalDevice,
-		pipelineLayoutCreateInfo_,
+		&pipelineLayoutCreateInfo,
 		vk::engine.allocator,
 		&pipelineLayout
-	);
+	    );
 	ASSERT(vk::engine.result, "Failed to create pipeline layout", VK_SC_PIPELINE_LAYOUT_CREATION_ERROR);
 	logger::log(EVENT_LOG, "Successfully created pipeline layout");
 
@@ -84,6 +92,8 @@ VK_STATUS_CODE GraphicsPipeline::destroyShaderModules() {
 
 VK_STATUS_CODE GraphicsPipeline::destroy() {
 
+    delete descriptorSets;
+
 	vkDestroyPipeline(vk::engine.logicalDevice, pipeline, vk::engine.allocator);
 	logger::log(EVENT_LOG, "Successfully destroyed graphics pipeline");
 
@@ -91,5 +101,22 @@ VK_STATUS_CODE GraphicsPipeline::destroy() {
 	logger::log(EVENT_LOG, "Successfully destroyed pipeline layout");
 
 	return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE GraphicsPipeline::bindDescriptors(std::vector< VkCommandBuffer >& commandBuffers_, uint32_t imageIndex_) {
+
+    vkCmdBindDescriptorSets(
+        commandBuffers_[imageIndex_],
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        pipelineLayout,
+        0,
+        1,
+        &(descriptorSets->descriptorSets[imageIndex_]),
+        0,
+        nullptr
+    );
+
+    return VK_SC_SUCCESS;
 
 }

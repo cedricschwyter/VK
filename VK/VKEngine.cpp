@@ -89,14 +89,11 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 	ASSERT(createSwapchain(), "Failed to create a swapchain with the given parameters", VK_SC_SWAPCHAIN_CREATION_ERROR);
 	ASSERT(createSwapchainImageViews(), "Failed to create swapchain image views", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
 	ASSERT(createRenderPasses(), "Failed to create render passes", VK_SC_RENDER_PASS_CREATION_ERROR);
-    ASSERT(createDescriptorSetLayouts(), "Failed to create descriptors", VK_SC_DESCRIPTOR_ERROR);
+    ASSERT(allocateUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
 	ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
 	ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
 	ASSERT(allocateCommandPools(), "Failed to allocate command pools", VK_SC_COMMAND_POOL_ALLOCATION_ERROR);
 	ASSERT(allocateNecessaryBuffers(), "Failed to create necessary buffers", VK_SC_BUFFER_CREATION_ERROR);
-    ASSERT(allocateUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
-    ASSERT(createDescriptorPools(), "Failed to create descriptor pools", VK_SC_DESCRIPTOR_POOL_ERROR);
-    ASSERT(createDescriptorSets(), "Failed to create descriptor sets", VK_SC_DESCRIPTOR_SET_CREATION_ERROR);
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 	ASSERT(initializeSynchronizationObjects(), "Failed to initialize sync-objects", VK_SC_SYNCHRONIZATION_OBJECT_INITIALIZATION_ERROR);
 
@@ -170,9 +167,6 @@ VK_STATUS_CODE VKEngine::loop() {
 VK_STATUS_CODE VKEngine::clean() {
 
 	ASSERT(cleanSwapchain(), "Failed to clean swapchain", VK_SC_SWAPCHAIN_CLEAN_ERROR);
-
-    vkDestroyDescriptorSetLayout(logicalDevice, descriptorSetLayout, allocator);
-    logger::log(EVENT_LOG, "Successfully destroyed descriptor set layout");
 
     delete indexBuffer;
     delete vertexBuffer;
@@ -838,7 +832,7 @@ VK_STATUS_CODE VKEngine::createSwapchain() {
 	swapchainCreateInfo.imageArrayLayers				= 1;										// Amount of layers in an image, always 1, unless doing stereoscopic stuff
 	swapchainCreateInfo.imageUsage						= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;		// Render directly to swapchain
 
-	QueueFamily family								= findSuitableQueueFamily(physicalDevice);
+	QueueFamily family								    = findSuitableQueueFamily(physicalDevice);
 	uint32_t queueFamilyIndices[]						= { family.graphicsFamilyIndex.value(), family.presentationFamilyIndex.value() };
 
 	if (family.graphicsFamilyIndex != family.presentationFamilyIndex) {		// If presentation queue and graphics queue are in the same queue family, exclusive ownership is not necessary
@@ -1020,12 +1014,25 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 	dynamicStateCreateInfo.sType												= VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 	dynamicStateCreateInfo.dynamicStateCount									= static_cast< uint32_t >(dynamicStates.size());
 	dynamicStateCreateInfo.pDynamicStates										= dynamicStates.data();
-	
-	// No uniform variables (yet), that would need to be specified in the pipeline layout
-	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo							= {};
-	pipelineLayoutCreateInfo.sType												= VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutCreateInfo.setLayoutCount                                     = 1;
-    pipelineLayoutCreateInfo.pSetLayouts                                        = &descriptorSetLayout;
+
+    std::vector< UniformInfo > bindings;
+    bindings.resize(swapchainImages.size());
+
+    for (size_t i = 0; i < swapchainImages.size(); i++) {
+
+        VkDescriptorBufferInfo mvpBufferInfo        = {};
+        mvpBufferInfo.buffer                        = mvpBuffers[i]->buf;
+        mvpBufferInfo.offset                        = 0;
+        mvpBufferInfo.range                         = sizeof(MVPBufferObject);
+
+        UniformInfo mvpInfo                         = {};
+        mvpInfo.binding                             = 0;
+        mvpInfo.stageFlags                          = VK_SHADER_STAGE_VERTEX_BIT;
+        mvpInfo.bufferInfo                          = mvpBufferInfo;
+
+        bindings[i] = mvpInfo;
+
+    }
 
 	pipeline = GraphicsPipeline(
 		"shaders/standard/vert.spv", 
@@ -1039,7 +1046,8 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 		&colorBlendAttachmentState,
 		&colorBlendStateCreateInfo,
 		nullptr,						// Defined, but not referenced
-		&pipelineLayoutCreateInfo,
+		bindings,
+        1,
 		renderPass
 		);
 
@@ -1254,16 +1262,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
                     VK_INDEX_TYPE_UINT32
                     );
 
-                vkCmdBindDescriptorSets(
-                    standardCommandBuffers[i],
-                    VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    pipeline.pipelineLayout,
-                    0,
-                    1,
-                    &descriptorSets[i],
-                    0,
-                    nullptr
-                    );
+                pipeline.bindDescriptors(standardCommandBuffers, static_cast< uint32_t >(i));
 
 				vkCmdDrawIndexed(
 					standardCommandBuffers[i], 
@@ -1435,11 +1434,9 @@ VK_STATUS_CODE VKEngine::recreateSwapchain() {
 	ASSERT(createSwapchain(), "Failed to create a swapchain with the given parameters", VK_SC_SWAPCHAIN_CREATION_ERROR);
 	ASSERT(createSwapchainImageViews(), "Failed to create swapchain image views", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
 	ASSERT(createRenderPasses(), "Failed to create render passes", VK_SC_RENDER_PASS_CREATION_ERROR);
+    ASSERT(allocateUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
     ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
     ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
-    ASSERT(allocateUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
-    ASSERT(createDescriptorPools(), "Failed to create descriptor pools", VK_SC_DESCRIPTOR_POOL_ERROR);
-    ASSERT(createDescriptorSets(), "Failed to create descriptor sets", VK_SC_DESCRIPTOR_SET_CREATION_ERROR);
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 
 	return VK_SC_SUCCESS;
@@ -1453,14 +1450,11 @@ VK_STATUS_CODE VKEngine::cleanSwapchain() {
     logger::log(EVENT_LOG, "Destroying uniform buffers..");
     for (size_t i = 0; i < swapchainImages.size(); i++) {
 
-        delete uniformBuffers[i];
+        delete mvpBuffers[i];
         logger::log(EVENT_LOG, "Successfully destroyed uniform buffer");
 
     }
     logger::log(EVENT_LOG, "Successfully destroyed uniform buffers");
-
-    vkDestroyDescriptorPool(logicalDevice, descriptorPool, allocator);
-    logger::log(EVENT_LOG, "Successfully destroyed descriptor pool");
 
 	logger::log(EVENT_LOG, "Destroying framebuffers...");
 	for (auto framebuffer : swapchainFramebuffers) {
@@ -1542,37 +1536,9 @@ VK_STATUS_CODE VKEngine::allocateNecessaryBuffers() {
 
 }
 
-VK_STATUS_CODE VKEngine::createDescriptorSetLayouts() {
-
-    logger::log(EVENT_LOG, "Creating descriptors...");
-    VkDescriptorSetLayoutBinding mvpLayoutBinding           = {};
-    mvpLayoutBinding.binding                                = 0;
-    mvpLayoutBinding.descriptorType                         = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    mvpLayoutBinding.descriptorCount                        = 1;
-    mvpLayoutBinding.stageFlags                             = VK_SHADER_STAGE_VERTEX_BIT;
-
-    VkDescriptorSetLayoutCreateInfo layoutCreateInfo        = {};
-    layoutCreateInfo.sType                                  = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutCreateInfo.bindingCount                           = 1;
-    layoutCreateInfo.pBindings                              = &mvpLayoutBinding;
-
-    result = vkCreateDescriptorSetLayout(
-        logicalDevice, 
-        &layoutCreateInfo,
-        allocator,
-        &descriptorSetLayout
-        );
-    ASSERT(result, "Failed to create descriptor set layout", VK_SC_DESCRIPTOR_SET_LAYOUT_CREATION_ERROR);
-
-    logger::log(EVENT_LOG, "Successfully created descriptors");
-
-    return VK_SC_SUCCESS;
-
-}
-
 VK_STATUS_CODE VKEngine::allocateUniformBuffers() {
 
-    uniformBuffers.resize(swapchainImages.size());
+    mvpBuffers.resize(swapchainImages.size());
     
     VkDeviceSize bufferSize = sizeof(MVPBufferObject);
 
@@ -1584,7 +1550,7 @@ VK_STATUS_CODE VKEngine::allocateUniformBuffers() {
 
     for (size_t i = 0; i < swapchainImages.size(); i++) {
 
-        uniformBuffers[i] = new MVPBuffer(&mvpBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        mvpBuffers[i] = new UniformBuffer(&mvpBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
     }
 
@@ -1608,75 +1574,7 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers(uint32_t imageIndex_) {
     mvp.proj                                        = glm::perspective(glm::radians(45.0f), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 10.0f);
     mvp.proj[1][1]                                  *= -1;      // GLM was designed for OpenGL where y-axis is inverted
 
-    uniformBuffers[imageIndex_]->fill(&mvp);
-
-    return VK_SC_SUCCESS;
-
-}
-
-VK_STATUS_CODE VKEngine::createDescriptorPools() {
-
-    VkDescriptorPoolSize descriptorPoolSize                     = {};
-    descriptorPoolSize.type                                     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    descriptorPoolSize.descriptorCount                          = static_cast< uint32_t >(swapchainImages.size());
-
-    VkDescriptorPoolCreateInfo descriptorPoolCreateInfo         = {};
-    descriptorPoolCreateInfo.sType                              = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    descriptorPoolCreateInfo.poolSizeCount                      = 1;
-    descriptorPoolCreateInfo.pPoolSizes                         = &descriptorPoolSize;
-    descriptorPoolCreateInfo.maxSets                            = static_cast< uint32_t >(swapchainImages.size());
-
-    result = vkCreateDescriptorPool(
-        logicalDevice,
-        &descriptorPoolCreateInfo,
-        allocator,
-        &descriptorPool
-        );
-    ASSERT(result, "Failed to create descriptor pool", VK_SC_DESCRIPTOR_POOL_ERROR);
-
-    return VK_SC_SUCCESS;
-
-}
-
-VK_STATUS_CODE VKEngine::createDescriptorSets() {
-
-    std::vector< VkDescriptorSetLayout > layouts(swapchainImages.size(), descriptorSetLayout);
-
-    VkDescriptorSetAllocateInfo allocateInfo        = {};
-    allocateInfo.sType                              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocateInfo.descriptorPool                     = descriptorPool;
-    allocateInfo.descriptorSetCount                 = static_cast< uint32_t >(swapchainImages.size());
-    allocateInfo.pSetLayouts                        = layouts.data();
-
-    descriptorSets.resize(swapchainImages.size());
-    result = vkAllocateDescriptorSets(logicalDevice, &allocateInfo, descriptorSets.data());
-    ASSERT(result, "Failed to allocate descriptor sets", VK_SC_DESCRIPTOR_SET_CREATION_ERROR);
-
-    for (size_t i = 0; i < swapchainImages.size(); i++) {
-    
-        VkDescriptorBufferInfo bufferInfo           = {};
-        bufferInfo.buffer                           = uniformBuffers[i]->buf;
-        bufferInfo.offset                           = 0;
-        bufferInfo.range                            = sizeof(MVPBufferObject);
-
-        VkWriteDescriptorSet writeDescriptorSet     = {};
-        writeDescriptorSet.sType                    = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        writeDescriptorSet.dstSet                   = descriptorSets[i];
-        writeDescriptorSet.dstBinding               = 0;
-        writeDescriptorSet.dstArrayElement          = 0;
-        writeDescriptorSet.descriptorType           = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        writeDescriptorSet.descriptorCount          = 1;
-        writeDescriptorSet.pBufferInfo              = &bufferInfo;
-
-        vkUpdateDescriptorSets(
-            logicalDevice, 
-            1, 
-            &writeDescriptorSet, 
-            0, 
-            nullptr
-            );
-
-    }
+    mvpBuffers[imageIndex_]->fill(&mvp);
 
     return VK_SC_SUCCESS;
 

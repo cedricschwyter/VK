@@ -11,13 +11,14 @@
 #include <vulkan/vulkan.h>
 
 #include "VertFragShaderStages.hpp"
+#include "DescriptorSet.hpp"
 
 class GraphicsPipeline
 {
 public:
 
-    VkPipelineLayout			pipelineLayout;
-    VkPipeline					pipeline;
+    VkPipelineLayout			        pipelineLayout;
+    VkPipeline					        pipeline;
 
 	/**
 		Default constructor
@@ -38,7 +39,8 @@ public:
 		@param		colorBlendAttachmentState_			A pointer to a color blend attachment state structure
 		@param		colorBlendStateCreateInfo_			A pointer to a color blend state create info structure
 		@param		dynamicStateCreateInfo_				A pointer to a dynamic state create info structure
-		@param		pipelineLayoutCreateInfo_			A pointer to a pipeline layout create info structure
+        @param      uniformBindings_                    A reference to an std::vector of UniformInfo structures
+        @param      numUniforms_                        Number of uniform bindings
 		@param		renderPass_							A valid VkRenderPass handle
 	*/
 	GraphicsPipeline(
@@ -52,10 +54,21 @@ public:
 		const VkPipelineDepthStencilStateCreateInfo*		depthStencilStateCreateInfo_,
 		const VkPipelineColorBlendAttachmentState*			colorBlendAttachmentState_,
 		const VkPipelineColorBlendStateCreateInfo*			colorBlendStateCreateInfo_,
-		const VkPipelineDynamicStateCreateInfo*				dynamicStateCreateInfo_,
-		const VkPipelineLayoutCreateInfo*					pipelineLayoutCreateInfo_,
+		const VkPipelineDynamicStateCreateInfo*				dynamicStateCreateInfo_, 
+        const std::vector< UniformInfo >&                   uniformBindings_, 
+        uint32_t                                            numUniforms_,
 		VkRenderPass										renderPass_
-		);
+        );
+
+    /**
+        Binds the descriptor set
+
+        @param      commandBuffers_     The command buffers to be recorded
+        @param      imageIndex_         The swapchain image index
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE bindDescriptors(std::vector< VkCommandBuffer >& commandBuffers_, uint32_t imageIndex_);
 
 	/**
 		Destroys the VkShaderModules
@@ -74,6 +87,7 @@ public:
 private:
 
 	VertFragShaderStages		stages;
+    DescriptorSet*              descriptorSets;
 
 };
 

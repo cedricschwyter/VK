@@ -1,13 +1,13 @@
 /**
-    Implements the MVPBuffer class, inheriting BaseBuffer
+    Implements the UniformBuffer class, inheriting BaseBuffer
 
     @author		D3PSI
     @version	0.0.1 02.12.2019
 
-    @file		MVPBuffer.cpp
-    @brief		Implementation of the MVPBuffer class
+    @file		UnifromBuffer.cpp
+    @brief		Implementation of the UniformBuffer class
 */
-#include "MVPBuffer.hpp"
+#include "UniformBuffer.hpp"
 #include "VK.hpp"
 
 
