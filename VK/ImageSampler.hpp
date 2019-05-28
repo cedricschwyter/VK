@@ -21,5 +21,6 @@ public:
         Default destructor
     */
     ~ImageSampler(void);
+
 };
 

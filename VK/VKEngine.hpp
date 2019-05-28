@@ -47,7 +47,6 @@
 class VKEngine {
 public:
 
-	VkResult								result;
 	VkPhysicalDevice						physicalDevice;
 	VkDevice								logicalDevice;
 	VkAllocationCallbacks*					allocator;

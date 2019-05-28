@@ -22,13 +22,13 @@ BaseBuffer::BaseBuffer(const VkBufferCreateInfo* bufferCreateInfo_, VkMemoryProp
 	bufferCreateInfo = *bufferCreateInfo_;
 
 	logger::log(EVENT_LOG, "Creating buffer...");
-	vk::engine.result = vkCreateBuffer(
+	VkResult result = vkCreateBuffer(
 		vk::engine.logicalDevice,
 		bufferCreateInfo_,
 		vk::engine.allocator,
 		&buf
 		);
-	ASSERT(vk::engine.result, "Failed to create buffer", VK_SC_BUFFER_CREATION_ERROR);
+	ASSERT(result, "Failed to create buffer", VK_SC_BUFFER_CREATION_ERROR);
 	logger::log(EVENT_LOG, "Successfully created buffer");
 
 	VkMemoryRequirements memoryRequirements;
@@ -39,13 +39,13 @@ BaseBuffer::BaseBuffer(const VkBufferCreateInfo* bufferCreateInfo_, VkMemoryProp
 	memoryAllocateInfo.allocationSize					= memoryRequirements.size;
 	memoryAllocateInfo.memoryTypeIndex					= enumerateSuitableMemoryType(memoryRequirements.memoryTypeBits, properties_);
 
-	vk::engine.result = vkAllocateMemory(
+	result = vkAllocateMemory(
 		vk::engine.logicalDevice,
 		&memoryAllocateInfo,
 		vk::engine.allocator,
 		&mem
 		);
-	ASSERT(vk::engine.result, "Failed to allocate buffer memory", VK_SC_BUFFER_ALLOCATION_ERROR);
+	ASSERT(result, "Failed to allocate buffer memory", VK_SC_BUFFER_ALLOCATION_ERROR);
 
 	bind();
 
@@ -60,13 +60,13 @@ BaseBuffer::BaseBuffer(VkDeviceSize size_, VkBufferUsageFlags usage_, VkMemoryPr
     bufferCreateInfo.usage                    = usage_;
     bufferCreateInfo.sharingMode              = VK_SHARING_MODE_EXCLUSIVE;
 
-    vk::engine.result = vkCreateBuffer(
+    VkResult result = vkCreateBuffer(
         vk::engine.logicalDevice,
         &bufferCreateInfo, 
         vk::engine.allocator,
         &buf
         );
-    ASSERT(vk::engine.result, "Failed to create buffer", VK_SC_BUFFER_CREATION_ERROR);
+    ASSERT(result, "Failed to create buffer", VK_SC_BUFFER_CREATION_ERROR);
     logger::log(EVENT_LOG, "Successfully created buffer");
 
     VkMemoryRequirements memoryRequirements;
@@ -77,13 +77,13 @@ BaseBuffer::BaseBuffer(VkDeviceSize size_, VkBufferUsageFlags usage_, VkMemoryPr
     memoryAllocateInfo.allocationSize               = memoryRequirements.size;
     memoryAllocateInfo.memoryTypeIndex              = enumerateSuitableMemoryType(memoryRequirements.memoryTypeBits, properties_);
 
-    vk::engine.result = vkAllocateMemory(
+    result = vkAllocateMemory(
         vk::engine.logicalDevice,
         &memoryAllocateInfo,
         vk::engine.allocator,
         &mem
         );
-    ASSERT(vk::engine.result, "Failed to allocate buffer memory", VK_SC_BUFFER_ALLOCATION_ERROR);
+    ASSERT(result, "Failed to allocate buffer memory", VK_SC_BUFFER_ALLOCATION_ERROR);
 
     bind();
 
@@ -122,13 +122,13 @@ uint32_t BaseBuffer::enumerateSuitableMemoryType(uint32_t typeFilter_, VkMemoryP
 
 VK_STATUS_CODE BaseBuffer::bind() {
 	
-	vk::engine.result = vkBindBufferMemory(
+	VkResult result = vkBindBufferMemory(
 		vk::engine.logicalDevice,
 		buf,
 		mem,
 		static_cast< uint64_t >(0)
 		);
-	ASSERT(vk::engine.result, "Failed to bind buffer memory", VK_SC_BUFFER_BINDING_ERROR);
+	ASSERT(result, "Failed to bind buffer memory", VK_SC_BUFFER_BINDING_ERROR);
 
 	return VK_SC_SUCCESS;
 

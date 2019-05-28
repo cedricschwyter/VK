@@ -59,13 +59,13 @@ VkShaderModule VertFragShaderStages::createShaderModuleFromBinary(const std::vec
 	shaderModuleCreateInfo.pCode							= reinterpret_cast< const uint32_t* >(code_->data());
 
 	VkShaderModule module;
-	vk::engine.result = vkCreateShaderModule(
+	VkResult result = vkCreateShaderModule(
 		vk::engine.logicalDevice,
 		&shaderModuleCreateInfo, 
 		vk::engine.allocator,
 		&module
 		);
-	ASSERT(vk::engine.result, "Failed to create shader module", VK_SC_SHADER_MODULE_CREATION_ERROR);
+	ASSERT(result, "Failed to create shader module", VK_SC_SHADER_MODULE_CREATION_ERROR);
 
 	logger::log(EVENT_LOG, "Successfully created shader module");
 

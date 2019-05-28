@@ -259,7 +259,7 @@ VK_STATUS_CODE VKEngine::createInstance() {
 	}
 
 	logger::log(EVENT_LOG, "Creating VkInstance...");
-	result = vkCreateInstance(&instanceCreateInfo, allocator, &instance);
+	VkResult result = vkCreateInstance(&instanceCreateInfo, allocator, &instance);
 	ASSERT(result, "Failed to create VkInstance!", VK_SC_INSTANCE_CREATON_ERROR);
 
 	return VK_SC_SUCCESS;
@@ -379,7 +379,7 @@ VK_STATUS_CODE VKEngine::debugUtilsMessenger() {
 	debugUtilsMessengerCreateInfo.pfnUserCallback							= validationLayerDebugMessageCallback;
 	debugUtilsMessengerCreateInfo.pUserData									= nullptr;
 
-	result = vk::createDebugUtilsMessenger(
+	VkResult result = vk::createDebugUtilsMessenger(
 		instance,
 		&debugUtilsMessengerCreateInfo,
 		allocator,
@@ -586,7 +586,7 @@ VK_STATUS_CODE VKEngine::createLogicalDeviceFromPhysicalDevice() {
 
 	}
 
-	result = vkCreateDevice(
+	VkResult result = vkCreateDevice(
 		physicalDevice, 
 		&deviceCreateInfo, 
 		allocator, 
@@ -857,7 +857,7 @@ VK_STATUS_CODE VKEngine::createSwapchain() {
 	swapchainCreateInfo.presentMode						= presentMode;
 	swapchainCreateInfo.oldSwapchain					= VK_NULL_HANDLE;
 
-	result = vkCreateSwapchainKHR(
+	VkResult result = vkCreateSwapchainKHR(
 		logicalDevice,
 		&swapchainCreateInfo,
 		allocator,
@@ -888,42 +888,17 @@ VK_STATUS_CODE VKEngine::createSwapchain() {
 
 VK_STATUS_CODE VKEngine::createSwapchainImageViews() {
 
-	logger::log(EVENT_LOG, "Creating image views...");
+	logger::log(EVENT_LOG, "Creating swapchain image views...");
 
 	swapchainImageViews.resize(swapchainImages.size());
 
 	for (size_t i = 0; i < swapchainImages.size(); i++) {
-
-		logger::log(EVENT_LOG, "Creating image view...");
 	
-		VkImageViewCreateInfo imageViewCreateInfo				= {};
-		imageViewCreateInfo.sType								= VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		imageViewCreateInfo.image								= swapchainImages[i];
-		imageViewCreateInfo.viewType							= VK_IMAGE_VIEW_TYPE_2D;			// 2D textures will be used
-		imageViewCreateInfo.format								= swapchainImageFormat;
-		imageViewCreateInfo.components.r						= VK_COMPONENT_SWIZZLE_IDENTITY;
-		imageViewCreateInfo.components.g						= VK_COMPONENT_SWIZZLE_IDENTITY;
-		imageViewCreateInfo.components.b						= VK_COMPONENT_SWIZZLE_IDENTITY;
-		imageViewCreateInfo.components.a						= VK_COMPONENT_SWIZZLE_IDENTITY;
-		imageViewCreateInfo.subresourceRange.aspectMask			= VK_IMAGE_ASPECT_COLOR_BIT;		// use as color target
-		imageViewCreateInfo.subresourceRange.baseMipLevel		= 0;
-		imageViewCreateInfo.subresourceRange.levelCount			= 1;
-		imageViewCreateInfo.subresourceRange.baseArrayLayer		= 0;
-		imageViewCreateInfo.subresourceRange.layerCount			= 1;
-
-		result = vkCreateImageView(
-			logicalDevice,
-			&imageViewCreateInfo,
-			allocator,
-			&swapchainImageViews[i]
-			);
-		ASSERT(result, "Failed to create VkImageView", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
-
-		logger::log(EVENT_LOG, "Successfully created image view");
+        swapchainImageViews[i] = vk::createImageView(swapchainImages[i], swapchainImageFormat);
 
 	}
 
-	logger::log(EVENT_LOG, "Successfully created image views");
+	logger::log(EVENT_LOG, "Successfully created swapchain image views");
 
 	return VK_SC_SUCCESS;
 
@@ -1102,7 +1077,7 @@ VK_STATUS_CODE VKEngine::createRenderPasses() {
 	renderPassCreateInfo.dependencyCount					= 1;
 	renderPassCreateInfo.pDependencies						= &subpassDependency;
 
-	result = vkCreateRenderPass(
+	VkResult result = vkCreateRenderPass(
 				logicalDevice,
 				&renderPassCreateInfo, 
 				allocator, 
@@ -1141,7 +1116,7 @@ VK_STATUS_CODE VKEngine::allocateSwapchainFramebuffers() {
 		framebufferCreateInfo.height						= swapchainImageExtent.height;
 		framebufferCreateInfo.layers						= 1;
 
-		result = vkCreateFramebuffer(
+		VkResult result = vkCreateFramebuffer(
 			logicalDevice,
 			&framebufferCreateInfo,
 			allocator,
@@ -1169,7 +1144,7 @@ VK_STATUS_CODE VKEngine::allocateCommandPools() {
 	commandPoolCreateInfo.sType							= VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	commandPoolCreateInfo.queueFamilyIndex				= family.graphicsFamilyIndex.value();
 
-	result = vkCreateCommandPool(
+	VkResult result = vkCreateCommandPool(
 		logicalDevice,
 		&commandPoolCreateInfo,
 		allocator,
@@ -1210,7 +1185,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 	commandBufferAllocateInfo.level								= VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 	commandBufferAllocateInfo.commandBufferCount				= static_cast< uint32_t >(standardCommandBuffers.size());
 
-	result = vkAllocateCommandBuffers(
+	VkResult result = vkAllocateCommandBuffers(
 		logicalDevice,
 		&commandBufferAllocateInfo,
 		standardCommandBuffers.data()
@@ -1302,7 +1277,7 @@ VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
 	vkResetFences(logicalDevice, 1, &inFlightFences[currentSwapchainImage]);
 
 	uint32_t swapchainImageIndex;
-	result = vkAcquireNextImageKHR(
+	VkResult result = vkAcquireNextImageKHR(
 		logicalDevice,
 		swapchain,
 		std::numeric_limits< uint64_t >::max(),							// numeric limit of 64-bit unsigned interger disables timeout
@@ -1384,7 +1359,7 @@ VK_STATUS_CODE VKEngine::initializeSynchronizationObjects() {
 
 	for (size_t i = 0; i < vk::MAX_IN_FLIGHT_FRAMES; i++) {
 
-		result = vkCreateSemaphore(
+		VkResult result = vkCreateSemaphore(
 			logicalDevice,
 			&semaphoreCreateInfo,
 			allocator,

@@ -347,6 +347,40 @@ namespace vk {
 
     }
 
+    VkImageView createImageView(VkImage image_, VkFormat format_) {
+
+        logger::log(EVENT_LOG, "Creating image view...");
+
+        VkImageViewCreateInfo imageViewCreateInfo               = {};
+        imageViewCreateInfo.sType                               = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        imageViewCreateInfo.image                               = image_;
+        imageViewCreateInfo.viewType                            = VK_IMAGE_VIEW_TYPE_2D;
+        imageViewCreateInfo.format                              = format_;
+        imageViewCreateInfo.subresourceRange.aspectMask         = VK_IMAGE_ASPECT_COLOR_BIT;
+        imageViewCreateInfo.subresourceRange.baseMipLevel       = 0;
+        imageViewCreateInfo.subresourceRange.levelCount         = 1;
+        imageViewCreateInfo.subresourceRange.baseArrayLayer     = 0;
+        imageViewCreateInfo.subresourceRange.layerCount         = 1;
+        imageViewCreateInfo.components.r                        = VK_COMPONENT_SWIZZLE_IDENTITY;
+        imageViewCreateInfo.components.g                        = VK_COMPONENT_SWIZZLE_IDENTITY;
+        imageViewCreateInfo.components.b                        = VK_COMPONENT_SWIZZLE_IDENTITY;
+        imageViewCreateInfo.components.a                        = VK_COMPONENT_SWIZZLE_IDENTITY;
+
+        VkImageView imgView;
+        VkResult result = vkCreateImageView(
+            engine.logicalDevice,
+            &imageViewCreateInfo,
+            engine.allocator,
+            &imgView
+            );
+        ASSERT(result,"Failed to create image view", VK_SC_IMAGE_VIEW_CREATION_ERROR);
+
+        logger::log(EVENT_LOG, "Successfully created image view");
+
+        return imgView;
+
+    }
+
 }
 
 /**

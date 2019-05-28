@@ -58,13 +58,13 @@ ImageObject::ImageObject(
     imageCreateInfo.samples                 = VK_SAMPLE_COUNT_1_BIT;
     imageCreateInfo.sharingMode             = VK_SHARING_MODE_EXCLUSIVE;
    
-    vk::engine.result = vkCreateImage(
+    VkResult result = vkCreateImage(
         vk::engine.logicalDevice, 
         &imageCreateInfo, 
         vk::engine.allocator, 
         &img
         );
-    ASSERT(vk::engine.result, "Failed to create image", VK_SC_TEXTURE_IMAGE_CREATION_ERROR);
+    ASSERT(result, "Failed to create image", VK_SC_TEXTURE_IMAGE_CREATION_ERROR);
 
     VkMemoryRequirements memoryRequirements;
     vkGetImageMemoryRequirements(vk::engine.logicalDevice, img, &memoryRequirements);
@@ -74,13 +74,13 @@ ImageObject::ImageObject(
     memoryAllocateInfo.allocationSize                   = memoryRequirements.size;
     memoryAllocateInfo.memoryTypeIndex                  = enumerateSuitableMemoryType(memoryRequirements.memoryTypeBits, properties_);
 
-    vk::engine.result = vkAllocateMemory(
+    result = vkAllocateMemory(
         vk::engine.logicalDevice,
         &memoryAllocateInfo,
         vk::engine.allocator,
         &mem
         );
-    ASSERT(vk::engine.result, "Failed to allocate buffer memory", VK_SC_BUFFER_ALLOCATION_ERROR);
+    ASSERT(result, "Failed to allocate buffer memory", VK_SC_BUFFER_ALLOCATION_ERROR);
 
     bind();
 
@@ -107,40 +107,19 @@ ImageObject::ImageObject(
 
     delete stagingBuffer;
 
-    VkImageViewCreateInfo imageViewCreateInfo              = {};
-    imageViewCreateInfo.sType                              = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    imageViewCreateInfo.image                              = img;
-    imageViewCreateInfo.viewType                           = VK_IMAGE_VIEW_TYPE_2D;
-    imageViewCreateInfo.format                             = VK_FORMAT_R8G8B8A8_UNORM;
-    imageViewCreateInfo.subresourceRange.aspectMask        = VK_IMAGE_ASPECT_COLOR_BIT;
-    imageViewCreateInfo.subresourceRange.baseMipLevel      = 0;
-    imageViewCreateInfo.subresourceRange.levelCount        = 1;
-    imageViewCreateInfo.subresourceRange.baseArrayLayer    = 0;
-    imageViewCreateInfo.subresourceRange.layerCount        = 1;
-    imageViewCreateInfo.components.r                       = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCreateInfo.components.g                       = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCreateInfo.components.b                       = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCreateInfo.components.a                       = VK_COMPONENT_SWIZZLE_IDENTITY;
-
-    vk::engine.result = vkCreateImageView(
-        vk::engine.logicalDevice,
-        &imageViewCreateInfo, 
-        vk::engine.allocator,
-        &imgView
-        );
-    ASSERT(vk::engine.result, "Failed to create image view", VK_SC_TEXTURE_IMAGE_VIEW_CREATION_ERROR);
+    imgView = vk::createImageView(img, VK_FORMAT_R8G8B8A8_UNORM);
 
 }
 
 VK_STATUS_CODE ImageObject::bind() {
 
-    vk::engine.result = vkBindImageMemory(
+    VkResult result = vkBindImageMemory(
         vk::engine.logicalDevice,
         img,
         mem,
         0
         );
-    ASSERT(vk::engine.result, "Failed to bind buffer memory", VK_SC_BUFFER_BINDING_ERROR);
+    ASSERT(result, "Failed to bind buffer memory", VK_SC_BUFFER_BINDING_ERROR);
 
     return VK_SC_SUCCESS;
 
@@ -148,6 +127,7 @@ VK_STATUS_CODE ImageObject::bind() {
 
 ImageObject::~ImageObject() {
 
+    vkDestroyImageView(vk::engine.logicalDevice, imgView, vk::engine.allocator);
     vkDestroyImage(vk::engine.logicalDevice, img, vk::engine.allocator);
 
 }

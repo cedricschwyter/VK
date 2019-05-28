@@ -150,4 +150,14 @@ namespace vk {
         uint32_t        height_
         );
 
+    /**
+        Creates a VkImageView handle
+
+        @param      image_      The VkImage handle to create an image view from
+        @param      format_     The image format
+
+        @return     Returns a valid VkImageView handle
+    */
+    VkImageView createImageView(VkImage image_, VkFormat format_);
+
 }
