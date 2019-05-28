@@ -1333,6 +1333,7 @@ VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
 
 		hasFramebufferBeenResized = false;
 		recreateSwapchain();
+        return VK_SC_SWAPCHAIN_RECREATED;
 
 	}
 	ASSERT(result, "Failed to present swapchain image", VK_SC_PRESENTATION_ERROR);
