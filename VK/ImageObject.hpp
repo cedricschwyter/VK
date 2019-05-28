@@ -50,10 +50,10 @@ public:
 private:
 
     int                 w, h, ch;
-    VkDeviceSize        imageSize          = 0;
-
+    VkDeviceSize        imageSize               = 0;
     BaseBuffer*         stagingBuffer;
     VkImage             img;
+    VkImageView         imgView;
 
 };
 
