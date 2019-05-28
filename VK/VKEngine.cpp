@@ -173,6 +173,7 @@ VK_STATUS_CODE VKEngine::clean() {
 
     delete indexBuffer;
     delete vertexBuffer;
+    logger::log(EVENT_LOG, "Successfully destroyed buffers, textures and samplers");
 
 	for (size_t i = 0; i < vk::MAX_IN_FLIGHT_FRAMES; i++) {
 
