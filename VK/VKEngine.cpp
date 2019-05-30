@@ -1041,7 +1041,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 		&colorBlendStateCreateInfo,
 		nullptr,						// Defined, but not referenced
 		bindings,
-        bindings.size(),
+        static_cast< uint32_t >(bindings.size()),
 		renderPass
 		);
 
