@@ -51,6 +51,8 @@ public:
 	VkDevice								logicalDevice;
 	VkAllocationCallbacks*					allocator;
     std::vector< VkImage >					swapchainImages;
+    VkCommandPool							standardCommandPool;
+    VkQueue									graphicsQueue                       = VK_NULL_HANDLE;
 
 	/**
 		Initializes VKEngine and loads dependencies
@@ -58,6 +60,15 @@ public:
 		@return		Returns VK_SC_SUCCESS on success
 	*/
 	VK_STATUS_CODE init(void);
+
+    /**
+        Finds queue families that are suitable for the operations that are about to be performed on them
+
+        @param		device_		A valid VkPhysicalDevice handle whose queue families are to be tested
+
+        @return		Returns a QueueFamily struct
+    */
+    QueueFamily findSuitableQueueFamily(VkPhysicalDevice device_);
 
 private:
 
@@ -74,7 +85,6 @@ private:
 	const bool								validationLayersEnabled				= false;
 #endif
 	VkDebugUtilsMessengerEXT				validationLayerDebugMessenger		= VK_NULL_HANDLE;
-    VkQueue									graphicsQueue                       = VK_NULL_HANDLE;
 	VkQueue									presentationQueue					= VK_NULL_HANDLE;
 	VkSurfaceKHR							surface								= VK_NULL_HANDLE;
 	const std::vector< const char* >		requiredExtensions					= {
@@ -90,7 +100,6 @@ private:
 	std::vector< VkFramebuffer >			swapchainFramebuffers;
 	VkRenderPass							renderPass;
 	GraphicsPipeline						pipeline;
-    VkCommandPool							standardCommandPool;
 	std::vector< VkCommandBuffer >			standardCommandBuffers;
 	std::vector< VkSemaphore >				swapchainImageAvailableSemaphores;
 	std::vector< VkSemaphore >				renderingCompletedSemaphores;
@@ -212,15 +221,6 @@ private:
 		@return		Returns VK_SC_SUCCESS on success
 	*/
 	VK_STATUS_CODE printPhysicalDevicePropertiesAndFeatures(VkPhysicalDevice device_);
-
-	/**
-		Finds queue families that are suitable for the operations that are about to be performed on them
-	
-		@param		device_		A valid VkPhysicalDevice handle whose queue families are to be tested
-
-		@return		Returns a QueueFamily struct
-	*/
-	QueueFamily findSuitableQueueFamily(VkPhysicalDevice device_);
 
 	/**
 		Creates a VkDevice handle from a VkPhysicalDevice (class member)

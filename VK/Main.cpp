@@ -203,7 +203,7 @@ namespace vk {
         VkCommandBufferAllocateInfo allocInfo       = {};
         allocInfo.sType                             = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.level                             = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandPool                       = transferCommandPool;
+        allocInfo.commandPool                       = vk::engine.standardCommandPool;
         allocInfo.commandBufferCount                = 1;
 
         VkCommandBuffer commandBuffer;
@@ -229,17 +229,17 @@ namespace vk {
         submitInfo.pCommandBuffers          = &commandBuffer_;
 
         vkQueueSubmit(
-            transferQueue, 
+            vk::engine.graphicsQueue, 
             1, 
             &submitInfo, 
             VK_NULL_HANDLE
             );
 
-        vkQueueWaitIdle(transferQueue);
+        vkQueueWaitIdle(vk::engine.graphicsQueue);
 
         vkFreeCommandBuffers(
             engine.logicalDevice, 
-            transferCommandPool,
+            vk::engine.standardCommandPool,
             1, 
             &commandBuffer_
             );
@@ -293,7 +293,6 @@ namespace vk {
             logger::log(ERROR_LOG, "Unsupported layout transition");
 
         }
-
 
         vkCmdPipelineBarrier(
             commandBuffer,

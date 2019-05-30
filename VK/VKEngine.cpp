@@ -1536,11 +1536,7 @@ VK_STATUS_CODE VKEngine::allocateUniformBuffers() {
     mvpBufferCreateInfo.usage                       = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
     mvpBufferCreateInfo.sharingMode                 = VK_SHARING_MODE_EXCLUSIVE;
 
-    for (size_t i = 0; i < swapchainImages.size(); i++) {
-
-        mvpBuffer = new UniformBuffer(&mvpBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-    }
+    mvpBuffer = new UniformBuffer(&mvpBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
     logger::log(EVENT_LOG, "Successfully created buffers");
 

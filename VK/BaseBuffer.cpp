@@ -55,10 +55,15 @@ BaseBuffer::BaseBuffer(VkDeviceSize size_, VkBufferUsageFlags usage_, VkMemoryPr
 
     logger::log(EVENT_LOG, "Creating buffer...");
 
+    QueueFamily family                        = vk::engine.findSuitableQueueFamily(vk::engine.physicalDevice);
+    std::vector< uint32_t > indices           = { family.transferFamilyIndex.value() };
+
     bufferCreateInfo.sType                    = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferCreateInfo.size                     = size_;
     bufferCreateInfo.usage                    = usage_;
     bufferCreateInfo.sharingMode              = VK_SHARING_MODE_EXCLUSIVE;
+    bufferCreateInfo.pQueueFamilyIndices      = indices.data();
+    bufferCreateInfo.queueFamilyIndexCount    = static_cast< uint32_t >(indices.size());
 
     VkResult result = vkCreateBuffer(
         vk::engine.logicalDevice,
@@ -172,11 +177,16 @@ VK_STATUS_CODE BaseBuffer::fill(const unsigned char* bufData_) {
 
 VK_STATUS_CODE BaseBuffer::fillS(const void* bufData_, size_t bufSize_) {
 
+    QueueFamily family                      = vk::engine.findSuitableQueueFamily(vk::engine.physicalDevice);
+    std::vector< uint32_t > indices         = { family.transferFamilyIndex.value() };
+
     VkBufferCreateInfo bufferCreateInfo     = {};
     bufferCreateInfo.sType                  = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferCreateInfo.size                   = bufSize_;
     bufferCreateInfo.usage                  = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
     bufferCreateInfo.sharingMode            = VK_SHARING_MODE_EXCLUSIVE;
+    bufferCreateInfo.pQueueFamilyIndices    = indices.data();
+    bufferCreateInfo.queueFamilyIndexCount  = static_cast< uint32_t >(indices.size());
 
     BaseBuffer* stagingBuffer               = new BaseBuffer(&bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
