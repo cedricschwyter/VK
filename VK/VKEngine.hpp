@@ -42,11 +42,11 @@
 #include "IndexBuffer.hpp"
 #include "UniformBuffer.hpp"
 #include "MVPBufferObject.cpp"
+#include "ImageObject.hpp"
 
 class VKEngine {
 public:
 
-	VkResult								result;
 	VkPhysicalDevice						physicalDevice;
 	VkDevice								logicalDevice;
 	VkAllocationCallbacks*					allocator;
@@ -74,7 +74,7 @@ private:
 	const bool								validationLayersEnabled				= false;
 #endif
 	VkDebugUtilsMessengerEXT				validationLayerDebugMessenger		= VK_NULL_HANDLE;
-	VkQueue									graphicsQueue						= VK_NULL_HANDLE;
+    VkQueue									graphicsQueue                       = VK_NULL_HANDLE;
 	VkQueue									presentationQueue					= VK_NULL_HANDLE;
 	VkSurfaceKHR							surface								= VK_NULL_HANDLE;
 	const std::vector< const char* >		requiredExtensions					= {
@@ -90,7 +90,7 @@ private:
 	std::vector< VkFramebuffer >			swapchainFramebuffers;
 	VkRenderPass							renderPass;
 	GraphicsPipeline						pipeline;
-	VkCommandPool							standardCommandPool;
+    VkCommandPool							standardCommandPool;
 	std::vector< VkCommandBuffer >			standardCommandBuffers;
 	std::vector< VkSemaphore >				swapchainImageAvailableSemaphores;
 	std::vector< VkSemaphore >				renderingCompletedSemaphores;
@@ -99,8 +99,9 @@ private:
 	bool									hasFramebufferBeenResized			= false;
 	BaseBuffer*								vertexBuffer;
     BaseBuffer*                             indexBuffer;
-    std::vector< UniformBuffer* >           mvpBuffers;
+    UniformBuffer*                          mvpBuffer;
     bool                                    initialized                         = false;
+    ImageObject*                            image;
 
 	/**
 		Initializes the logger
@@ -390,10 +391,15 @@ private:
     /**
         Updates the uniform buffers in the shaders
 
-        @param      imageIndex_     The current swapchain image
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE updateUniformBuffers();
+
+    /**
+        Loads and generates necessary textures
 
         @return     Returns VK_SC_SUCCESS on success
     */
-    VK_STATUS_CODE updateUniformBuffers(uint32_t imageIndex_);
+    VK_STATUS_CODE createTextureImages(void);
 
 };

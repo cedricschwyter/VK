@@ -18,5 +18,7 @@ struct UniformInfo {
     uint32_t                    binding;
     VkPipelineStageFlags        stageFlags;
     VkDescriptorBufferInfo      bufferInfo;
+    VkDescriptorImageInfo       imageInfo;
+    VkDescriptorType            type;
 
 };

@@ -78,6 +78,9 @@
     <ClCompile Include="UniformInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ImageObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VK_STATUS_CODE.hpp">
@@ -119,6 +122,9 @@
     <ClInclude Include="UniformBuffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ImageObject.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\standard\shader.frag" />
@@ -135,5 +141,10 @@
     <None Include="zlib1.dll" />
     <None Include="shaders\standard\frag.spv" />
     <None Include="shaders\standard\vert.spv" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\textures\application\vulkan.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

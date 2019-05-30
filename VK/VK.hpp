@@ -106,4 +106,58 @@ namespace vk {
     */
     void copyBuffer(VkBuffer srcBuf_, VkBuffer dstBuf_, VkDeviceSize size_);
 
+    /**
+        Starts a command buffer
+
+        @return     Returns a command buffer handle
+    */
+    VkCommandBuffer startCommandBuffer(void);
+
+    /**
+        Ends a command buffer
+
+        @param      commandBuffer_      The command buffer to end
+    */
+    void endCommandBuffer(VkCommandBuffer commandBuffer_);
+
+    /**
+        Executes an image layout transition operation
+
+        @param      image_          The image to transition
+        @param      format_         The image format
+        @param      oldLayout_      The old layout
+        @param      newLayout_      The new layout
+    */
+    void imageLayoutTransition(
+        VkImage         image_,
+        VkFormat        format_,
+        VkImageLayout   oldLayout_,
+        VkImageLayout   newLayout_
+        );
+
+    /**
+        Copies a specific buffer area to an image
+
+        @param      buffer_     The buffer to read from
+        @param      image_      The image to write to
+        @param      width_      The width of the area
+        @param      height_     The height of the area
+    */
+    void copyBufferToImage(
+        VkBuffer        buffer_,
+        VkImage         image_,
+        uint32_t        width_,
+        uint32_t        height_
+        );
+
+    /**
+        Creates a VkImageView handle
+
+        @param      image_      The VkImage handle to create an image view from
+        @param      format_     The image format
+
+        @return     Returns a valid VkImageView handle
+    */
+    VkImageView createImageView(VkImage image_, VkFormat format_);
+
 }

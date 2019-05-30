@@ -139,6 +139,7 @@
     <ClCompile Include="BaseBuffer.cpp" />
     <ClCompile Include="DescriptorSet.cpp" />
     <ClCompile Include="GraphicsPipeline.cpp" />
+    <ClCompile Include="ImageObject.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="LoadingScreen.cpp" />
     <ClCompile Include="Logger.cpp" />
@@ -163,6 +164,7 @@
     <ClInclude Include="ConsoleColor.hpp" />
     <ClInclude Include="DescriptorSet.hpp" />
     <ClInclude Include="GraphicsPipeline.hpp" />
+    <ClInclude Include="ImageObject.hpp" />
     <ClInclude Include="IndexBuffer.hpp" />
     <ClInclude Include="LoadingScreen.hpp" />
     <ClInclude Include="Logger.hpp" />
@@ -185,6 +187,9 @@
     <None Include="shaders\standard\shader.vert" />
     <None Include="shaders\standard\vert.spv" />
     <None Include="zlib1.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\textures\application\vulkan.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

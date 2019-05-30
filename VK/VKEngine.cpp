@@ -90,9 +90,10 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 	ASSERT(createSwapchainImageViews(), "Failed to create swapchain image views", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
 	ASSERT(createRenderPasses(), "Failed to create render passes", VK_SC_RENDER_PASS_CREATION_ERROR);
     ASSERT(allocateUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
-	ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
 	ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
 	ASSERT(allocateCommandPools(), "Failed to allocate command pools", VK_SC_COMMAND_POOL_ALLOCATION_ERROR);
+    ASSERT(createTextureImages(), "Failed to create texture images", VK_SC_TEXTURE_IMAGE_CREATION_ERROR);
+    ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
 	ASSERT(allocateNecessaryBuffers(), "Failed to create necessary buffers", VK_SC_BUFFER_CREATION_ERROR);
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 	ASSERT(initializeSynchronizationObjects(), "Failed to initialize sync-objects", VK_SC_SYNCHRONIZATION_OBJECT_INITIALIZATION_ERROR);
@@ -168,8 +169,11 @@ VK_STATUS_CODE VKEngine::clean() {
 
 	ASSERT(cleanSwapchain(), "Failed to clean swapchain", VK_SC_SWAPCHAIN_CLEAN_ERROR);
 
+    delete image;
+
     delete indexBuffer;
     delete vertexBuffer;
+    logger::log(EVENT_LOG, "Successfully destroyed buffers, textures and samplers");
 
 	for (size_t i = 0; i < vk::MAX_IN_FLIGHT_FRAMES; i++) {
 
@@ -256,7 +260,7 @@ VK_STATUS_CODE VKEngine::createInstance() {
 	}
 
 	logger::log(EVENT_LOG, "Creating VkInstance...");
-	result = vkCreateInstance(&instanceCreateInfo, allocator, &instance);
+	VkResult result = vkCreateInstance(&instanceCreateInfo, allocator, &instance);
 	ASSERT(result, "Failed to create VkInstance!", VK_SC_INSTANCE_CREATON_ERROR);
 
 	return VK_SC_SUCCESS;
@@ -346,13 +350,16 @@ VKAPI_ATTR VkBool32 VKAPI_CALL VKEngine::validationLayerDebugMessageCallback(
 	std::string header = "Validation Layer:	";
 	std::string message(pCallbackData_->pMessage);
 
-	logger::log(EVENT_LOG, header + message);
-
 	if (messageSeverity_ > VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
 	
 		logger::log(ERROR_LOG, header + message);
 
-	}
+    }
+    else {
+
+        logger::log(EVENT_LOG, header + message);
+
+    }
 
 	return VK_FALSE;
 
@@ -376,7 +383,7 @@ VK_STATUS_CODE VKEngine::debugUtilsMessenger() {
 	debugUtilsMessengerCreateInfo.pfnUserCallback							= validationLayerDebugMessageCallback;
 	debugUtilsMessengerCreateInfo.pUserData									= nullptr;
 
-	result = vk::createDebugUtilsMessenger(
+	VkResult result = vk::createDebugUtilsMessenger(
 		instance,
 		&debugUtilsMessengerCreateInfo,
 		allocator,
@@ -459,6 +466,7 @@ int VKEngine::evaluateDeviceSuitabilityScore(VkPhysicalDevice device_) {
 		|| !checkDeviceSwapchainExtensionSupport(device_) 
 		|| swapchainDetails.supportedFormats.empty() 
 		|| swapchainDetails.presentationModes.empty()
+        || !physicalDeviceFeatures.samplerAnisotropy
 		) {		// absolutely necessary features needed to run application on that GPU
 	
 		return 0;
@@ -561,8 +569,9 @@ VK_STATUS_CODE VKEngine::createLogicalDeviceFromPhysicalDevice() {
 
 	}
 
-	VkPhysicalDeviceFeatures physicalDeviceFeatures			= {};		// No features are necessary at the moment so this struct is just initialized to VK_FALSE (0)
-	
+	VkPhysicalDeviceFeatures physicalDeviceFeatures			= {};
+    physicalDeviceFeatures.samplerAnisotropy                = VK_TRUE;
+
 	VkDeviceCreateInfo deviceCreateInfo						= {};
 	deviceCreateInfo.sType									= VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	deviceCreateInfo.queueCreateInfoCount					= static_cast< uint32_t >(deviceQueueCreateInfos.size());
@@ -583,7 +592,7 @@ VK_STATUS_CODE VKEngine::createLogicalDeviceFromPhysicalDevice() {
 
 	}
 
-	result = vkCreateDevice(
+	VkResult result = vkCreateDevice(
 		physicalDevice, 
 		&deviceCreateInfo, 
 		allocator, 
@@ -854,7 +863,7 @@ VK_STATUS_CODE VKEngine::createSwapchain() {
 	swapchainCreateInfo.presentMode						= presentMode;
 	swapchainCreateInfo.oldSwapchain					= VK_NULL_HANDLE;
 
-	result = vkCreateSwapchainKHR(
+	VkResult result = vkCreateSwapchainKHR(
 		logicalDevice,
 		&swapchainCreateInfo,
 		allocator,
@@ -885,42 +894,17 @@ VK_STATUS_CODE VKEngine::createSwapchain() {
 
 VK_STATUS_CODE VKEngine::createSwapchainImageViews() {
 
-	logger::log(EVENT_LOG, "Creating image views...");
+	logger::log(EVENT_LOG, "Creating swapchain image views...");
 
 	swapchainImageViews.resize(swapchainImages.size());
 
 	for (size_t i = 0; i < swapchainImages.size(); i++) {
-
-		logger::log(EVENT_LOG, "Creating image view...");
 	
-		VkImageViewCreateInfo imageViewCreateInfo				= {};
-		imageViewCreateInfo.sType								= VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		imageViewCreateInfo.image								= swapchainImages[i];
-		imageViewCreateInfo.viewType							= VK_IMAGE_VIEW_TYPE_2D;			// 2D textures will be used
-		imageViewCreateInfo.format								= swapchainImageFormat;
-		imageViewCreateInfo.components.r						= VK_COMPONENT_SWIZZLE_IDENTITY;
-		imageViewCreateInfo.components.g						= VK_COMPONENT_SWIZZLE_IDENTITY;
-		imageViewCreateInfo.components.b						= VK_COMPONENT_SWIZZLE_IDENTITY;
-		imageViewCreateInfo.components.a						= VK_COMPONENT_SWIZZLE_IDENTITY;
-		imageViewCreateInfo.subresourceRange.aspectMask			= VK_IMAGE_ASPECT_COLOR_BIT;		// use as color target
-		imageViewCreateInfo.subresourceRange.baseMipLevel		= 0;
-		imageViewCreateInfo.subresourceRange.levelCount			= 1;
-		imageViewCreateInfo.subresourceRange.baseArrayLayer		= 0;
-		imageViewCreateInfo.subresourceRange.layerCount			= 1;
-
-		result = vkCreateImageView(
-			logicalDevice,
-			&imageViewCreateInfo,
-			allocator,
-			&swapchainImageViews[i]
-			);
-		ASSERT(result, "Failed to create VkImageView", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
-
-		logger::log(EVENT_LOG, "Successfully created image view");
+        swapchainImageViews[i] = vk::createImageView(swapchainImages[i], swapchainImageFormat);
 
 	}
 
-	logger::log(EVENT_LOG, "Successfully created image views");
+	logger::log(EVENT_LOG, "Successfully created swapchain image views");
 
 	return VK_SC_SUCCESS;
 
@@ -1015,24 +999,34 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 	dynamicStateCreateInfo.dynamicStateCount									= static_cast< uint32_t >(dynamicStates.size());
 	dynamicStateCreateInfo.pDynamicStates										= dynamicStates.data();
 
-    std::vector< UniformInfo > bindings;
-    bindings.resize(swapchainImages.size());
+    VkDescriptorBufferInfo mvpBufferInfo        = {};
+    mvpBufferInfo.buffer                        = mvpBuffer->buf;
+    mvpBufferInfo.offset                        = 0;
+    mvpBufferInfo.range                         = sizeof(MVPBufferObject);
 
-    for (size_t i = 0; i < swapchainImages.size(); i++) {
+    UniformInfo mvpInfo                         = {};
+    mvpInfo.binding                             = 0;
+    mvpInfo.stageFlags                          = VK_SHADER_STAGE_VERTEX_BIT;
+    mvpInfo.bufferInfo                          = mvpBufferInfo;
+    mvpInfo.type                                = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 
-        VkDescriptorBufferInfo mvpBufferInfo        = {};
-        mvpBufferInfo.buffer                        = mvpBuffers[i]->buf;
-        mvpBufferInfo.offset                        = 0;
-        mvpBufferInfo.range                         = sizeof(MVPBufferObject);
+    VkDescriptorImageInfo imageInfo             = {};
+    imageInfo.sampler                           = image->imgSampler;
+    imageInfo.imageLayout                       = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageInfo.imageView                         = image->imgView;
 
-        UniformInfo mvpInfo                         = {};
-        mvpInfo.binding                             = 0;
-        mvpInfo.stageFlags                          = VK_SHADER_STAGE_VERTEX_BIT;
-        mvpInfo.bufferInfo                          = mvpBufferInfo;
+    UniformInfo samplerInfo                     = {};
+    samplerInfo.binding                         = 1;
+    samplerInfo.stageFlags                      = VK_SHADER_STAGE_FRAGMENT_BIT;
+    samplerInfo.imageInfo                       = imageInfo;
+    samplerInfo.type                            = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 
-        bindings[i] = mvpInfo;
-
-    }
+    std::vector< UniformInfo > bindings         = {
+    
+        mvpInfo,
+        samplerInfo
+    
+    };
 
 	pipeline = GraphicsPipeline(
 		"shaders/standard/vert.spv", 
@@ -1047,7 +1041,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 		&colorBlendStateCreateInfo,
 		nullptr,						// Defined, but not referenced
 		bindings,
-        1,
+        bindings.size(),
 		renderPass
 		);
 
@@ -1099,7 +1093,7 @@ VK_STATUS_CODE VKEngine::createRenderPasses() {
 	renderPassCreateInfo.dependencyCount					= 1;
 	renderPassCreateInfo.pDependencies						= &subpassDependency;
 
-	result = vkCreateRenderPass(
+	VkResult result = vkCreateRenderPass(
 				logicalDevice,
 				&renderPassCreateInfo, 
 				allocator, 
@@ -1138,7 +1132,7 @@ VK_STATUS_CODE VKEngine::allocateSwapchainFramebuffers() {
 		framebufferCreateInfo.height						= swapchainImageExtent.height;
 		framebufferCreateInfo.layers						= 1;
 
-		result = vkCreateFramebuffer(
+		VkResult result = vkCreateFramebuffer(
 			logicalDevice,
 			&framebufferCreateInfo,
 			allocator,
@@ -1166,7 +1160,7 @@ VK_STATUS_CODE VKEngine::allocateCommandPools() {
 	commandPoolCreateInfo.sType							= VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	commandPoolCreateInfo.queueFamilyIndex				= family.graphicsFamilyIndex.value();
 
-	result = vkCreateCommandPool(
+	VkResult result = vkCreateCommandPool(
 		logicalDevice,
 		&commandPoolCreateInfo,
 		allocator,
@@ -1207,7 +1201,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 	commandBufferAllocateInfo.level								= VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 	commandBufferAllocateInfo.commandBufferCount				= static_cast< uint32_t >(standardCommandBuffers.size());
 
-	result = vkAllocateCommandBuffers(
+	VkResult result = vkAllocateCommandBuffers(
 		logicalDevice,
 		&commandBufferAllocateInfo,
 		standardCommandBuffers.data()
@@ -1299,7 +1293,7 @@ VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
 	vkResetFences(logicalDevice, 1, &inFlightFences[currentSwapchainImage]);
 
 	uint32_t swapchainImageIndex;
-	result = vkAcquireNextImageKHR(
+	VkResult result = vkAcquireNextImageKHR(
 		logicalDevice,
 		swapchain,
 		std::numeric_limits< uint64_t >::max(),							// numeric limit of 64-bit unsigned interger disables timeout
@@ -1314,7 +1308,7 @@ VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
 	}
 	ASSERT(result, "Failed to acquire swapchain image", VK_SC_SWAPCHAIN_IMAGE_ACQUIRE_ERROR);
 
-    ASSERT(updateUniformBuffers(swapchainImageIndex), "Failed to update uniform buffers", VK_SC_UNIFORM_BUFFER_UPDATE_ERROR);
+    ASSERT(updateUniformBuffers(), "Failed to update uniform buffers", VK_SC_UNIFORM_BUFFER_UPDATE_ERROR);
 
 	VkSubmitInfo submitInfo							= {};
 	submitInfo.sType								= VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1355,6 +1349,8 @@ VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
 		hasFramebufferBeenResized = false;
 		recreateSwapchain();
 
+        return VK_SC_SWAPCHAIN_RECREATED;
+
 	}
 	ASSERT(result, "Failed to present swapchain image", VK_SC_PRESENTATION_ERROR);
 
@@ -1381,7 +1377,7 @@ VK_STATUS_CODE VKEngine::initializeSynchronizationObjects() {
 
 	for (size_t i = 0; i < vk::MAX_IN_FLIGHT_FRAMES; i++) {
 
-		result = vkCreateSemaphore(
+		VkResult result = vkCreateSemaphore(
 			logicalDevice,
 			&semaphoreCreateInfo,
 			allocator,
@@ -1447,13 +1443,7 @@ VK_STATUS_CODE VKEngine::cleanSwapchain() {
 
 	logger::log(EVENT_LOG, "Cleaning swapchain...");
 
-    logger::log(EVENT_LOG, "Destroying uniform buffers..");
-    for (size_t i = 0; i < swapchainImages.size(); i++) {
-
-        delete mvpBuffers[i];
-        logger::log(EVENT_LOG, "Successfully destroyed uniform buffer");
-
-    }
+    delete mvpBuffer;
     logger::log(EVENT_LOG, "Successfully destroyed uniform buffers");
 
 	logger::log(EVENT_LOG, "Destroying framebuffers...");
@@ -1537,9 +1527,7 @@ VK_STATUS_CODE VKEngine::allocateNecessaryBuffers() {
 }
 
 VK_STATUS_CODE VKEngine::allocateUniformBuffers() {
-
-    mvpBuffers.resize(swapchainImages.size());
-    
+        
     VkDeviceSize bufferSize = sizeof(MVPBufferObject);
 
     VkBufferCreateInfo mvpBufferCreateInfo          = {};
@@ -1550,7 +1538,7 @@ VK_STATUS_CODE VKEngine::allocateUniformBuffers() {
 
     for (size_t i = 0; i < swapchainImages.size(); i++) {
 
-        mvpBuffers[i] = new UniformBuffer(&mvpBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        mvpBuffer = new UniformBuffer(&mvpBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
     }
 
@@ -1560,7 +1548,7 @@ VK_STATUS_CODE VKEngine::allocateUniformBuffers() {
 
 }
 
-VK_STATUS_CODE VKEngine::updateUniformBuffers(uint32_t imageIndex_) {
+VK_STATUS_CODE VKEngine::updateUniformBuffers() {
 
     static auto            start                    = std::chrono::high_resolution_clock::now();
     auto                   current                  = std::chrono::high_resolution_clock::now();
@@ -1569,12 +1557,30 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers(uint32_t imageIndex_) {
     
     MVPBufferObject mvp                             = {};
 
-    mvp.model                                       = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(1.0f, -1.0f, 1.0f));
+    mvp.model                                       = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     mvp.view                                        = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     mvp.proj                                        = glm::perspective(glm::radians(45.0f), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 10.0f);
     mvp.proj[1][1]                                  *= -1;      // GLM was designed for OpenGL where y-axis is inverted
 
-    mvpBuffers[imageIndex_]->fill(&mvp);
+    mvpBuffer->fill(&mvp);
+
+    return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::createTextureImages() {
+
+    logger::log(EVENT_LOG, "Loading textures...");
+    
+    image = new ImageObject(
+        "res/textures/application/vulkan.png",
+        VK_FORMAT_R8G8B8A8_UNORM,
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+        );
+
+    logger::log(EVENT_LOG, "Successfully loaded textures");
 
     return VK_SC_SUCCESS;
 

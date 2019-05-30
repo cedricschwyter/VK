@@ -35,6 +35,15 @@ public:
 	*/
 	explicit BaseBuffer(const VkBufferCreateInfo* bufferCreateInfo_, VkMemoryPropertyFlags properties_);
 
+    /**
+        Constructor with more precise arguments
+
+        @param      size_           The buffer size
+        @param      usage_          Buffer usage flags
+        @param      properties_     Necessary memory properties
+    */
+    explicit BaseBuffer(VkDeviceSize size_, VkBufferUsageFlags usage_, VkMemoryPropertyFlags properties_);
+
 	/**
 		Maps data to a buffer
 
@@ -43,6 +52,15 @@ public:
 		@return		Returns VK_SC_SUCCESS on success
 	*/
 	VK_STATUS_CODE fill(const void* bufData_);
+
+    /**
+        Maps data to a buffer
+
+        @param		bufData_		Overloaded parameter specifically for images
+
+        @return		Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE fill(const unsigned char* bufData_);
 
     /**
         Maps data to a buffer using a staging buffer

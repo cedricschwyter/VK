@@ -36,10 +36,10 @@ namespace vk {
 
 	const std::vector< BaseVertex >		vertices					= {
 	
-        {{-0.5f, -0.5f}, { 1.0f,  1.0f,  0.0f}},
-        {{ 0.5f, -0.5f}, { 0.0f,  1.0f,  0.0f}},
-        {{ 0.5f,  0.5f}, { 0.0f,  1.0f,  1.0f}},
-        {{-0.5f,  0.5f}, { 1.0f,  0.0f,  1.0f}}
+        {{-0.5f, -0.5f}, { 1.0f,  0.0f,  0.0f}, { 1.0f,  0.0f}},
+        {{ 0.5f, -0.5f}, { 0.0f,  1.0f,  0.0f}, { 0.0f,  0.0f}},
+        {{ 0.5f,  0.5f}, { 0.0f,  0.0f,  1.0f}, { 0.0f,  1.0f}},
+        {{-0.5f,  0.5f}, { 1.0f,  1.0f,  1.0f}, { 1.0f,  1.0f}}
 
 	};
 
@@ -198,7 +198,188 @@ namespace vk {
 
     }
 
+    VkCommandBuffer startCommandBuffer() {
+    
+        VkCommandBufferAllocateInfo allocInfo       = {};
+        allocInfo.sType                             = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.level                             = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.commandPool                       = transferCommandPool;
+        allocInfo.commandBufferCount                = 1;
 
+        VkCommandBuffer commandBuffer;
+        vkAllocateCommandBuffers(engine.logicalDevice, &allocInfo, &commandBuffer);
+
+        VkCommandBufferBeginInfo beginInfo          = {};
+        beginInfo.sType                             = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags                             = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+        vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+        return commandBuffer;
+    
+    }
+
+    void endCommandBuffer(VkCommandBuffer commandBuffer_) {
+    
+        vkEndCommandBuffer(commandBuffer_);
+
+        VkSubmitInfo submitInfo             = {};
+        submitInfo.sType                    = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.commandBufferCount       = 1;
+        submitInfo.pCommandBuffers          = &commandBuffer_;
+
+        vkQueueSubmit(
+            transferQueue, 
+            1, 
+            &submitInfo, 
+            VK_NULL_HANDLE
+            );
+
+        vkQueueWaitIdle(transferQueue);
+
+        vkFreeCommandBuffers(
+            engine.logicalDevice, 
+            transferCommandPool,
+            1, 
+            &commandBuffer_
+            );
+    
+    }
+
+    void imageLayoutTransition(
+        VkImage         image_, 
+        VkFormat        format_, 
+        VkImageLayout   oldLayout_, 
+        VkImageLayout   newLayout_
+        ) {
+    
+        VkCommandBuffer commandBuffer               = startCommandBuffer();
+
+        VkImageMemoryBarrier barrier                = {};
+        barrier.sType                               = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        barrier.oldLayout                           = oldLayout_;
+        barrier.newLayout                           = newLayout_;
+        barrier.srcQueueFamilyIndex                 = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex                 = VK_QUEUE_FAMILY_IGNORED;
+        barrier.image                               = image_;
+        barrier.subresourceRange.aspectMask         = VK_IMAGE_ASPECT_COLOR_BIT;
+        barrier.subresourceRange.baseMipLevel       = 0;
+        barrier.subresourceRange.levelCount         = 1;
+        barrier.subresourceRange.baseArrayLayer     = 0 ;
+        barrier.subresourceRange.layerCount         = 1;
+
+        VkPipelineStageFlags sourceStage;
+        VkPipelineStageFlags destinationStage;
+
+        if (oldLayout_ == VK_IMAGE_LAYOUT_UNDEFINED && newLayout_ == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+
+            barrier.srcAccessMask       = 0;
+            barrier.dstAccessMask       = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+            sourceStage                 = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+            destinationStage            = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        }
+        else if (oldLayout_ == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout_ == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+
+            barrier.srcAccessMask       = VK_ACCESS_TRANSFER_WRITE_BIT;
+            barrier.dstAccessMask       = VK_ACCESS_SHADER_READ_BIT;
+
+            sourceStage                 = VK_PIPELINE_STAGE_TRANSFER_BIT;
+            destinationStage            = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+
+        }
+        else {
+
+            logger::log(ERROR_LOG, "Unsupported layout transition");
+
+        }
+
+
+        vkCmdPipelineBarrier(
+            commandBuffer,
+            sourceStage, 
+            destinationStage, 
+            0,
+            0,
+            nullptr,
+            0,
+            nullptr,
+            1,
+            &barrier
+            );
+
+        endCommandBuffer(commandBuffer);
+    
+    }
+
+    void copyBufferToImage(
+        VkBuffer        buffer_, 
+        VkImage         image_, 
+        uint32_t        width_, 
+        uint32_t        height_
+        ) {
+
+        VkCommandBuffer commandBuffer                   = startCommandBuffer();
+
+        VkBufferImageCopy copyRegion                        = {};
+        copyRegion.bufferOffset                             = 0;
+        copyRegion.bufferRowLength                          = 0;
+        copyRegion.bufferImageHeight                        = 0;
+
+        copyRegion.imageSubresource.aspectMask              = VK_IMAGE_ASPECT_COLOR_BIT;
+        copyRegion.imageSubresource.mipLevel                = 0;
+        copyRegion.imageSubresource.baseArrayLayer          = 0;
+        copyRegion.imageSubresource.layerCount              = 1;
+
+        copyRegion.imageOffset                              = { 0, 0, 0 };
+        copyRegion.imageExtent                              = {width_, height_, 1};
+
+        vkCmdCopyBufferToImage(
+            commandBuffer,
+            buffer_,
+            image_,
+            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            1,
+            &copyRegion
+            );
+
+        endCommandBuffer(commandBuffer);
+
+    }
+
+    VkImageView createImageView(VkImage image_, VkFormat format_) {
+
+        logger::log(EVENT_LOG, "Creating image view...");
+
+        VkImageViewCreateInfo imageViewCreateInfo               = {};
+        imageViewCreateInfo.sType                               = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        imageViewCreateInfo.image                               = image_;
+        imageViewCreateInfo.viewType                            = VK_IMAGE_VIEW_TYPE_2D;
+        imageViewCreateInfo.format                              = format_;
+        imageViewCreateInfo.subresourceRange.aspectMask         = VK_IMAGE_ASPECT_COLOR_BIT;
+        imageViewCreateInfo.subresourceRange.baseMipLevel       = 0;
+        imageViewCreateInfo.subresourceRange.levelCount         = 1;
+        imageViewCreateInfo.subresourceRange.baseArrayLayer     = 0;
+        imageViewCreateInfo.subresourceRange.layerCount         = 1;
+        imageViewCreateInfo.components.r                        = VK_COMPONENT_SWIZZLE_IDENTITY;
+        imageViewCreateInfo.components.g                        = VK_COMPONENT_SWIZZLE_IDENTITY;
+        imageViewCreateInfo.components.b                        = VK_COMPONENT_SWIZZLE_IDENTITY;
+        imageViewCreateInfo.components.a                        = VK_COMPONENT_SWIZZLE_IDENTITY;
+
+        VkImageView imgView;
+        VkResult result = vkCreateImageView(
+            engine.logicalDevice,
+            &imageViewCreateInfo,
+            engine.allocator,
+            &imgView
+            );
+        ASSERT(result,"Failed to create image view", VK_SC_IMAGE_VIEW_CREATION_ERROR);
+
+        logger::log(EVENT_LOG, "Successfully created image view");
+
+        return imgView;
+
+    }
 
 }
 

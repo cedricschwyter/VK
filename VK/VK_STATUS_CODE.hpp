@@ -15,6 +15,10 @@
 */
 typedef enum VK_STATUS_CODE {
 
+    VK_SC_SAMPLER_CREATION_ERROR                            = -46,
+    VK_SC_IMAGE_VIEW_CREATION_ERROR                         = -45,
+    VK_SC_TEXTURE_IMAGE_VIEW_CREATION_ERROR                 = -44,
+    VK_SC_TEXTURE_IMAGE_CREATION_ERROR                      = -43,
     VK_SC_DESCRIPTOR_SET_CREATION_ERROR                     = -42,
     VK_SC_DESCRIPTOR_POOL_ERROR                             = -41,
     VK_SC_UNIFORM_BUFFER_UPDATE_ERROR                       = -40,
@@ -57,6 +61,7 @@ typedef enum VK_STATUS_CODE {
 	VK_SC_WINDOW_ERROR										= -3,
 	VK_SC_LOGGER_ERROR										= -2,
 	VK_SC_UKNOWN_ERROR										= -1,
-	VK_SC_SUCCESS											= 0
+	VK_SC_SUCCESS											= 0,
+    VK_SC_SWAPCHAIN_RECREATED                               = VK_SC_SUCCESS
 
 } VK_STATUS_CODE;

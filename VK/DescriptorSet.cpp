@@ -26,7 +26,7 @@ DescriptorSet::DescriptorSet(const std::vector< UniformInfo >& uniformBindings_,
 
         VkDescriptorSetLayoutBinding binding                    = {};
         binding.binding                                         = uniformBindings_[i].binding;
-        binding.descriptorType                                  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        binding.descriptorType                                  = uniformBindings_[i].type;
         binding.descriptorCount                                 = 1;
         binding.stageFlags                                      = uniformBindings_[i].stageFlags;
 
@@ -39,31 +39,36 @@ DescriptorSet::DescriptorSet(const std::vector< UniformInfo >& uniformBindings_,
     layoutCreateInfo.bindingCount                               = static_cast< uint32_t >(bindings.size());
     layoutCreateInfo.pBindings                                  = bindings.data();
 
-    vk::engine.result = vkCreateDescriptorSetLayout(
+    VkResult result = vkCreateDescriptorSetLayout(
         vk::engine.logicalDevice,
         &layoutCreateInfo,
         vk::engine.allocator,
         &descriptorSetLayout
         );
-    ASSERT(vk::engine.result, "Failed to create descriptor set layout", VK_SC_DESCRIPTOR_SET_LAYOUT_CREATION_ERROR);
+    ASSERT(result, "Failed to create descriptor set layout", VK_SC_DESCRIPTOR_SET_LAYOUT_CREATION_ERROR);
 
-    VkDescriptorPoolSize descriptorPoolSize                     = {};
-    descriptorPoolSize.type                                     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    descriptorPoolSize.descriptorCount                          = static_cast< uint32_t >(vk::engine.swapchainImages.size());
+    std::vector< VkDescriptorPoolSize > descriptorPoolSizes;
+    descriptorPoolSizes.resize(numUniforms_);
+    for (uint32_t i = 0; i < numUniforms_; i++) {
+
+        descriptorPoolSizes[i].type                     = uniformBindings_[i].type;
+        descriptorPoolSizes[i].descriptorCount          = static_cast<uint32_t>(vk::engine.swapchainImages.size());
+
+    }
 
     VkDescriptorPoolCreateInfo descriptorPoolCreateInfo         = {};
     descriptorPoolCreateInfo.sType                              = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    descriptorPoolCreateInfo.poolSizeCount                      = 1;
-    descriptorPoolCreateInfo.pPoolSizes                         = &descriptorPoolSize;
+    descriptorPoolCreateInfo.poolSizeCount                      = static_cast< uint32_t >(descriptorPoolSizes.size());
+    descriptorPoolCreateInfo.pPoolSizes                         = descriptorPoolSizes.data();
     descriptorPoolCreateInfo.maxSets                            = static_cast< uint32_t >(vk::engine.swapchainImages.size());
 
-    vk::engine.result = vkCreateDescriptorPool(
+    result = vkCreateDescriptorPool(
         vk::engine.logicalDevice,
         &descriptorPoolCreateInfo,
         vk::engine.allocator,
         &descriptorPool
-    );
-    ASSERT(vk::engine.result, "Failed to create descriptor pool", VK_SC_DESCRIPTOR_POOL_ERROR);
+        );
+    ASSERT(result, "Failed to create descriptor pool", VK_SC_DESCRIPTOR_POOL_ERROR);
 
     std::vector< VkDescriptorSetLayout > layouts(vk::engine.swapchainImages.size(), descriptorSetLayout);
 
@@ -74,27 +79,32 @@ DescriptorSet::DescriptorSet(const std::vector< UniformInfo >& uniformBindings_,
     allocateInfo.pSetLayouts                        = layouts.data();
 
     descriptorSets.resize(vk::engine.swapchainImages.size());
-    vk::engine.result = vkAllocateDescriptorSets(vk::engine.logicalDevice, &allocateInfo, descriptorSets.data());
-    ASSERT(vk::engine.result, "Failed to allocate descriptor sets", VK_SC_DESCRIPTOR_SET_CREATION_ERROR);
+    result = vkAllocateDescriptorSets(vk::engine.logicalDevice, &allocateInfo, descriptorSets.data());
+    ASSERT(result, "Failed to allocate descriptor sets", VK_SC_DESCRIPTOR_SET_CREATION_ERROR);
 
     for (size_t i = 0; i < vk::engine.swapchainImages.size(); i++) {
 
-        VkWriteDescriptorSet writeDescriptorSet         = {};
-        writeDescriptorSet.sType                        = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        writeDescriptorSet.dstSet                       = descriptorSets[i];
-        writeDescriptorSet.dstBinding                   = uniformBindings_[i].binding;
-        writeDescriptorSet.dstArrayElement              = 0;
-        writeDescriptorSet.descriptorType               = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        writeDescriptorSet.descriptorCount              = 1;
-        writeDescriptorSet.pBufferInfo                  = &(uniformBindings_[i].bufferInfo);
+        for (size_t j = 0; j < numUniforms_; j++) {
+        
+            VkWriteDescriptorSet writeDescriptorSet         = {};
+            writeDescriptorSet.sType                        = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            writeDescriptorSet.dstSet                       = descriptorSets[i];
+            writeDescriptorSet.dstBinding                   = uniformBindings_[j].binding;
+            writeDescriptorSet.dstArrayElement              = 0;
+            writeDescriptorSet.descriptorType               = uniformBindings_[j].type;
+            writeDescriptorSet.descriptorCount              = 1;
+            writeDescriptorSet.pBufferInfo                  = &(uniformBindings_[j].bufferInfo);
+            writeDescriptorSet.pImageInfo                   = &(uniformBindings_[j].imageInfo);
 
-        vkUpdateDescriptorSets(
-            vk::engine.logicalDevice,
-            1,
-            &writeDescriptorSet,
-            0,
-            nullptr
-            );
+            vkUpdateDescriptorSets(
+                vk::engine.logicalDevice,
+                1,
+                &writeDescriptorSet,
+                0,
+                nullptr
+                );
+
+        }
 
     }
 

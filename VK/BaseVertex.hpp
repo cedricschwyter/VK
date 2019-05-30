@@ -16,6 +16,7 @@ struct BaseVertex {
 
 	glm::vec2 pos;
 	glm::vec3 col;
+    glm::vec2 tex;
 
 	static VkVertexInputBindingDescription getBindingDescription() {
 	
@@ -28,9 +29,9 @@ struct BaseVertex {
 	
 	}
 
-	static std::array< VkVertexInputAttributeDescription, 2 > getAttributeDescriptions() {
+	static std::array< VkVertexInputAttributeDescription, 3 > getAttributeDescriptions() {
 	
-		std::array< VkVertexInputAttributeDescription, 2 > vertexInputAttributeDescriptions			= {};
+		std::array< VkVertexInputAttributeDescription, 3 > vertexInputAttributeDescriptions			= {};
 		vertexInputAttributeDescriptions[0].binding													= 0;
 		vertexInputAttributeDescriptions[0].location												= 0;
 		vertexInputAttributeDescriptions[0].format													= VK_FORMAT_R32G32_SFLOAT;			
@@ -40,6 +41,11 @@ struct BaseVertex {
 		vertexInputAttributeDescriptions[1].location												= 1;
 		vertexInputAttributeDescriptions[1].format													= VK_FORMAT_R32G32B32_SFLOAT;		
 		vertexInputAttributeDescriptions[1].offset													= offsetof(BaseVertex, col);
+
+        vertexInputAttributeDescriptions[2].binding                                                 = 0;
+        vertexInputAttributeDescriptions[2].location                                                = 2;
+        vertexInputAttributeDescriptions[2].format                                                  = VK_FORMAT_R32G32_SFLOAT;
+        vertexInputAttributeDescriptions[2].offset                                                  = offsetof(BaseVertex, tex);
 
 		return vertexInputAttributeDescriptions;
 	
