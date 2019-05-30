@@ -18,6 +18,9 @@ class ImageObject :
 {
 public:
 
+    VkImageView         imgView;
+    VkSampler           imgSampler;
+
     /**
         Constructor
 
@@ -53,8 +56,6 @@ private:
     VkDeviceSize        imageSize               = 0;
     BaseBuffer*         stagingBuffer;
     VkImage             img;
-    VkImageView         imgView;
-    VkSampler           imgSampler;
 
 };
 

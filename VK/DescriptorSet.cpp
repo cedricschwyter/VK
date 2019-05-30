@@ -26,7 +26,7 @@ DescriptorSet::DescriptorSet(const std::vector< UniformInfo >& uniformBindings_,
 
         VkDescriptorSetLayoutBinding binding                    = {};
         binding.binding                                         = uniformBindings_[i].binding;
-        binding.descriptorType                                  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        binding.descriptorType                                  = uniformBindings_[i].type;
         binding.descriptorCount                                 = 1;
         binding.stageFlags                                      = uniformBindings_[i].stageFlags;
 
@@ -84,9 +84,10 @@ DescriptorSet::DescriptorSet(const std::vector< UniformInfo >& uniformBindings_,
         writeDescriptorSet.dstSet                       = descriptorSets[i];
         writeDescriptorSet.dstBinding                   = uniformBindings_[i].binding;
         writeDescriptorSet.dstArrayElement              = 0;
-        writeDescriptorSet.descriptorType               = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        writeDescriptorSet.descriptorType               = uniformBindings_[i].type;
         writeDescriptorSet.descriptorCount              = 1;
         writeDescriptorSet.pBufferInfo                  = &(uniformBindings_[i].bufferInfo);
+        writeDescriptorSet.pImageInfo                   = &(uniformBindings_[i].imageInfo);
 
         vkUpdateDescriptorSets(
             vk::engine.logicalDevice,

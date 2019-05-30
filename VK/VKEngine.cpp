@@ -90,10 +90,10 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 	ASSERT(createSwapchainImageViews(), "Failed to create swapchain image views", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
 	ASSERT(createRenderPasses(), "Failed to create render passes", VK_SC_RENDER_PASS_CREATION_ERROR);
     ASSERT(allocateUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
-	ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
 	ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
 	ASSERT(allocateCommandPools(), "Failed to allocate command pools", VK_SC_COMMAND_POOL_ALLOCATION_ERROR);
     ASSERT(createTextureImages(), "Failed to create texture images", VK_SC_TEXTURE_IMAGE_CREATION_ERROR);
+    ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
 	ASSERT(allocateNecessaryBuffers(), "Failed to create necessary buffers", VK_SC_BUFFER_CREATION_ERROR);
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 	ASSERT(initializeSynchronizationObjects(), "Failed to initialize sync-objects", VK_SC_SYNCHRONIZATION_OBJECT_INITIALIZATION_ERROR);
@@ -999,8 +999,10 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 	dynamicStateCreateInfo.dynamicStateCount									= static_cast< uint32_t >(dynamicStates.size());
 	dynamicStateCreateInfo.pDynamicStates										= dynamicStates.data();
 
+    uint32_t numUniforms = 2;
+
     std::vector< UniformInfo > bindings;
-    bindings.resize(swapchainImages.size());
+    bindings.resize(swapchainImages.size() * numUniforms);
 
     for (size_t i = 0; i < swapchainImages.size(); i++) {
 
@@ -1013,8 +1015,21 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
         mvpInfo.binding                             = 0;
         mvpInfo.stageFlags                          = VK_SHADER_STAGE_VERTEX_BIT;
         mvpInfo.bufferInfo                          = mvpBufferInfo;
+        mvpInfo.type                                = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 
-        bindings[i] = mvpInfo;
+        VkDescriptorImageInfo imageInfo             = {};
+        imageInfo.sampler                           = image->imgSampler;
+        imageInfo.imageLayout                       = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageInfo.imageView                         = image->imgView;
+
+        UniformInfo samplerInfo                     = {};
+        samplerInfo.binding                         = 1;
+        samplerInfo.stageFlags                      = VK_SHADER_STAGE_FRAGMENT_BIT;
+        samplerInfo.imageInfo                       = imageInfo;
+        samplerInfo.type                            = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+
+        bindings[i]                                 = mvpInfo;
+        bindings[i + swapchainImages.size()]        = samplerInfo;
 
     }
 
@@ -1031,7 +1046,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 		&colorBlendStateCreateInfo,
 		nullptr,						// Defined, but not referenced
 		bindings,
-        1,
+        static_cast< uint32_t >(bindings.size()),
 		renderPass
 		);
 
