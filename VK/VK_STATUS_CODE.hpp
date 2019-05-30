@@ -15,6 +15,7 @@
 */
 typedef enum VK_STATUS_CODE {
 
+    VK_SC_SAMPLER_CREATION_ERROR                            = -46,
     VK_SC_IMAGE_VIEW_CREATION_ERROR                         = -45,
     VK_SC_TEXTURE_IMAGE_VIEW_CREATION_ERROR                 = -44,
     VK_SC_TEXTURE_IMAGE_CREATION_ERROR                      = -43,

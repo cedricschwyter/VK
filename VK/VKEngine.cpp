@@ -350,13 +350,16 @@ VKAPI_ATTR VkBool32 VKAPI_CALL VKEngine::validationLayerDebugMessageCallback(
 	std::string header = "Validation Layer:	";
 	std::string message(pCallbackData_->pMessage);
 
-	logger::log(EVENT_LOG, header + message);
-
 	if (messageSeverity_ > VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
 	
 		logger::log(ERROR_LOG, header + message);
 
-	}
+    }
+    else {
+
+        logger::log(EVENT_LOG, header + message);
+
+    }
 
 	return VK_FALSE;
 
@@ -463,6 +466,7 @@ int VKEngine::evaluateDeviceSuitabilityScore(VkPhysicalDevice device_) {
 		|| !checkDeviceSwapchainExtensionSupport(device_) 
 		|| swapchainDetails.supportedFormats.empty() 
 		|| swapchainDetails.presentationModes.empty()
+        || !physicalDeviceFeatures.samplerAnisotropy
 		) {		// absolutely necessary features needed to run application on that GPU
 	
 		return 0;
@@ -565,8 +569,9 @@ VK_STATUS_CODE VKEngine::createLogicalDeviceFromPhysicalDevice() {
 
 	}
 
-	VkPhysicalDeviceFeatures physicalDeviceFeatures			= {};		// No features are necessary at the moment so this struct is just initialized to VK_FALSE (0)
-	
+	VkPhysicalDeviceFeatures physicalDeviceFeatures			= {};
+    physicalDeviceFeatures.samplerAnisotropy                = VK_TRUE;
+
 	VkDeviceCreateInfo deviceCreateInfo						= {};
 	deviceCreateInfo.sType									= VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	deviceCreateInfo.queueCreateInfoCount					= static_cast< uint32_t >(deviceQueueCreateInfos.size());
@@ -1333,6 +1338,7 @@ VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
 
 		hasFramebufferBeenResized = false;
 		recreateSwapchain();
+
         return VK_SC_SWAPCHAIN_RECREATED;
 
 	}

@@ -54,6 +54,7 @@ private:
     BaseBuffer*         stagingBuffer;
     VkImage             img;
     VkImageView         imgView;
+    VkSampler           imgSampler;
 
 };
 
