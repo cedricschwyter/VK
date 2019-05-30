@@ -99,7 +99,7 @@ private:
 	bool									hasFramebufferBeenResized			= false;
 	BaseBuffer*								vertexBuffer;
     BaseBuffer*                             indexBuffer;
-    std::vector< UniformBuffer* >           mvpBuffers;
+    UniformBuffer*                          mvpBuffer;
     bool                                    initialized                         = false;
     ImageObject*                            image;
 
@@ -391,11 +391,9 @@ private:
     /**
         Updates the uniform buffers in the shaders
 
-        @param      imageIndex_     The current swapchain image
-
         @return     Returns VK_SC_SUCCESS on success
     */
-    VK_STATUS_CODE updateUniformBuffers(uint32_t imageIndex_);
+    VK_STATUS_CODE updateUniformBuffers();
 
     /**
         Loads and generates necessary textures

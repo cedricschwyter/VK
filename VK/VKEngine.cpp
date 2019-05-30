@@ -999,39 +999,34 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 	dynamicStateCreateInfo.dynamicStateCount									= static_cast< uint32_t >(dynamicStates.size());
 	dynamicStateCreateInfo.pDynamicStates										= dynamicStates.data();
 
-    uint32_t numUniforms = 2;
+    VkDescriptorBufferInfo mvpBufferInfo        = {};
+    mvpBufferInfo.buffer                        = mvpBuffer->buf;
+    mvpBufferInfo.offset                        = 0;
+    mvpBufferInfo.range                         = sizeof(MVPBufferObject);
 
-    std::vector< UniformInfo > bindings;
-    bindings.resize(swapchainImages.size() * numUniforms);
+    UniformInfo mvpInfo                         = {};
+    mvpInfo.binding                             = 0;
+    mvpInfo.stageFlags                          = VK_SHADER_STAGE_VERTEX_BIT;
+    mvpInfo.bufferInfo                          = mvpBufferInfo;
+    mvpInfo.type                                = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 
-    for (size_t i = 0; i < swapchainImages.size(); i++) {
+    VkDescriptorImageInfo imageInfo             = {};
+    imageInfo.sampler                           = image->imgSampler;
+    imageInfo.imageLayout                       = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageInfo.imageView                         = image->imgView;
 
-        VkDescriptorBufferInfo mvpBufferInfo        = {};
-        mvpBufferInfo.buffer                        = mvpBuffers[i]->buf;
-        mvpBufferInfo.offset                        = 0;
-        mvpBufferInfo.range                         = sizeof(MVPBufferObject);
+    UniformInfo samplerInfo                     = {};
+    samplerInfo.binding                         = 1;
+    samplerInfo.stageFlags                      = VK_SHADER_STAGE_FRAGMENT_BIT;
+    samplerInfo.imageInfo                       = imageInfo;
+    samplerInfo.type                            = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 
-        UniformInfo mvpInfo                         = {};
-        mvpInfo.binding                             = 0;
-        mvpInfo.stageFlags                          = VK_SHADER_STAGE_VERTEX_BIT;
-        mvpInfo.bufferInfo                          = mvpBufferInfo;
-        mvpInfo.type                                = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-
-        VkDescriptorImageInfo imageInfo             = {};
-        imageInfo.sampler                           = image->imgSampler;
-        imageInfo.imageLayout                       = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView                         = image->imgView;
-
-        UniformInfo samplerInfo                     = {};
-        samplerInfo.binding                         = 1;
-        samplerInfo.stageFlags                      = VK_SHADER_STAGE_FRAGMENT_BIT;
-        samplerInfo.imageInfo                       = imageInfo;
-        samplerInfo.type                            = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-
-        bindings[i]                                 = mvpInfo;
-        bindings[i + swapchainImages.size()]        = samplerInfo;
-
-    }
+    std::vector< UniformInfo > bindings         = {
+    
+        mvpInfo,
+        samplerInfo
+    
+    };
 
 	pipeline = GraphicsPipeline(
 		"shaders/standard/vert.spv", 
@@ -1046,7 +1041,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 		&colorBlendStateCreateInfo,
 		nullptr,						// Defined, but not referenced
 		bindings,
-        static_cast< uint32_t >(bindings.size()),
+        bindings.size(),
 		renderPass
 		);
 
@@ -1313,7 +1308,7 @@ VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
 	}
 	ASSERT(result, "Failed to acquire swapchain image", VK_SC_SWAPCHAIN_IMAGE_ACQUIRE_ERROR);
 
-    ASSERT(updateUniformBuffers(swapchainImageIndex), "Failed to update uniform buffers", VK_SC_UNIFORM_BUFFER_UPDATE_ERROR);
+    ASSERT(updateUniformBuffers(), "Failed to update uniform buffers", VK_SC_UNIFORM_BUFFER_UPDATE_ERROR);
 
 	VkSubmitInfo submitInfo							= {};
 	submitInfo.sType								= VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1448,13 +1443,7 @@ VK_STATUS_CODE VKEngine::cleanSwapchain() {
 
 	logger::log(EVENT_LOG, "Cleaning swapchain...");
 
-    logger::log(EVENT_LOG, "Destroying uniform buffers..");
-    for (size_t i = 0; i < swapchainImages.size(); i++) {
-
-        delete mvpBuffers[i];
-        logger::log(EVENT_LOG, "Successfully destroyed uniform buffer");
-
-    }
+    delete mvpBuffer;
     logger::log(EVENT_LOG, "Successfully destroyed uniform buffers");
 
 	logger::log(EVENT_LOG, "Destroying framebuffers...");
@@ -1538,9 +1527,7 @@ VK_STATUS_CODE VKEngine::allocateNecessaryBuffers() {
 }
 
 VK_STATUS_CODE VKEngine::allocateUniformBuffers() {
-
-    mvpBuffers.resize(swapchainImages.size());
-    
+        
     VkDeviceSize bufferSize = sizeof(MVPBufferObject);
 
     VkBufferCreateInfo mvpBufferCreateInfo          = {};
@@ -1551,7 +1538,7 @@ VK_STATUS_CODE VKEngine::allocateUniformBuffers() {
 
     for (size_t i = 0; i < swapchainImages.size(); i++) {
 
-        mvpBuffers[i] = new UniformBuffer(&mvpBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        mvpBuffer = new UniformBuffer(&mvpBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
     }
 
@@ -1561,7 +1548,7 @@ VK_STATUS_CODE VKEngine::allocateUniformBuffers() {
 
 }
 
-VK_STATUS_CODE VKEngine::updateUniformBuffers(uint32_t imageIndex_) {
+VK_STATUS_CODE VKEngine::updateUniformBuffers() {
 
     static auto            start                    = std::chrono::high_resolution_clock::now();
     auto                   current                  = std::chrono::high_resolution_clock::now();
@@ -1570,12 +1557,12 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers(uint32_t imageIndex_) {
     
     MVPBufferObject mvp                             = {};
 
-    mvp.model                                       = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(1.0f, -1.0f, 1.0f));
+    mvp.model                                       = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     mvp.view                                        = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     mvp.proj                                        = glm::perspective(glm::radians(45.0f), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 10.0f);
     mvp.proj[1][1]                                  *= -1;      // GLM was designed for OpenGL where y-axis is inverted
 
-    mvpBuffers[imageIndex_]->fill(&mvp);
+    mvpBuffer->fill(&mvp);
 
     return VK_SC_SUCCESS;
 
