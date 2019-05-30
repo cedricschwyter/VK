@@ -137,7 +137,9 @@
   <ItemGroup>
     <ClCompile Include="ASSERT.cpp" />
     <ClCompile Include="BaseBuffer.cpp" />
+    <ClCompile Include="BaseCamera.cpp" />
     <ClCompile Include="DescriptorSet.cpp" />
+    <ClCompile Include="FPSCamera.cpp" />
     <ClCompile Include="GraphicsPipeline.cpp" />
     <ClCompile Include="ImageObject.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
@@ -160,9 +162,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseBuffer.hpp" />
+    <ClInclude Include="BaseCamera.hpp" />
     <ClInclude Include="BaseVertex.hpp" />
     <ClInclude Include="ConsoleColor.hpp" />
     <ClInclude Include="DescriptorSet.hpp" />
+    <ClInclude Include="FPSCamera.hpp" />
     <ClInclude Include="GraphicsPipeline.hpp" />
     <ClInclude Include="ImageObject.hpp" />
     <ClInclude Include="IndexBuffer.hpp" />
