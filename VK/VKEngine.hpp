@@ -55,7 +55,7 @@ public:
     std::vector< VkImage >					swapchainImages;
     VkCommandPool							standardCommandPool;
     VkQueue									graphicsQueue                       = VK_NULL_HANDLE;
-    FPSCamera*                             camera;
+    FPSCamera*                              camera;
 
 	/**
 		Initializes VKEngine and loads dependencies
@@ -83,7 +83,7 @@ private:
 	
 	};
 #ifdef VK_DEVELOPMENT
-	const bool								validationLayersEnabled				= false;
+	const bool								validationLayersEnabled				= true;
 #else
 	const bool								validationLayersEnabled				= false;
 #endif
