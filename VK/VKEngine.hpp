@@ -43,6 +43,8 @@
 #include "UniformBuffer.hpp"
 #include "MVPBufferObject.cpp"
 #include "ImageObject.hpp"
+#include "BaseCamera.hpp"
+#include "FPSCamera.hpp"
 
 class VKEngine {
 public:
@@ -51,6 +53,7 @@ public:
 	VkDevice								logicalDevice;
 	VkAllocationCallbacks*					allocator;
     std::vector< VkImage >					swapchainImages;
+    FPSCamera*                             camera;
 
 	/**
 		Initializes VKEngine and loads dependencies
@@ -69,7 +72,7 @@ private:
 	
 	};
 #ifdef VK_DEVELOPMENT
-	const bool								validationLayersEnabled				= true;
+	const bool								validationLayersEnabled				= false;
 #else
 	const bool								validationLayersEnabled				= false;
 #endif
@@ -401,5 +404,17 @@ private:
         @return     Returns VK_SC_SUCCESS on success
     */
     VK_STATUS_CODE createTextureImages(void);
+
+    /**
+        Creates a camera object
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE createCamera(void);
+
+    /**
+        Checks for keyboard and mouse input
+    */
+    void checkInput(void);
 
 };

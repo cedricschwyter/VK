@@ -97,6 +97,7 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 	ASSERT(allocateNecessaryBuffers(), "Failed to create necessary buffers", VK_SC_BUFFER_CREATION_ERROR);
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 	ASSERT(initializeSynchronizationObjects(), "Failed to initialize sync-objects", VK_SC_SYNCHRONIZATION_OBJECT_INITIALIZATION_ERROR);
+    ASSERT(createCamera(), "Failed to create camera", VK_SC_CAMERA_CREATION_ERROR);
 
     if (!initialized) {
 
@@ -153,6 +154,7 @@ VK_STATUS_CODE VKEngine::loop() {
 		}
 
 		glfwPollEvents();
+        checkInput();
 		showNextSwapchainImage();
 	
 	}
@@ -168,6 +170,9 @@ VK_STATUS_CODE VKEngine::loop() {
 VK_STATUS_CODE VKEngine::clean() {
 
 	ASSERT(cleanSwapchain(), "Failed to clean swapchain", VK_SC_SWAPCHAIN_CLEAN_ERROR);
+
+    delete camera;
+    logger::log(EVENT_LOG, "Successfully destroyed camera");
 
     delete image;
 
@@ -1558,7 +1563,7 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers() {
     MVPBufferObject mvp                             = {};
 
     mvp.model                                       = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    mvp.view                                        = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    mvp.view                                        = camera->getViewMatrix();
     mvp.proj                                        = glm::perspective(glm::radians(45.0f), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 10.0f);
     mvp.proj[1][1]                                  *= -1;      // GLM was designed for OpenGL where y-axis is inverted
 
@@ -1583,5 +1588,24 @@ VK_STATUS_CODE VKEngine::createTextureImages() {
     logger::log(EVENT_LOG, "Successfully loaded textures");
 
     return VK_SC_SUCCESS;
+
+}
+
+VK_STATUS_CODE VKEngine::createCamera() {
+
+    camera = new FPSCamera();
+
+    return VK_SC_SUCCESS;
+
+}
+
+void VKEngine::checkInput() {
+
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+    
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+    
+    }
+    camera->checkInput(window);
 
 }
