@@ -15,8 +15,6 @@ class FPSCamera :
 {
 public:
 
-    float camSpeed       = 0.001f;
-
     /**
         Default constructor
     */
@@ -28,6 +26,11 @@ public:
         @param      window_     A pointer to the GLFWwindow in focus
     */
     void checkInput(GLFWwindow* window_);
+
+    /**
+        Calculates the new direction vector for the camera
+    */
+    static void calculateNewFrontVector(double xPos_, double yPos_);
 
     /**
         Default constructor

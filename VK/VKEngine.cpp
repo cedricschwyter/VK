@@ -43,7 +43,6 @@ VK_STATUS_CODE VKEngine::initWindow() {
 
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-	glfwWindowHint(GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	glfwWindowHint(GLFW_FOCUSED, GLFW_TRUE);
 	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
@@ -67,11 +66,16 @@ VK_STATUS_CODE VKEngine::initWindow() {
 	stbi_image_free(windowIcon[0].pixels);
 	logger::log(EVENT_LOG, "Successfully initialized window");
 
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 	glfwSetWindowUserPointer(window, this);
 	logger::log(EVENT_LOG, "Successfully set GLFW window user pointer");
 
 	glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 	logger::log(EVENT_LOG, "Successfully set framebuffer resize callback");
+
+    glfwSetCursorPosCallback(window, mouseInputCallback);
+    logger::log(EVENT_LOG, "Successfully set cursor position callback");
 
 	return VK_SC_SUCCESS;
 
@@ -1603,5 +1607,12 @@ void VKEngine::checkInput() {
     
     }
     camera->checkInput(window);
+
+}
+
+void VKEngine::mouseInputCallback(GLFWwindow* window_, double xPos_, double yPos_) {
+
+    auto vkengine = reinterpret_cast<VKEngine*>(glfwGetWindowUserPointer(window_));
+    vkengine->camera->calculateNewFrontVector(xPos_, yPos_);
 
 }

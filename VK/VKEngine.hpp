@@ -417,4 +417,13 @@ private:
     */
     void checkInput(void);
 
+    /**
+        Callback function for GLFW on mouse events
+
+        @param      window_     A pointer to a focused GLFWwindow
+        @param      xPos_       The x-component of the mouse's position on screen
+        @param      yPos_       The y-component of the mouse's position on screen
+    */
+    static void mouseInputCallback(GLFWwindow* window_, double xPos_, double yPos_);
+
 };
