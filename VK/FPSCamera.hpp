@@ -28,9 +28,17 @@ public:
     void checkInput(GLFWwindow* window_);
 
     /**
-        Calculates the new direction vector for the camera
+        Calculates the new orientation for the camera
+
+        @param      xPos_       The x-position of the cursor
+        @param      yPos_       The y-position of the cursor
     */
-    static void calculateNewFrontVector(double xPos_, double yPos_);
+    void processMouseMovement(double xPos_, double yPos_);
+
+    /**
+        Updates the camera orientation vectors
+    */
+    void updateCameraVectors(void);
 
     /**
         Default constructor

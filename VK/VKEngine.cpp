@@ -1612,7 +1612,7 @@ void VKEngine::checkInput() {
 
 void VKEngine::mouseInputCallback(GLFWwindow* window_, double xPos_, double yPos_) {
 
-    auto vkengine = reinterpret_cast<VKEngine*>(glfwGetWindowUserPointer(window_));
-    vkengine->camera->calculateNewFrontVector(xPos_, yPos_);
+    auto vkengine = reinterpret_cast< VKEngine* >(glfwGetWindowUserPointer(window_));
+    vkengine->camera->processMouseMovement(xPos_, yPos_);
 
 }

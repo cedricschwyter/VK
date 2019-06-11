@@ -22,7 +22,7 @@ BaseCamera::~BaseCamera() {
 
 }
 
-glm::mat4& BaseCamera::getViewMatrix() {
+glm::mat4 BaseCamera::getViewMatrix() {
 
     glm::mat4 view; 
     view = glm::lookAt(camPos, camPos + camFront, camUp);

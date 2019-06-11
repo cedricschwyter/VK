@@ -53,15 +53,51 @@ void FPSCamera::checkInput(GLFWwindow* window_) {
 
 }
 
-void FPSCamera::calculateNewFrontVector(double xPos_, double yPos_) {
+void FPSCamera::processMouseMovement(double xPos_, double yPos_) {
 
-    static double lastX = 0;
-    static double lastY = 0;
+    double xOff;
+    double yOff;
 
-    double xOff = xPos_ - lastX;
-    double yOff = yPos_ - lastY;  
+    if (firstMouse) {
+
+        xOff = 0;
+        yOff = 0;
+        firstMouse = false;
+
+    }
+    else {
+    
+        xOff = xPos_ - lastX;
+        yOff = -(yPos_ - lastY);
+    
+    }
+ 
     lastX = xPos_;
     lastY = yPos_;
+
+    float sensitivity = 0.05f;
+    xOff *= sensitivity;
+    yOff *= sensitivity;
+
+    yaw += xOff;
+    pitch += yOff;
+
+    pitch = std::clamp(pitch, -89.0, 89.0);
+
+    updateCameraVectors();
+
+}
+
+void FPSCamera::updateCameraVectors() {
+
+    glm::vec3 newFront;
+    newFront.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    newFront.y = sin(glm::radians(pitch));
+    newFront.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+    camFront = glm::normalize(newFront);
+    camRight = glm::normalize(glm::cross(camFront, camUp));
+    camUp = glm::normalize(glm::cross(camRight, camFront));
 
 }
 
