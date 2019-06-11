@@ -10,50 +10,10 @@
 #include "FPSCamera.hpp"
 
 
-FPSCamera::FPSCamera() {
-
-
-
-}
-
-void FPSCamera::checkInput(GLFWwindow* window_) {
-
-    static float deltaTime      = 0.0f;
-    static float lastFrame      = 0.0f;
-
-    float currentFrame          = static_cast< float >(glfwGetTime());
-    deltaTime                   = currentFrame - lastFrame;
-    lastFrame                   = currentFrame;
-
-    float camSpeed              = 2.5f * deltaTime;
-
-    if (glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS) {
-
-        camPos += camSpeed * camFront;
-
-    }
-
-    if (glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS) {
-
-        camPos -= camSpeed * camFront;
-
-    }
-
-    if (glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS) {
-
-        camPos -= glm::normalize(glm::cross(camFront, camUp)) * camSpeed;
-
-    }
-
-    if (glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS) {
-
-        camPos += glm::normalize(glm::cross(camFront, camUp)) * camSpeed;
-
-    }
-
-}
-
 void FPSCamera::processMouseMovement(double xPos_, double yPos_) {
+
+    static double lastX = 0.0;
+    static double lastY = 0.0;
 
     double xOff;
     double yOff;
@@ -79,25 +39,21 @@ void FPSCamera::processMouseMovement(double xPos_, double yPos_) {
     xOff *= sensitivity;
     yOff *= sensitivity;
 
-    yaw += xOff;
-    pitch += yOff;
+    BaseCamera::yaw += xOff;
+    BaseCamera::pitch += yOff;
 
-    pitch = std::clamp(pitch, -89.0, 89.0);
+    BaseCamera::pitch = std::clamp(BaseCamera::pitch, -89.0, 89.0);
+    std::cout << BaseCamera::pitch << "    " << BaseCamera::yaw << std::endl;
 
     updateCameraVectors();
 
 }
 
-void FPSCamera::updateCameraVectors() {
+void FPSCamera::processMouseScroll(double xOff_, double yOff_) {
 
-    glm::vec3 newFront;
-    newFront.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    newFront.y = sin(glm::radians(pitch));
-    newFront.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    zoom -= yOff_;
 
-    camFront = glm::normalize(newFront);
-    camRight = glm::normalize(glm::cross(camFront, camUp));
-    camUp = glm::normalize(glm::cross(camRight, camFront));
+    zoom = std::clamp(zoom, 1.0, 45.0);
 
 }
 

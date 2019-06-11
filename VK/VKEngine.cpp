@@ -74,8 +74,11 @@ VK_STATUS_CODE VKEngine::initWindow() {
 	glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 	logger::log(EVENT_LOG, "Successfully set framebuffer resize callback");
 
-    glfwSetCursorPosCallback(window, mouseInputCallback);
+    glfwSetCursorPosCallback(window, mouseMoveCallback);
     logger::log(EVENT_LOG, "Successfully set cursor position callback");
+
+    glfwSetScrollCallback(window, mouseScrollCallback);
+    logger::log(EVENT_LOG, "Successfully set mouse scroll callback");
 
 	return VK_SC_SUCCESS;
 
@@ -1562,9 +1565,9 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers() {
     
     MVPBufferObject mvp                             = {};
 
-    mvp.model                                       = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    mvp.model                                       = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     mvp.view                                        = camera->getViewMatrix();
-    mvp.proj                                        = glm::perspective(glm::radians(45.0f), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 10.0f);
+    mvp.proj                                        = glm::perspective(static_cast< float >(glm::radians(camera->zoom)), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 10.0f);
     mvp.proj[1][1]                                  *= -1;      // GLM was designed for OpenGL where y-axis is inverted
 
     mvpBuffer->fill(&mvp);
@@ -1610,9 +1613,16 @@ void VKEngine::checkInput() {
 
 }
 
-void VKEngine::mouseInputCallback(GLFWwindow* window_, double xPos_, double yPos_) {
+void VKEngine::mouseMoveCallback(GLFWwindow* window_, double xPos_, double yPos_) {
 
     auto vkengine = reinterpret_cast< VKEngine* >(glfwGetWindowUserPointer(window_));
     vkengine->camera->processMouseMovement(xPos_, yPos_);
+
+}
+
+void VKEngine::mouseScrollCallback(GLFWwindow* window_, double xOff_, double yOff_) {
+
+    auto vkengine = reinterpret_cast< VKEngine* >(glfwGetWindowUserPointer(window_));
+    vkengine->camera->processMouseScroll(xOff_, yOff_);
 
 }

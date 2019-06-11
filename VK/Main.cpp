@@ -33,6 +33,12 @@ namespace vk {
 	const unsigned int					MAX_IN_FLIGHT_FRAMES		= 4;
     VkQueue								transferQueue               = VK_NULL_HANDLE;
     VkCommandPool						transferCommandPool;
+    const double                        YAW                         = 225.0;
+    const double                        PITCH                       = 0.0;
+    const double                        ROLL                        = 0.0;
+    const double                        SPEED                       = 2.0;
+    const double                        SENS                        = 0.1;
+    const double                        ZOOM                        = 45.0;
 
 	const std::vector< BaseVertex >		vertices					= {
 	

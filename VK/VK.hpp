@@ -28,6 +28,14 @@ namespace vk {
     extern VkQueue                              transferQueue;
     extern VkCommandPool                        transferCommandPool;
 
+    // Starting/Default camera state values
+    extern const double                         YAW;
+    extern const double                         PITCH;
+    extern const double                         ROLL;
+    extern const double                         SPEED;
+    extern const double                         SENS;
+    extern const double                         ZOOM;
+
 	/**
 		Handles main initialization of everything
 

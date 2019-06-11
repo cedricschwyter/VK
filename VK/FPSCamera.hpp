@@ -13,19 +13,8 @@
 class FPSCamera :
     public BaseCamera
 {
+    using BaseCamera::BaseCamera;
 public:
-
-    /**
-        Default constructor
-    */
-    FPSCamera(void);
-
-    /**
-        Check for mouse and keyboard input related to the camera object
-
-        @param      window_     A pointer to the GLFWwindow in focus
-    */
-    void checkInput(GLFWwindow* window_);
 
     /**
         Calculates the new orientation for the camera
@@ -36,9 +25,12 @@ public:
     void processMouseMovement(double xPos_, double yPos_);
 
     /**
-        Updates the camera orientation vectors
+        Processes mouse scrolling events
+
+        @param      xOff_       The x-offset of the mousewheel
+        @param      yOff_       The y-offset of the mousewheel
     */
-    void updateCameraVectors(void);
+    void processMouseScroll(double xOff_, double yOff_);
 
     /**
         Default constructor

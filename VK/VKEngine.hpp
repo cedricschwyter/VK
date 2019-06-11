@@ -55,7 +55,7 @@ public:
     std::vector< VkImage >					swapchainImages;
     VkCommandPool							standardCommandPool;
     VkQueue									graphicsQueue                       = VK_NULL_HANDLE;
-    FPSCamera*                              camera;
+    FPSCamera*                             camera;
 
 	/**
 		Initializes VKEngine and loads dependencies
@@ -424,6 +424,14 @@ private:
         @param      xPos_       The x-component of the mouse's position on screen
         @param      yPos_       The y-component of the mouse's position on screen
     */
-    static void mouseInputCallback(GLFWwindow* window_, double xPos_, double yPos_);
+    static void mouseMoveCallback(GLFWwindow* window_, double xPos_, double yPos_);
+
+    /**
+        Callback function for GLFW on scroll events
+
+        @param      xOff_       The x-component of the scroll wheels offset
+        @param      yOff_       The y-component of the scroll wheels offset
+    */
+    static void mouseScrollCallback(GLFWwindow* window_, double xOff_, double yOff_);
 
 };
