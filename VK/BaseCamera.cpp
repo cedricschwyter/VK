@@ -20,7 +20,7 @@ BaseCamera::BaseCamera(
         camUp(glm::vec3(0.0f, 1.0f, 0.0f)),
         speed(vk::SPEED), 
         sens(vk::SENS), 
-        zoom(vk::ZOOM) {
+        fov(vk::FOV) {
 
     camPos      = pos_;
     worldUp     = up_;
@@ -94,6 +94,7 @@ void BaseCamera::updateCameraVectors() {
     newFront.z = glm::sin(static_cast< float >(glm::radians(BaseCamera::yaw))) * glm::cos(static_cast< float >(glm::radians(BaseCamera::pitch)));
 
     camFront = glm::normalize(newFront);
+    camUp = worldUp;
     camRight = glm::normalize(glm::cross(camFront, camUp));
 
 }

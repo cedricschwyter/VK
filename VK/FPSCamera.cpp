@@ -43,7 +43,7 @@ void FPSCamera::processMouseMovement(double xPos_, double yPos_) {
     BaseCamera::pitch += yOff;
 
     BaseCamera::pitch = std::clamp(BaseCamera::pitch, -89.0, 89.0);
-    std::cout << BaseCamera::pitch << "    " << BaseCamera::yaw << std::endl;
+    std::cout << "Pitch: " << BaseCamera::pitch << "    Yaw: " << BaseCamera::yaw << std::endl;
 
     updateCameraVectors();
 
@@ -51,10 +51,10 @@ void FPSCamera::processMouseMovement(double xPos_, double yPos_) {
 
 void FPSCamera::processMouseScroll(double xOff_, double yOff_) {
 
-    zoom -= yOff_;
+    fov -= yOff_;
 
-    zoom = std::clamp(zoom, 1.0, 45.0);
-    std::cout << zoom << std::endl;
+    fov = std::clamp(fov, 1.0, 103.0);
+    std::cout << "Zoom: " << fov << std::endl;
 
 }
 

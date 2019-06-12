@@ -23,7 +23,7 @@ namespace vk {
     extern const double                         ROLL;
     extern const double                         SPEED;
     extern const double                         SENS;
-    extern const double                         ZOOM;
+    extern const double                         FOV;
 
 }
 
@@ -54,7 +54,7 @@ public:
     double          roll;
     double          speed;
     double          sens;
-    double          zoom;
+    double          fov;
 
 
     bool            firstMouse          = true;

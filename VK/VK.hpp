@@ -34,7 +34,7 @@ namespace vk {
     extern const double                         ROLL;
     extern const double                         SPEED;
     extern const double                         SENS;
-    extern const double                         ZOOM;
+    extern const double                         FOV;
 
 	/**
 		Handles main initialization of everything
