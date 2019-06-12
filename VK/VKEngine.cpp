@@ -1568,8 +1568,7 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers() {
     mvp.model                                       = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     mvp.model                                       = glm::rotate(mvp.model, delta * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     mvp.view                                        = camera->getViewMatrix();
-    mvp.proj                                        = glm::perspective(static_cast< float >(glm::radians(camera->fov)), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 10.0f);
-    mvp.proj[1][1]                                  *= -1;      // GLM was designed for OpenGL where y-axis is inverted
+    mvp.proj                                        = glm::perspective(static_cast< float >(glm::radians(camera->fov)), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 100.0f);
 
     mvpBuffer->fill(&mvp);
 
