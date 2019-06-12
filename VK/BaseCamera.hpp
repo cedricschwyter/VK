@@ -1,11 +1,11 @@
 /**
     Defines the BaseCamera class
 
-    @author		D3PSI
-    @version	0.0.1 02.12.2019
+    @author        D3PSI
+    @version    0.0.1 02.12.2019
 
-    @file		BaseCamera.hpp
-    @brief		Definition of the BaseCamera class
+    @file        BaseCamera.hpp
+    @brief        Definition of the BaseCamera class
 */
 #pragma once
 #include <GLFW/glfw3.h>

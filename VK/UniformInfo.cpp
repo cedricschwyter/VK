@@ -1,11 +1,11 @@
 /**
     Defines the UniformInfo struct
 
-    @author		D3PSI
-    @version	0.0.1 02.12.2019
+    @author        D3PSI
+    @version    0.0.1 02.12.2019
 
-    @file		UniformInfo.cpp
-    @brief		Definition of the UniformInfo struct
+    @file        UniformInfo.cpp
+    @brief        Definition of the UniformInfo struct
 */ 
 #pragma once
 #include <vulkan/vulkan.h>
