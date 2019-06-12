@@ -9,22 +9,3 @@
 */
 #include "UniformBuffer.hpp"
 #include "VK.hpp"
-
-
-/*VK_STATUS_CODE MVPBuffer::fill(MVPBufferObject mvp_) {
-
-    void* data;
-    vkMapMemory(
-        vk::engine.logicalDevice,
-        mem,
-        0,
-        sizeof(mvp_),
-        0,
-        &data
-    );
-    memcpy(data, &mvp_, sizeof(mvp_));
-    vkUnmapMemory(vk::engine.logicalDevice, mem);
-
-    return VK_SC_SUCCESS;
-
-}*/
