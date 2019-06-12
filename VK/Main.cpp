@@ -38,7 +38,7 @@ namespace vk {
     const double                        ROLL                        = 0.0;
     const double                        SPEED                       = 2.0;
     const double                        SENS                        = 0.1;
-    const double                        FOV                        = 45.0;
+    const double                        FOV                         = 45.0;
 
 	const std::vector< BaseVertex >		vertices					= {
 	

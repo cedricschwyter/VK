@@ -56,8 +56,8 @@ public:
     double          sens;
     double          fov;
 
-
-    bool            firstMouse          = true;
+    bool            inputEnabled            = true;
+    bool            firstMouse              = true; 
 
     /**
         Constructor with arguments
@@ -77,11 +77,11 @@ public:
         );
 
     /**
-        Check for mouse and keyboard input related to the camera object
+        Check for keyboard input related to the camera object
 
         @param      window_     A pointer to the GLFWwindow in focus
     */
-    void checkInput(GLFWwindow* window_);
+    void proccessKeyboardInput(GLFWwindow* window_);
 
     /**
         Calculates the new orientation for the camera

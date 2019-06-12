@@ -37,7 +37,7 @@ BaseCamera::~BaseCamera() {
 
 }
 
-void BaseCamera::checkInput(GLFWwindow* window_) {
+void BaseCamera::proccessKeyboardInput(GLFWwindow* window_) {
 
     static float deltaTime = 0.0f;
     static float lastFrame = 0.0f;
@@ -69,6 +69,20 @@ void BaseCamera::checkInput(GLFWwindow* window_) {
     if (glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS) {
 
         camPos += glm::normalize(glm::cross(camFront, camUp)) * camSpeed;
+
+    }
+
+    if (glfwGetKey(window_, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+
+        inputEnabled = false;
+        glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        firstMouse = true;
+
+    }
+    else if (glfwGetKey(window_, GLFW_KEY_LEFT_CONTROL) == GLFW_RELEASE) {
+    
+        inputEnabled = true;
+        glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     }
 

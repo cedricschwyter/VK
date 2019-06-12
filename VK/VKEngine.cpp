@@ -1609,7 +1609,7 @@ void VKEngine::checkInput() {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     
     }
-    camera->checkInput(window);
+    camera->proccessKeyboardInput(window);
 
 }
 

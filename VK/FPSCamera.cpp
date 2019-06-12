@@ -15,38 +15,40 @@ void FPSCamera::processMouseMovement(double xPos_, double yPos_) {
     static double lastX = 0.0;
     static double lastY = 0.0;
 
-    double xOff;
-    double yOff;
+    if (inputEnabled) {
 
-    if (firstMouse) {
+        double xOff;
+        double yOff;
 
-        xOff = 0;
-        yOff = 0;
-        firstMouse = false;
+        if (firstMouse) {
+
+            xOff = 0;
+            yOff = 0;
+            firstMouse = false;
+
+        }
+        else {
+
+            xOff = xPos_ - lastX;
+            yOff = yPos_ - lastY;
+
+        }
+
+        lastX = xPos_;
+        lastY = yPos_;
+
+        xOff *= sens;
+        yOff *= sens;
+
+
+        yaw += xOff;
+        pitch += yOff;
+
+        pitch = std::clamp(pitch, -89.0, 89.0);
+
+        updateCameraVectors();
 
     }
-    else {
-    
-        xOff = xPos_ - lastX;
-        yOff = yPos_ - lastY;
-    
-    }
- 
-    lastX = xPos_;
-    lastY = yPos_;
-
-    xOff *= sens;
-    yOff *= sens;
-
-
-        BaseCamera::yaw += xOff;
-        BaseCamera::pitch += yOff;
-
-        BaseCamera::pitch = std::clamp(BaseCamera::pitch, -89.0, 89.0);
-        std::cout << BaseCamera::pitch << std::endl;
-
-
-    updateCameraVectors();
 
 }
 
@@ -56,9 +58,9 @@ void FPSCamera::processMouseScroll(double xOff_, double yOff_) {
 
         fov -= yOff_;
 
-    }
+        fov = std::clamp(fov, 1.0, 105.0);
 
-    fov = std::clamp(fov, 1.0, 105.0);
+    }
 
 }
 
