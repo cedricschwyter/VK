@@ -15,7 +15,17 @@
 #include <algorithm>
 #include <iostream>
 
-#include "VK.hpp"
+namespace vk {
+
+    // Starting/Default camera state values
+    extern const double                         YAW;
+    extern const double                         PITCH;
+    extern const double                         ROLL;
+    extern const double                         SPEED;
+    extern const double                         SENS;
+    extern const double                         ZOOM;
+
+}
 
 /**
     Defines camera movement states, not necessary because unused though
@@ -54,7 +64,7 @@ public:
 
         @param      pos_        The cameras initial position
         @param      up_         The cameras initial up-vector
-        @param      yaw_        The cameras inital yaw-angle
+        @param      yaw_        The cameras initial yaw-angle
         @param      pitch_      The cameras initial pitch-angle
         @param      roll_       The cameras initial roll-angle
     */

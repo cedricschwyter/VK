@@ -1242,7 +1242,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 		renderPassBeginInfo.renderArea.offset					= {0, 0};
 		renderPassBeginInfo.renderArea.extent					= swapchainImageExtent;
 		
-		VkClearValue clearColor									= {0.0f, 0.0f, 0.0f, 1.0f};
+		VkClearValue clearColor									= { 122.0f / 255.0f, 122.0f / 255.0f, 122.0f / 255.0f, 1.0f};
 		
 		renderPassBeginInfo.clearValueCount						= 1;
 		renderPassBeginInfo.pClearValues						= &clearColor;
@@ -1565,7 +1565,8 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers() {
     
     MVPBufferObject mvp                             = {};
 
-    mvp.model                                       = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    //mvp.model                                       = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    mvp.model                                       = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f));
     mvp.view                                        = camera->getViewMatrix();
     mvp.proj                                        = glm::perspective(static_cast< float >(glm::radians(camera->zoom)), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 10.0f);
     mvp.proj[1][1]                                  *= -1;      // GLM was designed for OpenGL where y-axis is inverted
@@ -1581,7 +1582,7 @@ VK_STATUS_CODE VKEngine::createTextureImages() {
     logger::log(EVENT_LOG, "Loading textures...");
     
     image = new ImageObject(
-        "res/textures/application/vulkan.png",
+        "res/textures/application/infinity.jpg",
         VK_FORMAT_R8G8B8A8_UNORM,
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,

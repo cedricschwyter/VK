@@ -8,7 +8,7 @@
     @brief		Implementation of the BaseCamera class
 */
 #include "BaseCamera.hpp"
-
+#include "VK.hpp"
 
 BaseCamera::BaseCamera(
     glm::vec3         pos_,
@@ -17,6 +17,7 @@ BaseCamera::BaseCamera(
     float             pitch_,
     float             roll_
     ) : camFront(glm::vec3(0.0f, 0.0f, -1.0f)), 
+        camUp(glm::vec3(0.0f, 1.0f, 0.0f)),
         speed(vk::SPEED), 
         sens(vk::SENS), 
         zoom(vk::ZOOM) {
@@ -94,7 +95,6 @@ void BaseCamera::updateCameraVectors() {
 
     camFront = glm::normalize(newFront);
     camRight = glm::normalize(glm::cross(camFront, camUp));
-    camUp = glm::normalize(glm::cross(camRight, camFront));
 
 }
 

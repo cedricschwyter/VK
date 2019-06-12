@@ -22,7 +22,7 @@ ImageObject::ImageObject(
     ) {
 
     stbi_uc* pix = stbi_load(
-        "res/textures/application/vulkan.png",
+        path_,
         &w,
         &h,
         &ch,

@@ -55,7 +55,7 @@ public:
     std::vector< VkImage >					swapchainImages;
     VkCommandPool							standardCommandPool;
     VkQueue									graphicsQueue                       = VK_NULL_HANDLE;
-    FPSCamera*                             camera;
+    BaseCamera*                             camera;
 
 	/**
 		Initializes VKEngine and loads dependencies

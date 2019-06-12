@@ -54,6 +54,7 @@ void FPSCamera::processMouseScroll(double xOff_, double yOff_) {
     zoom -= yOff_;
 
     zoom = std::clamp(zoom, 1.0, 45.0);
+    std::cout << zoom << std::endl;
 
 }
 
