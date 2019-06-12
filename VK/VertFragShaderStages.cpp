@@ -1,11 +1,11 @@
 /**
-	Implements the VertFragShaderStages wrapper for a Vulkan shader stage
+    Implements the VertFragShaderStages wrapper for a Vulkan shader stage
 
-	@author		D3PSI
-	@version	0.0.1 02.12.2019
+    @author        D3PSI
+    @version    0.0.1 02.12.2019
 
-	@file		VertFragShaderStages.cpp
-	@brief		Implementation of the VertFragShaderStages wrapper for a Vulkan shader stage
+    @file        VertFragShaderStages.cpp
+    @brief        Implementation of the VertFragShaderStages wrapper for a Vulkan shader stage
 */
 #include "VertFragShaderStages.hpp"
 #include "VK.hpp"
@@ -18,57 +18,57 @@ VertFragShaderStages::VertFragShaderStages() {
 
 VertFragShaderStages::VertFragShaderStages(const char* vertPath_, const char* fragPath_) {
 
-	const std::vector< char > vertCode					= vk::loadFile(vertPath_);
-	const std::vector< char > fragCode					= vk::loadFile(fragPath_);
+    const std::vector< char > vertCode                    = vk::loadFile(vertPath_);
+    const std::vector< char > fragCode                    = vk::loadFile(fragPath_);
 
-	vertModule											= createShaderModuleFromBinary(&vertCode);
-	fragModule											= createShaderModuleFromBinary(&fragCode);
+    vertModule                                            = createShaderModuleFromBinary(&vertCode);
+    fragModule                                            = createShaderModuleFromBinary(&fragCode);
 
-	vertStageInfo										= {};
-	vertStageInfo.sType									= VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-	vertStageInfo.stage									= VK_SHADER_STAGE_VERTEX_BIT;
-	vertStageInfo.module								= vertModule;
-	vertStageInfo.pName									= "main";
+    vertStageInfo                                        = {};
+    vertStageInfo.sType                                    = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    vertStageInfo.stage                                    = VK_SHADER_STAGE_VERTEX_BIT;
+    vertStageInfo.module                                = vertModule;
+    vertStageInfo.pName                                    = "main";
 
-	fragStageInfo										= {};
-	fragStageInfo.sType									= VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-	fragStageInfo.stage									= VK_SHADER_STAGE_FRAGMENT_BIT;
-	fragStageInfo.module								= fragModule;
-	fragStageInfo.pName									= "main";
+    fragStageInfo                                        = {};
+    fragStageInfo.sType                                    = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    fragStageInfo.stage                                    = VK_SHADER_STAGE_FRAGMENT_BIT;
+    fragStageInfo.module                                = fragModule;
+    fragStageInfo.pName                                    = "main";
 
-	stages												= { vertStageInfo, fragStageInfo };
+    stages                                                = { vertStageInfo, fragStageInfo };
 
 }
 
 VK_STATUS_CODE VertFragShaderStages::destroyModules() {
 
-	vkDestroyShaderModule(vk::engine.logicalDevice, vertModule, vk::engine.allocator);
-	vkDestroyShaderModule(vk::engine.logicalDevice, fragModule, vk::engine.allocator);
+    vkDestroyShaderModule(vk::engine.logicalDevice, vertModule, vk::engine.allocator);
+    vkDestroyShaderModule(vk::engine.logicalDevice, fragModule, vk::engine.allocator);
 
-	return VK_SC_SUCCESS;
+    return VK_SC_SUCCESS;
 
 }
 
 VkShaderModule VertFragShaderStages::createShaderModuleFromBinary(const std::vector< char >* code_) {
 
-	logger::log(EVENT_LOG, "Creating shader module...");
+    logger::log(EVENT_LOG, "Creating shader module...");
 
-	VkShaderModuleCreateInfo shaderModuleCreateInfo			= {};
-	shaderModuleCreateInfo.sType							= VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-	shaderModuleCreateInfo.codeSize							= code_->size();
-	shaderModuleCreateInfo.pCode							= reinterpret_cast< const uint32_t* >(code_->data());
+    VkShaderModuleCreateInfo shaderModuleCreateInfo            = {};
+    shaderModuleCreateInfo.sType                            = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    shaderModuleCreateInfo.codeSize                            = code_->size();
+    shaderModuleCreateInfo.pCode                            = reinterpret_cast< const uint32_t* >(code_->data());
 
-	VkShaderModule module;
-	VkResult result = vkCreateShaderModule(
-		vk::engine.logicalDevice,
-		&shaderModuleCreateInfo, 
-		vk::engine.allocator,
-		&module
-		);
-	ASSERT(result, "Failed to create shader module", VK_SC_SHADER_MODULE_CREATION_ERROR);
+    VkShaderModule module;
+    VkResult result = vkCreateShaderModule(
+        vk::engine.logicalDevice,
+        &shaderModuleCreateInfo, 
+        vk::engine.allocator,
+        &module
+        );
+    ASSERT(result, "Failed to create shader module", VK_SC_SHADER_MODULE_CREATION_ERROR);
 
-	logger::log(EVENT_LOG, "Successfully created shader module");
+    logger::log(EVENT_LOG, "Successfully created shader module");
 
-	return module;
+    return module;
 
 }

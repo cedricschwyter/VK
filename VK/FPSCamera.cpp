@@ -1,41 +1,64 @@
 /**
     Implements the FPSCamera class
 
-    @author		D3PSI
-    @version	0.0.1 02.12.2019
+    @author        D3PSI
+    @version    0.0.1 02.12.2019
 
-    @file		FPSCamera.cpp
-    @brief		Implementation of the FPSCamera class
+    @file        FPSCamera.cpp
+    @brief        Implementation of the FPSCamera class
 */
 #include "FPSCamera.hpp"
 
 
-FPSCamera::FPSCamera() : BaseCamera() {
+void FPSCamera::processMouseMovement(double xPos_, double yPos_) {
+
+    static double lastX = 0.0;
+    static double lastY = 0.0;
+
+    if (inputEnabled) {
+
+        double xOff;
+        double yOff;
+
+        if (firstMouse) {
+
+            xOff = 0;
+            yOff = 0;
+            firstMouse = false;
+
+        }
+        else {
+
+            xOff = xPos_ - lastX;
+            yOff = yPos_ - lastY;
+
+        }
+
+        lastX = xPos_;
+        lastY = yPos_;
+
+        xOff *= sens;
+        yOff *= sens;
 
 
+        yaw += xOff;
+        pitch += yOff;
+
+        pitch = std::clamp(pitch, -89.0, 89.0);
+
+        updateCameraVectors();
+
+    }
 
 }
 
-void FPSCamera::checkInput(GLFWwindow* window_) {
+void FPSCamera::processMouseScroll(double xOff_, double yOff_) {
+   
+    if (inputEnabled) {
 
-    if (glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS) {
+        fov -= yOff_;
 
-        camPos += camSpeed * camFront;
-
-    }
-    if (glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS) {
-
-        camPos -= camSpeed * camFront;
-
-    }
-    if (glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS) {
-
-        camPos -= glm::normalize(glm::cross(camFront, camUp)) * camSpeed;
-
-    }
-    if (glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS) {
-
-        camPos += glm::normalize(glm::cross(camFront, camUp)) * camSpeed;
+        fov = std::clamp(fov, 1.0, 105.0);
 
     }
 
