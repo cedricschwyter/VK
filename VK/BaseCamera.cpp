@@ -2,10 +2,10 @@
     Implements the BaseCamera class
 
     @author        D3PSI
-    @version    0.0.1 02.12.2019
+    @version       0.0.1 02.12.2019
 
-    @file        BaseCamera.cpp
-    @brief        Implementation of the BaseCamera class
+    @file          BaseCamera.cpp
+    @brief         Implementation of the BaseCamera class
 */
 #include "BaseCamera.hpp"
 #include "VK.hpp"

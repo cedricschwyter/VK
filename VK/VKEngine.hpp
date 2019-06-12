@@ -1,10 +1,10 @@
 /**
     Declares the VKEngine class
 
-    @author        D3PSI
-    @version    0.0.1 02.12.2019
+    @author       D3PSI
+    @version      0.0.1 02.12.2019
 
-    @file        VKEngine.hpp
+    @file         VKEngine.hpp
     @brief        Declaration of the VKEngine class
 */
 #pragma once
@@ -176,8 +176,8 @@ private:
     /**
         Message callback function for Vulkan validation layers so they can actually display their messages
 
-        @param         messageSeverity_    Message severity level (internal)
-        @param         messageType_        Message type (internal)
+        @param         messageSeverity_      Message severity level (internal)
+        @param         messageType_          Message type (internal)
         @param         pCallbackData_        Actual message (internal)
         @param         pUserData_            User specified data
 

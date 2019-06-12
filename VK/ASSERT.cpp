@@ -1,10 +1,10 @@
 /**
     Implements the ASSERT function
 
-    @author        D3PSI
-    @version    0.0.1 02.12.2019
+    @author       D3PSI
+    @version      0.0.1 02.12.2019
 
-    @file        ASSERT.cpp
+    @file         ASSERT.cpp
     @brief        Implementation of the ASSERT function
 */
 #pragma once
@@ -15,9 +15,9 @@
 /**
     Checks functions for a returncode other than 0 and throws an error
 
-    @param        val_    Value to be tested
-    @param        msg_    Error message that will get logged
-    @param        ret_    Return code
+    @param         val_    Value to be tested
+    @param         msg_    Error message that will get logged
+    @param         ret_    Return code
 
     @return        Returns ret_ if val_ is not 0
     @return        Returns val_ if val_ is 0
