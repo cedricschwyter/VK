@@ -81,7 +81,7 @@ public:
 
         @param      window_     A pointer to the GLFWwindow in focus
     */
-    void proccessKeyboardInput(GLFWwindow* window_);
+    virtual void proccessKeyboardInput(GLFWwindow* window_);
 
     /**
         Calculates the new orientation for the camera
