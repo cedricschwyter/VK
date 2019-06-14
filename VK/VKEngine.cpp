@@ -46,14 +46,6 @@ VK_STATUS_CODE VKEngine::initWindow() {
     glfwWindowHint(GLFW_FOCUSED, GLFW_TRUE);
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
-    window = glfwCreateWindow(
-        vk::WIDTH,
-        vk::HEIGHT,
-        vk::TITLE,
-        nullptr,
-        nullptr
-        );
-
     monitor = glfwGetPrimaryMonitor();
     const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 
@@ -825,16 +817,6 @@ VkSurfaceFormatKHR VKEngine::evaluateBestSwapchainSurfaceFormat(const std::vecto
 }
 
 VkPresentModeKHR VKEngine::evaluateBestSwapchainSurfacePresentMode(const std::vector< VkPresentModeKHR >& availablePresentModes_) {
-
-    for (const auto& presMode : availablePresentModes_) {
-    
-        if (presMode == VK_PRESENT_MODE_MAILBOX_KHR) {        // Prefer VK_PRESENT_MODE_MAILBOX_KHR over VK_PRESENT_MODE_FIFO_KHR because of tearing issues
-        
-            return presMode;
-        
-        }
-    
-    }
 
     return VK_PRESENT_MODE_FIFO_KHR;        // If no better mode is available, return VK_PRESENT_MODE_FIFO_KHR as its implied to be supported if the GPU support Vulkan
 

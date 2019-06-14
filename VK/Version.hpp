@@ -14,8 +14,8 @@
 //#define VK_RELEASE          // enable this for performance
 
 //#define VK_WINDOW_MODE_WINDOWED
-#define VK_WINDOW_MODE_FULLSCREEN
-//#define VK_WINDOW_MODE_BORDERLESS
+//#define VK_WINDOW_MODE_FULLSCREEN
+#define VK_WINDOW_MODE_BORDERLESS
 
 #define WIN_64                // Windows 64-bit
 //#define WIN_32              // Windows 32-bit
