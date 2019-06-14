@@ -1,10 +1,10 @@
 /**
     Declares the LoadingScreen class
 
-    @author        D3PSI
-    @version    0.0.1 02.12.2019
+    @author       D3PSI
+    @version      0.0.1 02.12.2019
 
-    @file        LoadingScreen.hpp
+    @file         LoadingScreen.hpp
     @brief        Declaration of the LoadingScreen class
 */
 #pragma once

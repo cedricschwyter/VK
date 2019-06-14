@@ -1,10 +1,10 @@
 /**
     Implements the LoadingScreen class
 
-    @author        D3PSI
-    @version    0.0.1 02.12.2019
+    @author       D3PSI
+    @version      0.0.1 02.12.2019
 
-    @file        LoadingScreen.cpp
+    @file         LoadingScreen.cpp
     @brief        Implementation of the LoadingScreen class
 */
 #include "LoadingScreen.hpp"
@@ -60,8 +60,8 @@ LoadingScreen::LoadingScreen() {
         vk::TITLE,
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
-        1300,
-        500,
+        1216,
+        614,
         SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_BORDERLESS
 
     );
@@ -81,7 +81,7 @@ LoadingScreen::LoadingScreen() {
 
     }
 
-    imageSurface = IMG_Load("res/textures/loading_screen/vulkan.png");
+    imageSurface = IMG_Load("res/textures/loading_screen/infinity.jpg");
     if (imageSurface == NULL) {
 
         std::string error = SDL_GetError();

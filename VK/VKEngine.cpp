@@ -54,14 +54,57 @@ VK_STATUS_CODE VKEngine::initWindow() {
         nullptr
         );
 
+    monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+#ifdef VK_WINDOW_MODE_FULLSCREEN
+    glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+    glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+    glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+    glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+    window = glfwCreateWindow(
+        mode->width,
+        mode->height,
+        vk::TITLE,
+        monitor,
+        nullptr
+        );
+#endif
+#if defined VK_WINDOW_MODE_WINDOWED
+    window = glfwCreateWindow(
+        vk::WIDTH,
+        vk::HEIGHT,
+        vk::TITLE,
+        nullptr,
+        nullptr
+        );
+
+    glfwSetWindowPos(
+        window,
+        mode->width / 2 - vk::WIDTH / 2,
+        mode->height / 2 - vk::HEIGHT / 2
+        );
+#endif
+#if defined VK_WINDOW_MODE_BORDERLESS || defined VK_WINDOW_MODE_UNDEFINED
+    window = glfwCreateWindow(
+        mode->width,
+        mode->height,
+        vk::TITLE,
+        monitor,
+        nullptr
+        );
+#endif
+
     GLFWimage windowIcon[1];
     windowIcon[0].pixels = stbi_load(
-        "res/textures/loading_screen/vulkan.png",
+        "res/textures/loading_screen/infinity.jpg",
         &windowIcon[0].width,
         &windowIcon[0].height,
         0,
         STBI_rgb_alpha
         );
+
     glfwSetWindowIcon(window, 1, windowIcon);
     stbi_image_free(windowIcon[0].pixels);
     logger::log(EVENT_LOG, "Successfully initialized window");

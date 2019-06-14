@@ -76,6 +76,7 @@ public:
 private:
 
     GLFWwindow*                             window;
+    GLFWmonitor*                            monitor;
     VkInstance                              instance                             = VK_NULL_HANDLE;
     const std::vector< const char* >        validationLayers                     = {
     

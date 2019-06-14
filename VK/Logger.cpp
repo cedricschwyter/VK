@@ -1,10 +1,10 @@
 /**
     Implements the Logger namespace
 
-    @author        D3PSI
-    @version    0.0.1 02.12.2019
+    @author       D3PSI
+    @version      0.0.1 02.12.2019
 
-    @file        Logger.cpp
+    @file         Logger.cpp
     @brief        Implementation of the Logger namespace
 */
 #pragma once
@@ -226,9 +226,9 @@ namespace logger {
         if (log_ == ERROR_LOG) {
 #ifdef VK_DEVELOPMENT
             __debugbreak();
-#endif
+#else
             throw std::runtime_error(msg_);
-
+#endif
         }
 
         streamBusy.unlock();

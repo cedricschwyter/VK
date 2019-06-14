@@ -1,10 +1,10 @@
 /**
     Implements the FPSCamera class
 
-    @author        D3PSI
-    @version    0.0.1 02.12.2019
+    @author       D3PSI
+    @version      0.0.1 02.12.2019
 
-    @file        FPSCamera.cpp
+    @file         FPSCamera.cpp
     @brief        Implementation of the FPSCamera class
 */
 #include "FPSCamera.hpp"
