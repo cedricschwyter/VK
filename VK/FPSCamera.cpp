@@ -10,7 +10,7 @@
 #include "FPSCamera.hpp"
 
 
-void BaseCamera::proccessKeyboardInput(GLFWwindow* window_) {
+void FPSCamera::processKeyboardInput(GLFWwindow* window_) {
 
     static float deltaTime = 0.0f;
     static float lastFrame = 0.0f;

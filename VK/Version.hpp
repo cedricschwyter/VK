@@ -13,9 +13,9 @@
 //#define VK_DEVELOPMENT      // enable this for verbose output
 //#define VK_RELEASE          // enable this for performance
 
-//#define VK_WINDOW_MODE_WINDOWED
+#define VK_WINDOW_MODE_WINDOWED
 //#define VK_WINDOW_MODE_FULLSCREEN
-#define VK_WINDOW_MODE_BORDERLESS
+//#define VK_WINDOW_MODE_BORDERLESS
 
 #define WIN_64                // Windows 64-bit
 //#define WIN_32              // Windows 32-bit
@@ -33,4 +33,8 @@
 
 #if !defined WIN_64 && !defined WIN_32 && !defined MACOSX && !defined LINUX
     #define WIN_64
+#endif
+
+#if !defined VK_DEVELOPMENT && defined VK_RELEASE && (defined WIN_64 || defined WIN_32)
+    #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 #endif

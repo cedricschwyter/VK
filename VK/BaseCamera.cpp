@@ -16,8 +16,7 @@ BaseCamera::BaseCamera(
     float             yaw_,
     float             pitch_,
     float             roll_
-    ) : camFront(glm::vec3(0.0f, 0.0f, -1.0f)), 
-        camUp(glm::vec3(0.0f, 1.0f, 0.0f)),
+    ) : camUp(glm::vec3(0.0f, 1.0f, 0.0f)),
         speed(vk::SPEED), 
         sens(vk::SENS), 
         fov(vk::FOV) {
@@ -37,7 +36,7 @@ BaseCamera::~BaseCamera() {
 
 }
 
-void BaseCamera::proccessKeyboardInput(GLFWwindow* window_) {
+void BaseCamera::processKeyboardInput(GLFWwindow* window_) {
 
     
 
@@ -58,14 +57,15 @@ void BaseCamera::processMouseScroll(double xOff_, double yOff_) {
 void BaseCamera::updateCameraVectors() {
 
     glm::vec3 newFront;
-    newFront.x = glm::cos(static_cast< float >(glm::radians(BaseCamera::yaw))) * glm::cos(static_cast< float >(glm::radians(BaseCamera::pitch)));
-    newFront.y = glm::sin(static_cast< float >(glm::radians(BaseCamera::pitch)));
-    newFront.z = glm::sin(static_cast< float >(glm::radians(BaseCamera::yaw))) * glm::cos(static_cast< float >(glm::radians(BaseCamera::pitch)));
+    newFront.x = static_cast< float >(glm::cos(glm::radians(yaw)) * glm::cos(glm::radians(pitch)));
+    newFront.y = static_cast< float >(glm::sin(glm::radians(pitch)));
+    newFront.z = static_cast< float >(glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch)));
 
     camFront = glm::normalize(newFront);
-    camUp = worldUp;
-    camRight = glm::normalize(glm::cross(camFront, camUp));
-
+    
+    camRight = glm::normalize(glm::cross(camFront, worldUp));
+    camUp = glm::normalize(glm::cross(camRight, camFront));
+        
 }
 
 glm::mat4 BaseCamera::getViewMatrix() {

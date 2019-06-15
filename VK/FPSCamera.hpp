@@ -17,6 +17,13 @@ class FPSCamera :
 public:
 
     /**
+        Handles keyboard input
+
+        @param      window_     A pointer to a GLFW window
+    */
+    void processKeyboardInput(GLFWwindow* window_);
+
+    /**
         Calculates the new orientation for the camera
 
         @param      xPos_       The x-position of the cursor

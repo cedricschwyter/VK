@@ -818,6 +818,16 @@ VkSurfaceFormatKHR VKEngine::evaluateBestSwapchainSurfaceFormat(const std::vecto
 
 VkPresentModeKHR VKEngine::evaluateBestSwapchainSurfacePresentMode(const std::vector< VkPresentModeKHR >& availablePresentModes_) {
 
+    for (const auto& presMode : availablePresentModes_) {
+
+        if (presMode == VK_PRESENT_MODE_MAILBOX_KHR) {        // VK_PRESENT_MODE_MAILBOX_KHR MAY cause tearing issues in borderless window or fullscreen mode
+
+            return presMode;
+
+        }
+
+    }
+
     return VK_PRESENT_MODE_FIFO_KHR;        // If no better mode is available, return VK_PRESENT_MODE_FIFO_KHR as its implied to be supported if the GPU support Vulkan
 
 }
@@ -1590,8 +1600,7 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers() {
     
     MVPBufferObject mvp                             = {};
 
-    mvp.model                                       = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    mvp.model                                       = glm::rotate(mvp.model, delta * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    mvp.model                                       = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     mvp.view                                        = camera->getViewMatrix();
     mvp.proj                                        = glm::perspective(static_cast< float >(glm::radians(camera->fov)), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 100.0f);
 
@@ -1634,7 +1643,35 @@ void VKEngine::processKeyboardInput() {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     
     }
-    camera->proccessKeyboardInput(window);
+
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+
+        static double start     = glfwGetTime();
+        double now              = glfwGetTime();
+        static bool pressed     = false;
+
+        if (now - start > 1.0) {
+
+            delete camera;
+            if (pressed) {
+
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                camera = new FPSCamera();
+                pressed = false;
+            }
+            else {
+
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                camera = new CenterCamera(ORIGIN, 5.0f);
+                pressed = true;
+
+            }
+            start = glfwGetTime();
+
+        }
+
+    }
+    camera->processKeyboardInput(window);
 
 }
 
