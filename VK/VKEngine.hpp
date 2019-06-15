@@ -13,6 +13,7 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -46,6 +47,7 @@
 #include "BaseCamera.hpp"
 #include "FPSCamera.hpp"
 #include "CenterCamera.hpp"
+#include "DepthBuffer.hpp"
 
 class VKEngine {
 public:
@@ -435,5 +437,12 @@ private:
         @param         yOff_       The y-component of the scroll wheels offset
     */
     static void mouseScrollCallback(GLFWwindow* window_, double xOff_, double yOff_);
+
+    /**
+        Generates some depth resources and applies them to the rendered images
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE createDepthBuffer(void);
 
 };

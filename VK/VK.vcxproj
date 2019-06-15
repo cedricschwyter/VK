@@ -139,6 +139,7 @@
     <ClCompile Include="BaseBuffer.cpp" />
     <ClCompile Include="BaseCamera.cpp" />
     <ClCompile Include="CenterCamera.cpp" />
+    <ClCompile Include="DepthBuffer.cpp" />
     <ClCompile Include="DescriptorSet.cpp" />
     <ClCompile Include="FPSCamera.cpp" />
     <ClCompile Include="GraphicsPipeline.cpp" />
@@ -167,6 +168,7 @@
     <ClInclude Include="BaseVertex.hpp" />
     <ClInclude Include="CenterCamera.hpp" />
     <ClInclude Include="ConsoleColor.hpp" />
+    <ClInclude Include="DepthBuffer.hpp" />
     <ClInclude Include="DescriptorSet.hpp" />
     <ClInclude Include="FPSCamera.hpp" />
     <ClInclude Include="GraphicsPipeline.hpp" />

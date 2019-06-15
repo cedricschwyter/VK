@@ -1,5 +1,5 @@
 /**
-    Defines the FPSCamera class
+    Defines the FPSCamera class, inheriting BaseCamera
 
     @author       D3PSI
     @version      0.0.1 02.12.2019

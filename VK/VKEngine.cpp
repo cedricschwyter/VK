@@ -1688,3 +1688,9 @@ void VKEngine::mouseScrollCallback(GLFWwindow* window_, double xOff_, double yOf
     vkengine->camera->processMouseScroll(xOff_, yOff_);
 
 }
+
+VK_STATUS_CODE VKEngine::createDepthBuffer() {
+
+
+
+}

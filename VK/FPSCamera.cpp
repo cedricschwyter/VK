@@ -1,5 +1,5 @@
 /**
-    Implements the FPSCamera class
+    Implements the FPSCamera class, inheriting BaseCamera
 
     @author       D3PSI
     @version      0.0.1 02.12.2019
@@ -35,13 +35,13 @@ void FPSCamera::processKeyboardInput(GLFWwindow* window_) {
 
     if (glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS) {
 
-        camPos -= glm::normalize(glm::cross(camFront, camUp)) * camSpeed;
+        camPos -= camRight * camSpeed;
 
     }
 
     if (glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS) {
 
-        camPos += glm::normalize(glm::cross(camFront, camUp)) * camSpeed;
+        camPos += camRight * camSpeed;
 
     }
 
