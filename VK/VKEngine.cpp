@@ -1646,11 +1646,11 @@ void VKEngine::processKeyboardInput() {
 
     if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
 
-        static double start     = glfwGetTime();
+        static double start     = glfwGetTime() - 1.0;      // -1.0 prevents bug for first time switch
         double now              = glfwGetTime();
         static bool pressed     = false;
 
-        if (now - start > 1.0) {
+        if (now - start > 0.5) {
 
             delete camera;
             if (pressed) {
