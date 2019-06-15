@@ -23,7 +23,7 @@ public:
     /**
         Default constructor
     */
-    GraphicsPipeline(void);
+    GraphicsPipeline(void) = default;
 
     /**
         Constructor

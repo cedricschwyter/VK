@@ -1,13 +1,14 @@
 /**
     Sets build-options by defining macros
 
-    @author        D3PSI
-    @version    0.0.1 02.12.2019
+    @author       D3PSI
+    @version      0.0.1 02.12.2019
 
-    @file        Version.hpp
+    @file         Version.hpp
     @brief        Set build-options by defining macros
 */
 #pragma once
+#include "Makros.hpp"
 
 // Edit configuration here
 //#define VK_DEVELOPMENT      // enable this for verbose output
@@ -38,3 +39,10 @@
 #if !defined VK_DEVELOPMENT && defined VK_RELEASE && (defined WIN_64 || defined WIN_32)
     #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 #endif
+
+#ifndef NOMINMAX
+    #if defined WIN_64 || defined WIN_32
+        #define NOMINMAX        // Fixes std::min/std::max/std::clamp error
+        #include <Windows.h>
+    #endif
+#endif // NOMINMAX

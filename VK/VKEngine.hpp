@@ -32,7 +32,6 @@
 
 #include "VK_STATUS_CODE.hpp"
 #include "Logger.hpp"
-#include "ASSERT.cpp"
 #include "QueueFamily.cpp"
 #include "LoadingScreen.hpp"
 #include "SwapchainDetails.cpp"
@@ -115,6 +114,7 @@ private:
     bool                                    hasFramebufferBeenResized            = false;
     BaseBuffer*                             vertexBuffer;
     BaseBuffer*                             indexBuffer;
+    BaseBuffer*                             depthBuffer;
     UniformBuffer*                          mvpBuffer;
     bool                                    initialized                          = false;
     ImageObject*                            image;

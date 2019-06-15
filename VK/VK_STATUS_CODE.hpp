@@ -63,6 +63,7 @@ typedef enum VK_STATUS_CODE {
     VK_SC_LOGGER_ERROR                                      = -2,
     VK_SC_UKNOWN_ERROR                                      = -1,
     VK_SC_SUCCESS                                           = 0,
-    VK_SC_SWAPCHAIN_RECREATED                               = VK_SC_SUCCESS
+    VK_SC_SWAPCHAIN_RECREATED                               = VK_SC_SUCCESS,
+    VK_SC_ERROR_CODE_BUFFER_NOT_INITIALIZED                 = 1
 
 } VK_STATUS_CODE;

@@ -9,6 +9,7 @@
 */
 #include "BaseBuffer.hpp"
 #include "VK.hpp"
+#include "ASSERT.cpp"
 
 
 BaseBuffer::BaseBuffer() {

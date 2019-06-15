@@ -12,6 +12,7 @@
 #include <stb_image.h>
 
 #include "VK.hpp"
+#include "ASSERT.cpp"
 
 ImageObject::ImageObject(
     const char*                 path_, 

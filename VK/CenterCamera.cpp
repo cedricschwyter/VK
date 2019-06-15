@@ -45,6 +45,8 @@ void CenterCamera::processKeyboardInput(GLFWwindow* window_) {
 
     }
 
+    pitch = std::clamp(pitch, -89.0, 89.0);
+
     updateCameraVectors();
 
 }

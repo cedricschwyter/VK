@@ -10,6 +10,7 @@
 #pragma once
 #include <iostream>
 
+#include "VK.hpp"
 #include "Logger.hpp"
 
 /**
@@ -28,13 +29,18 @@ inline int ASSERT(int val_, const char* msg_, int ret_) {
 
         logger::log(ERROR_LOG, msg_);
 
+        vk::errorCodeBuffer = ret_;
+
         return ret_;
 
     }
     else {
     
+        vk::errorCodeBuffer = val_;
+
         return val_;
 
     }
+
 
 }

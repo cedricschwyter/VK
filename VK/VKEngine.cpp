@@ -9,6 +9,7 @@
 */
 #include "VKEngine.hpp"
 #include "VK.hpp"
+#include "ASSERT.cpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -1691,6 +1692,6 @@ void VKEngine::mouseScrollCallback(GLFWwindow* window_, double xOff_, double yOf
 
 VK_STATUS_CODE VKEngine::createDepthBuffer() {
 
-
+    depthBuffer = new DepthBuffer();
 
 }

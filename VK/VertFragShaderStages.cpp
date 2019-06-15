@@ -9,6 +9,7 @@
 */
 #include "VertFragShaderStages.hpp"
 #include "VK.hpp"
+#include "ASSERT.cpp"
 
 VertFragShaderStages::VertFragShaderStages() {
 

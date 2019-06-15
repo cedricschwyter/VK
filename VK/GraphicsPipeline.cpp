@@ -9,13 +9,8 @@
 */
 #include "GraphicsPipeline.hpp"
 #include "VK.hpp"
+#include "ASSERT.cpp"
 
-
-GraphicsPipeline::GraphicsPipeline() {
-
-
-
-}
 
 GraphicsPipeline::GraphicsPipeline(
     const char*                                            vertPath_,

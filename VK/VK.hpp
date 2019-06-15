@@ -1,23 +1,30 @@
 /**
     Prototypes the vk namespace
 
-    @author        D3PSI
-    @version    0.0.1 02.12.2019
+    @author       D3PSI
+    @version      0.0.1 02.12.2019
 
-    @file        VK.hpp
+    @file         VK.hpp
     @brief        Prototype of the vk namespace
 */
 #pragma once
+#include "Version.hpp"
+
 #include <vulkan/vulkan.h>
+
+#include <iostream>
 
 #include "VKEngine.hpp"
 #include "VK_STATUS_CODE.hpp"
+
 
 /**
     Prototypes a namespace to prevent global naming conflicts
 */
 namespace vk {
 
+    extern int                                  errorCodeBuffer;
+    
     extern VKEngine                             engine;
     extern const unsigned int                   HEIGHT;
     extern const unsigned int                   WIDTH;
@@ -167,5 +174,16 @@ namespace vk {
         @return     Returns a valid VkImageView handle
     */
     VkImageView createImageView(VkImage image_, VkFormat format_);
+
+    /**
+        Evaluates the best buffer format to use
+
+        @param      candidates_         A reference to an std::vector of VkFormats to evaluate from
+        @param      tiling_             VkImageTiling flags
+        @param      features_           Feature flags the format must have
+
+        @return     Returns the best VkFormat to use
+    */
+    VkFormat enumerateSupportedBufferFormat(const std::vector< VkFormat >& candidates_, VkImageTiling tiling_, VkFormatFeatureFlags features_);
 
 }

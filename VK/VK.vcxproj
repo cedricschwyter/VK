@@ -159,6 +159,7 @@
     <ClCompile Include="VertFragShaderStages.cpp" />
     <ClCompile Include="SwapchainDetails.cpp" />
     <ClCompile Include="Version.hpp" />
+    <ClCompile Include="VK.cpp" />
     <ClCompile Include="VK.hpp" />
     <ClCompile Include="VKEngine.cpp" />
   </ItemGroup>

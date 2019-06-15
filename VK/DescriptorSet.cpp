@@ -9,6 +9,7 @@
 */
 #include "DescriptorSet.hpp"
 #include "VK.hpp"
+#include "ASSERT.cpp"
 
 
 DescriptorSet::DescriptorSet() {
