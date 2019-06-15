@@ -45,6 +45,7 @@
 #include "ImageObject.hpp"
 #include "BaseCamera.hpp"
 #include "FPSCamera.hpp"
+#include "CenterCamera.hpp"
 
 class VKEngine {
 public:

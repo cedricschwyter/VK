@@ -15,6 +15,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include "Makros.hpp"
+
 namespace vk {
 
     // Starting/Default camera state values
@@ -69,7 +71,7 @@ public:
         @param      roll_       The cameras initial roll-angle
     */
     BaseCamera(
-        glm::vec3         pos_          = glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3         pos_          = ORIGIN,
         glm::vec3         up_           = glm::vec3(0.0f, 1.0f, 0.0f),
         float             yaw_          = static_cast< float >(vk::YAW),
         float             pitch_        = static_cast< float >(vk::PITCH),
@@ -81,7 +83,7 @@ public:
 
         @param      window_     A pointer to the GLFWwindow in focus
     */
-    void proccessKeyboardInput(GLFWwindow* window_);
+    virtual void processKeyboardInput(GLFWwindow* window_);
 
     /**
         Calculates the new orientation for the camera
@@ -102,7 +104,7 @@ public:
     /**
         Updates the camera orientation vectors
     */
-    void updateCameraVectors(void);
+    virtual void updateCameraVectors(void);
 
     /**
         Calculates the view matrix using the current camera state

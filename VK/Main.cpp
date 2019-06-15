@@ -8,11 +8,8 @@
     @brief        Implementation of the Vulkan-part for my Vulkan vs. OpenGL comparison (Maturaarbeit)
 */
 
+#include "Makros.hpp"
 #include "Version.hpp"
-
-#if !defined VK_DEVELOPMENT && defined VK_RELEASE && (defined WIN_64 || defined WIN_32)
-    #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
-#endif
 
 #include <iostream>
 #if defined WIN_64 || defined WIN_32
