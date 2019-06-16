@@ -11,10 +11,10 @@
 #include <vulkan/vulkan.h>
 
 #include "Logger.hpp"
-#include "BaseImage.hpp"
+#include "BaseBuffer.hpp"
 
 class TextureImage : 
-    public BaseImage
+    public BaseBuffer
 {
 public:
 

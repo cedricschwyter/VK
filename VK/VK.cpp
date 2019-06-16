@@ -449,6 +449,91 @@ namespace vk {
 
     }
 
+    uint32_t enumerateSuitableMemoryType(uint32_t typeFilter_, VkMemoryPropertyFlags memoryPropertyFlags_) {
+
+        VkPhysicalDeviceMemoryProperties memProp;
+        vkGetPhysicalDeviceMemoryProperties(engine.physicalDevice, &memProp);
+
+        for (uint32_t i = 0; i < memProp.memoryTypeCount; i++) {
+            // Does the memory type have all of the necessary properties?
+            if (typeFilter_ & (1 << i) && (memProp.memoryTypes[i].propertyFlags & memoryPropertyFlags_) == memoryPropertyFlags_) {        // Some bitwise-operation magic to find appropriate bit-indices
+
+                return i;
+
+            }
+
+        }
+
+        logger::log(ERROR_LOG, "Failed to find suitable memory type!");
+
+        return VK_SC_BUFFER_MEMORY_TYPE_CREATION_ERROR;
+
+    }
+
+    VK_STATUS_CODE createImage(
+        uint32_t                    width_,
+        uint32_t                    height_,
+        uint32_t                    mipLevels_,
+        VkFormat                    format_,
+        VkImageTiling               tiling_,
+        VkImageUsageFlags           usage_,
+        VkMemoryPropertyFlags       properties_,
+        VkSampleCountFlagBits       samples_,
+        VkImage& img_,
+        VkDeviceMemory& imgMem_
+        ) {
+
+        VkImageCreateInfo imgCreateInfo         = {};
+        imgCreateInfo.sType                     = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+        imgCreateInfo.imageType                 = VK_IMAGE_TYPE_2D;
+        imgCreateInfo.extent.width              = width_;
+        imgCreateInfo.extent.height             = height_;
+        imgCreateInfo.extent.depth              = 1;
+        imgCreateInfo.mipLevels                 = mipLevels_;
+        imgCreateInfo.arrayLayers               = 1;
+        imgCreateInfo.format                    = format_;
+        imgCreateInfo.tiling                    = tiling_;
+        imgCreateInfo.initialLayout             = VK_IMAGE_LAYOUT_UNDEFINED;
+        imgCreateInfo.usage                     = usage_;
+        imgCreateInfo.samples                   = samples_;
+        imgCreateInfo.sharingMode               = VK_SHARING_MODE_EXCLUSIVE;
+
+        VkResult result = vkCreateImage(
+            vk::engine.logicalDevice,
+            &imgCreateInfo,
+            vk::engine.allocator,
+            &img_
+            );
+        ASSERT(result, "Failed to create image from the given parameters", VK_SC_IMAGE_CREATION_ERROR);
+
+        VkMemoryRequirements memReqs;
+        vkGetImageMemoryRequirements(vk::engine.logicalDevice, img_, &memReqs);
+
+        VkMemoryAllocateInfo memoryAllocInfo        = {};
+        memoryAllocInfo.sType                       = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        memoryAllocInfo.allocationSize              = memReqs.size;
+        memoryAllocInfo.memoryTypeIndex             = vk::enumerateSuitableMemoryType(memReqs.memoryTypeBits, properties_);
+
+        result = vkAllocateMemory(
+            vk::engine.logicalDevice,
+            &memoryAllocInfo,
+            vk::engine.allocator,
+            &imgMem_
+            );
+        ASSERT(result, "Failed to allocate image memory", VK_SC_IMAGE_MEMORY_ALLOCATION_ERROR);
+
+        vkBindImageMemory(
+            vk::engine.logicalDevice,
+            img_,
+            imgMem_,
+            0
+            );
+
+        return vk::errorCodeBuffer;
+
+    }
+
+
     bool hasStencilBufferComponent(VkFormat format_) {
 
         return format_ == VK_FORMAT_D32_SFLOAT_S8_UINT || format_ == VK_FORMAT_D24_UNORM_S8_UINT;

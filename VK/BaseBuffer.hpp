@@ -25,7 +25,7 @@ public:
     /**
         Explicit Default constructor
     */
-    explicit BaseBuffer();
+    explicit BaseBuffer(void) = default;
 
     /**
         Constructor
@@ -89,16 +89,6 @@ public:
 protected:
 
     VkBufferCreateInfo        bufferCreateInfo           = {};
-
-    /**
-        Finds the appropriate memory type to use for the specified operation
-
-        @param         typeFilter_                    Filter for the right memory type
-        @param         memoryPropertyFlags_           The necessary memory properties that must be supported by the memory
-
-        @return        Returns an index for a memory type 
-    */
-    uint32_t enumerateSuitableMemoryType(uint32_t typeFilter_, VkMemoryPropertyFlags memoryPropertyFlags_);
 
 };
 

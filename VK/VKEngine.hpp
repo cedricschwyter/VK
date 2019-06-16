@@ -119,7 +119,7 @@ private:
     BaseBuffer*                             mvpBuffer;
     BaseImage*                              depthBuffer;
     BaseImage*                              msaaBufferImage;
-    BaseImage*                              image;
+    TextureImage*                           image;
     bool                                    initialized                          = false;
 
     /**

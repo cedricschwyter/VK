@@ -12,12 +12,6 @@
 #include "ASSERT.cpp"
 
 
-BaseBuffer::BaseBuffer() {
-
-
-
-}
-
 BaseBuffer::BaseBuffer(const VkBufferCreateInfo* bufferCreateInfo_, VkMemoryPropertyFlags properties_) {
 
     bufferCreateInfo = *bufferCreateInfo_;
@@ -38,7 +32,7 @@ BaseBuffer::BaseBuffer(const VkBufferCreateInfo* bufferCreateInfo_, VkMemoryProp
     VkMemoryAllocateInfo memoryAllocateInfo                = {};
     memoryAllocateInfo.sType                               = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     memoryAllocateInfo.allocationSize                      = memoryRequirements.size;
-    memoryAllocateInfo.memoryTypeIndex                     = enumerateSuitableMemoryType(memoryRequirements.memoryTypeBits, properties_);
+    memoryAllocateInfo.memoryTypeIndex                     = vk::enumerateSuitableMemoryType(memoryRequirements.memoryTypeBits, properties_);
 
     result = vkAllocateMemory(
         vk::engine.logicalDevice,
@@ -81,7 +75,7 @@ BaseBuffer::BaseBuffer(VkDeviceSize size_, VkBufferUsageFlags usage_, VkMemoryPr
     VkMemoryAllocateInfo memoryAllocateInfo         = {};
     memoryAllocateInfo.sType                        = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     memoryAllocateInfo.allocationSize               = memoryRequirements.size;
-    memoryAllocateInfo.memoryTypeIndex              = enumerateSuitableMemoryType(memoryRequirements.memoryTypeBits, properties_);
+    memoryAllocateInfo.memoryTypeIndex              = vk::enumerateSuitableMemoryType(memoryRequirements.memoryTypeBits, properties_);
 
     result = vkAllocateMemory(
         vk::engine.logicalDevice,
@@ -102,27 +96,6 @@ BaseBuffer::~BaseBuffer() {
 
     vkFreeMemory(vk::engine.logicalDevice, mem, vk::engine.allocator);
     logger::log(EVENT_LOG, "Successfully destroyed buffer memory");
-
-}
-
-uint32_t BaseBuffer::enumerateSuitableMemoryType(uint32_t typeFilter_, VkMemoryPropertyFlags memoryPropertyFlags_) {
-
-    VkPhysicalDeviceMemoryProperties memProp;
-    vkGetPhysicalDeviceMemoryProperties(vk::engine.physicalDevice, &memProp);
-
-    for (uint32_t i = 0; i < memProp.memoryTypeCount; i++) {
-                                    // Does the memory type have all of the necessary properties?
-        if (typeFilter_ & (1 << i) && (memProp.memoryTypes[i].propertyFlags & memoryPropertyFlags_) == memoryPropertyFlags_) {        // Some bitwise-operation magic to find appropriate bit-indices
-        
-            return i;
-        
-        }
-    
-    }
-
-    logger::log(ERROR_LOG, "Failed to find suitable memory type!");
-
-    return VK_SC_BUFFER_MEMORY_TYPE_CREATION_ERROR;
 
 }
 

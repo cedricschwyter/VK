@@ -14,7 +14,8 @@
 DepthBuffer::DepthBuffer() {
 
     imgFormat = enumerateSupportedDepthBufferFormat();
-    createImage(
+
+    vk::createImage(
         vk::engine.swapchainImageExtent.width, 
         vk::engine.swapchainImageExtent.height, 
         1,
@@ -22,9 +23,24 @@ DepthBuffer::DepthBuffer() {
         VK_IMAGE_TILING_OPTIMAL, 
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, 
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
-        vk::engine.maxMSAASamples
+        vk::engine.maxMSAASamples,
+        img,
+        imgMem
         );
-    imgView = vk::createImageView(img, imgFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
+
+    imgView = vk::createImageView(
+        img, 
+        imgFormat, 
+        VK_IMAGE_ASPECT_DEPTH_BIT, 
+        1
+        );
+
+    if (img == VK_NULL_HANDLE) {
+    
+        std::cout << "DEPTH\n";
+
+    }
+
     vk::imageLayoutTransition(
         img, 
         imgFormat, 

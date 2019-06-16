@@ -196,6 +196,45 @@ namespace vk {
     VkFormat enumerateSupportedBufferFormat(const std::vector< VkFormat >& candidates_, VkImageTiling tiling_, VkFormatFeatureFlags features_);
 
     /**
+        Finds the appropriate memory type to use for the specified operation
+
+        @param         typeFilter_                    Filter for the right memory type
+        @param         memoryPropertyFlags_           The necessary memory properties that must be supported by the memory
+
+        @return        Returns an index for a memory type
+    */
+    uint32_t enumerateSuitableMemoryType(uint32_t typeFilter_, VkMemoryPropertyFlags memoryPropertyFlags_);
+
+    /**
+        Creates a VkImage handle
+
+        @param      width_              The width of the image
+        @param      height_             The height of the image
+        @param      mipLevels_          The number of mipmaps to generate
+        @param      format_             The image format
+        @param      tiling_             The image tiling flags
+        @param      usage_              The image usage flags
+        @param      properties_         Image memory property flags
+        @param      samples_            The number of samples per pixel
+        @param      image_              The handle where the image will be stored
+        @param      imageMemory_        The handle where the image's device memory will be stored
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE createImage(
+        uint32_t                    width_,
+        uint32_t                    height_,
+        uint32_t                    mipLevels_,
+        VkFormat                    format_,
+        VkImageTiling               tiling_,
+        VkImageUsageFlags           usage_,
+        VkMemoryPropertyFlags       properties_,
+        VkSampleCountFlagBits       samples_,
+        VkImage& img_,
+        VkDeviceMemory& imgMem_
+        );
+
+    /**
         Checks whether a VkFormat has a stencil component
 
         @param      format_         The format in question
