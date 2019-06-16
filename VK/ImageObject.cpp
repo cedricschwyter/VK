@@ -108,7 +108,7 @@ ImageObject::ImageObject(
 
     delete stagingBuffer;
 
-    imgView = vk::createImageView(img, VK_FORMAT_R8G8B8A8_UNORM);
+    imgView = vk::createImageView(img, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT);
 
     VkSamplerCreateInfo samplerCreateInfo           = {};
     samplerCreateInfo.sType                         = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;

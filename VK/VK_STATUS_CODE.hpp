@@ -15,6 +15,9 @@
 */
 typedef enum VK_STATUS_CODE {
 
+    VK_SC_IMAGE_MEMORY_ALLOCATION_ERROR                     = -50,
+    VK_SC_DEPTH_BUFFER_CREATION_ERROR                       = -49,
+    VK_SC_IMAGE_CREATION_ERROR                              = -48,
     VK_SC_CAMERA_CREATION_ERROR                             = -47,
     VK_SC_SAMPLER_CREATION_ERROR                            = -46,
     VK_SC_IMAGE_VIEW_CREATION_ERROR                         = -45,

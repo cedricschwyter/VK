@@ -1,10 +1,10 @@
 /**
     Implements the BaseBuffer class
 
-    @author        D3PSI
-    @version    0.0.1 02.12.2019
+    @author       D3PSI
+    @version      0.0.1 02.12.2019
 
-    @file        BaseBuffer.cpp
+    @file         BaseBuffer.cpp
     @brief        Implementation of the BaseBuffer class
 */
 #include "BaseBuffer.hpp"

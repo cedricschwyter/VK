@@ -8,12 +8,15 @@
     @brief        Definition of the DepthBuffer class
 */
 #pragma once
-#include "BaseBuffer.hpp"
+#include "BaseImage.hpp"
 
 class DepthBuffer :
-    public BaseBuffer
+    public BaseImage
 {
 public:
+
+    VkFormat            depthFormat;
+    VkImageView         imgView;
 
     /**
         Default constructor
@@ -29,7 +32,6 @@ private:
 
     VkImage             img;
     VkDeviceMemory      imgMem;
-    VkImageView         imgView;
 
     /**
         Evaluates the best depth buffer format to use

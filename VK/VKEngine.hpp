@@ -55,6 +55,8 @@ public:
     VkDevice                                logicalDevice;
     VkAllocationCallbacks*                  allocator;
     std::vector< VkImage >                  swapchainImages;
+    VkFormat                                swapchainImageFormat;
+    VkExtent2D                              swapchainImageExtent;
     VkCommandPool                           standardCommandPool;
     VkQueue                                 graphicsQueue                        = VK_NULL_HANDLE;
     BaseCamera*                             camera;
@@ -100,8 +102,6 @@ private:
     };
     LoadingScreen*                          loadingScreen                        = nullptr;
     VkSwapchainKHR                          swapchain                            = VK_NULL_HANDLE;
-    VkFormat                                swapchainImageFormat;
-    VkExtent2D                              swapchainImageExtent;
     std::vector< VkImageView >              swapchainImageViews;
     std::vector< VkFramebuffer >            swapchainFramebuffers;
     VkRenderPass                            renderPass;
@@ -443,6 +443,6 @@ private:
 
         @return     Returns VK_SC_SUCCESS on success
     */
-    VK_STATUS_CODE createDepthBuffer(void);
+    VK_STATUS_CODE allocateDepthBuffer(void);
 
 };

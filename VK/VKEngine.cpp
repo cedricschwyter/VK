@@ -131,10 +131,11 @@ VK_STATUS_CODE VKEngine::initVulkan() {
     ASSERT(createLogicalDeviceFromPhysicalDevice(), "Failed to create a logical device from the selected physical device", VK_SC_LOGICAL_DEVICE_CREATION_ERROR);
     ASSERT(createSwapchain(), "Failed to create a swapchain with the given parameters", VK_SC_SWAPCHAIN_CREATION_ERROR);
     ASSERT(createSwapchainImageViews(), "Failed to create swapchain image views", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
+    ASSERT(allocateCommandPools(), "Failed to allocate command pools", VK_SC_COMMAND_POOL_ALLOCATION_ERROR);
+    ASSERT(allocateDepthBuffer(), "Failed to allocate depth buffer", VK_SC_DEPTH_BUFFER_CREATION_ERROR);
     ASSERT(createRenderPasses(), "Failed to create render passes", VK_SC_RENDER_PASS_CREATION_ERROR);
     ASSERT(allocateUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
     ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
-    ASSERT(allocateCommandPools(), "Failed to allocate command pools", VK_SC_COMMAND_POOL_ALLOCATION_ERROR);
     ASSERT(createTextureImages(), "Failed to create texture images", VK_SC_TEXTURE_IMAGE_CREATION_ERROR);
     ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
     ASSERT(allocateNecessaryBuffers(), "Failed to create necessary buffers", VK_SC_BUFFER_CREATION_ERROR);
@@ -144,11 +145,11 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 
     if (!initialized) {
 
-        glfwShowWindow(window);
-        glfwFocusWindow(window);
         loadingScreen->closeMutex.lock();
         loadingScreen->close = true;
         loadingScreen->closeMutex.unlock();
+        glfwShowWindow(window);
+        glfwFocusWindow(window);
         initialized = true;
 
     }
@@ -948,7 +949,7 @@ VK_STATUS_CODE VKEngine::createSwapchainImageViews() {
 
     for (size_t i = 0; i < swapchainImages.size(); i++) {
     
-        swapchainImageViews[i] = vk::createImageView(swapchainImages[i], swapchainImageFormat);
+        swapchainImageViews[i] = vk::createImageView(swapchainImages[i], swapchainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
 
     }
 
@@ -1008,33 +1009,39 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     rasterizationStateCreateInfo.depthBiasEnable                                    = VK_FALSE;
 
     // No multisampling (yet)
-    VkPipelineMultisampleStateCreateInfo multisampleStateCreateInfo                = {};
-    multisampleStateCreateInfo.sType                                               = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    multisampleStateCreateInfo.sampleShadingEnable                                 = VK_FALSE;
-    multisampleStateCreateInfo.rasterizationSamples                                = VK_SAMPLE_COUNT_1_BIT;
+    VkPipelineMultisampleStateCreateInfo multisampleStateCreateInfo                 = {};
+    multisampleStateCreateInfo.sType                                                = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+    multisampleStateCreateInfo.sampleShadingEnable                                  = VK_FALSE;
+    multisampleStateCreateInfo.rasterizationSamples                                 = VK_SAMPLE_COUNT_1_BIT;
+                                                                                    
+    VkPipelineDepthStencilStateCreateInfo depthStencilStateCreateInfo               = {};
+    depthStencilStateCreateInfo.sType                                               = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    depthStencilStateCreateInfo.depthTestEnable                                     = VK_TRUE;
+    depthStencilStateCreateInfo.depthWriteEnable                                    = VK_TRUE;
+    depthStencilStateCreateInfo.depthCompareOp                                      = VK_COMPARE_OP_LESS;
+    depthStencilStateCreateInfo.depthBoundsTestEnable                               = VK_FALSE;
+    depthStencilStateCreateInfo.stencilTestEnable                                   = VK_FALSE;
 
-    // No depth/stencil buffering (yet) \\
-
-    VkPipelineColorBlendAttachmentState colorBlendAttachmentState                  = {};
-    colorBlendAttachmentState.colorWriteMask                                       = VK_COLOR_COMPONENT_R_BIT
-                                                                                   | VK_COLOR_COMPONENT_G_BIT
-                                                                                   | VK_COLOR_COMPONENT_B_BIT
-                                                                                   | VK_COLOR_COMPONENT_A_BIT;
-    colorBlendAttachmentState.blendEnable                                          = VK_TRUE;        // Implement alpha-blending
-    colorBlendAttachmentState.srcColorBlendFactor                                  = VK_BLEND_FACTOR_SRC_ALPHA;
-    colorBlendAttachmentState.dstColorBlendFactor                                  = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-    colorBlendAttachmentState.colorBlendOp                                         = VK_BLEND_OP_ADD;
-    colorBlendAttachmentState.srcAlphaBlendFactor                                  = VK_BLEND_FACTOR_ONE;
-    colorBlendAttachmentState.dstAlphaBlendFactor                                  = VK_BLEND_FACTOR_ZERO;
-    colorBlendAttachmentState.alphaBlendOp                                         = VK_BLEND_OP_ADD;
-
-    VkPipelineColorBlendStateCreateInfo colorBlendStateCreateInfo                  = {};
-    colorBlendStateCreateInfo.sType                                                = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    colorBlendStateCreateInfo.logicOpEnable                                        = VK_FALSE;
-    colorBlendStateCreateInfo.attachmentCount                                      = 1;
-    colorBlendStateCreateInfo.pAttachments                                         = &colorBlendAttachmentState;
-
-    std::vector< VkDynamicState > dynamicStates                                    = {
+    VkPipelineColorBlendAttachmentState colorBlendAttachmentState                   = {};
+    colorBlendAttachmentState.colorWriteMask                                        = VK_COLOR_COMPONENT_R_BIT
+                                                                                    | VK_COLOR_COMPONENT_G_BIT
+                                                                                    | VK_COLOR_COMPONENT_B_BIT
+                                                                                    | VK_COLOR_COMPONENT_A_BIT;
+    colorBlendAttachmentState.blendEnable                                           = VK_TRUE;        // Implement alpha-blending
+    colorBlendAttachmentState.srcColorBlendFactor                                   = VK_BLEND_FACTOR_SRC_ALPHA;
+    colorBlendAttachmentState.dstColorBlendFactor                                   = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+    colorBlendAttachmentState.colorBlendOp                                          = VK_BLEND_OP_ADD;
+    colorBlendAttachmentState.srcAlphaBlendFactor                                   = VK_BLEND_FACTOR_ONE;
+    colorBlendAttachmentState.dstAlphaBlendFactor                                   = VK_BLEND_FACTOR_ZERO;
+    colorBlendAttachmentState.alphaBlendOp                                          = VK_BLEND_OP_ADD;
+                                                                                    
+    VkPipelineColorBlendStateCreateInfo colorBlendStateCreateInfo                   = {};
+    colorBlendStateCreateInfo.sType                                                 = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+    colorBlendStateCreateInfo.logicOpEnable                                         = VK_FALSE;
+    colorBlendStateCreateInfo.attachmentCount                                       = 1;
+    colorBlendStateCreateInfo.pAttachments                                          = &colorBlendAttachmentState;
+                                                                                    
+    std::vector< VkDynamicState > dynamicStates                                     = {
     
         VK_DYNAMIC_STATE_VIEWPORT,
         VK_DYNAMIC_STATE_SCISSOR
@@ -1042,34 +1049,34 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     };
 
     // Dynamic states require GPU features that I do not want to activate just now, so I'll define this struct here but not reference it in the pipeline create info
-    VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo                        = {};
-    dynamicStateCreateInfo.sType                                                   = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-    dynamicStateCreateInfo.dynamicStateCount                                       = static_cast< uint32_t >(dynamicStates.size());
-    dynamicStateCreateInfo.pDynamicStates                                          = dynamicStates.data();
-
-    VkDescriptorBufferInfo mvpBufferInfo                                           = {};
-    mvpBufferInfo.buffer                                                           = mvpBuffer->buf;
-    mvpBufferInfo.offset                                                           = 0;
-    mvpBufferInfo.range                                                            = sizeof(MVPBufferObject);
-
-    UniformInfo mvpInfo                                                            = {};
-    mvpInfo.binding                                                                = 0;
-    mvpInfo.stageFlags                                                             = VK_SHADER_STAGE_VERTEX_BIT;
-    mvpInfo.bufferInfo                                                             = mvpBufferInfo;
-    mvpInfo.type                                                                   = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-
-    VkDescriptorImageInfo imageInfo                                                = {};
-    imageInfo.sampler                                                              = image->imgSampler;
-    imageInfo.imageLayout                                                          = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView                                                            = image->imgView;
-
-    UniformInfo samplerInfo                                                        = {};
-    samplerInfo.binding                                                            = 1;
-    samplerInfo.stageFlags                                                         = VK_SHADER_STAGE_FRAGMENT_BIT;
-    samplerInfo.imageInfo                                                          = imageInfo;
-    samplerInfo.type                                                               = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-
-    std::vector< UniformInfo > bindings                                            = {
+    VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo                         = {};
+    dynamicStateCreateInfo.sType                                                    = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+    dynamicStateCreateInfo.dynamicStateCount                                        = static_cast< uint32_t >(dynamicStates.size());
+    dynamicStateCreateInfo.pDynamicStates                                           = dynamicStates.data();
+                                                                                    
+    VkDescriptorBufferInfo mvpBufferInfo                                            = {};
+    mvpBufferInfo.buffer                                                            = mvpBuffer->buf;
+    mvpBufferInfo.offset                                                            = 0;
+    mvpBufferInfo.range                                                             = sizeof(MVPBufferObject);
+                                                                                    
+    UniformInfo mvpInfo                                                             = {};
+    mvpInfo.binding                                                                 = 0;
+    mvpInfo.stageFlags                                                              = VK_SHADER_STAGE_VERTEX_BIT;
+    mvpInfo.bufferInfo                                                              = mvpBufferInfo;
+    mvpInfo.type                                                                    = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                                                                                    
+    VkDescriptorImageInfo imageInfo                                                 = {};
+    imageInfo.sampler                                                               = image->imgSampler;
+    imageInfo.imageLayout                                                           = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageInfo.imageView                                                             = image->imgView;
+                                                                                    
+    UniformInfo samplerInfo                                                         = {};
+    samplerInfo.binding                                                             = 1;
+    samplerInfo.stageFlags                                                          = VK_SHADER_STAGE_FRAGMENT_BIT;
+    samplerInfo.imageInfo                                                           = imageInfo;
+    samplerInfo.type                                                                = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                                                                                    
+    std::vector< UniformInfo > bindings                                             = {
     
         mvpInfo,
         samplerInfo
@@ -1084,7 +1091,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
         &viewportStateCreateInfo,
         &rasterizationStateCreateInfo,
         &multisampleStateCreateInfo,
-        nullptr,                        // Still no depth/stencil buffering
+        &depthStencilStateCreateInfo,
         &colorBlendAttachmentState,
         &colorBlendStateCreateInfo,
         nullptr,                        // Defined, but not referenced
@@ -1117,15 +1124,31 @@ VK_STATUS_CODE VKEngine::createRenderPasses() {
     colorAttachmentReference.attachment                         = 0;
     colorAttachmentReference.layout                             = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+    VkAttachmentDescription depthBufferAttachmentDescription    = {};
+    depthBufferAttachmentDescription.format                     = reinterpret_cast< DepthBuffer* >(depthBuffer)->depthFormat;
+    depthBufferAttachmentDescription.samples                    = VK_SAMPLE_COUNT_1_BIT;
+    depthBufferAttachmentDescription.loadOp                     = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    depthBufferAttachmentDescription.storeOp                    = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depthBufferAttachmentDescription.stencilLoadOp              = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    depthBufferAttachmentDescription.stencilStoreOp             = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depthBufferAttachmentDescription.initialLayout              = VK_IMAGE_LAYOUT_UNDEFINED;
+    depthBufferAttachmentDescription.finalLayout                = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+    VkAttachmentReference depthBufferAttachmentReference        = {};
+    depthBufferAttachmentReference.attachment                   = 1;
+    depthBufferAttachmentReference.layout                       = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
     VkSubpassDescription subpassDescription                     = {};
     subpassDescription.pipelineBindPoint                        = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpassDescription.colorAttachmentCount                     = 1;
     subpassDescription.pColorAttachments                        = &colorAttachmentReference;
+    subpassDescription.pDepthStencilAttachment                  = &depthBufferAttachmentReference;
 
+    std::vector< VkAttachmentDescription > attachments          = {colorAttachmentDescription, depthBufferAttachmentDescription};
     VkRenderPassCreateInfo renderPassCreateInfo                 = {};
     renderPassCreateInfo.sType                                  = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassCreateInfo.attachmentCount                        = 1;
-    renderPassCreateInfo.pAttachments                           = &colorAttachmentDescription;
+    renderPassCreateInfo.attachmentCount                        = static_cast< uint32_t >(attachments.size());
+    renderPassCreateInfo.pAttachments                           = attachments.data();
     renderPassCreateInfo.subpassCount                           = 1;
     renderPassCreateInfo.pSubpasses                             = &subpassDescription;
 
@@ -1165,17 +1188,18 @@ VK_STATUS_CODE VKEngine::allocateSwapchainFramebuffers() {
     
         logger::log(EVENT_LOG, "Creating framebuffer...");
 
-        VkImageView attachments[] = {
+        std::vector< VkImageView > attachments = {
         
-            swapchainImageViews[i]
+            swapchainImageViews[i],
+            reinterpret_cast< DepthBuffer* >(depthBuffer)->imgView
         
         };
     
         VkFramebufferCreateInfo framebufferCreateInfo          = {};
         framebufferCreateInfo.sType                            = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebufferCreateInfo.renderPass                       = renderPass;
-        framebufferCreateInfo.attachmentCount                  = 1;
-        framebufferCreateInfo.pAttachments                     = attachments;
+        framebufferCreateInfo.attachmentCount                  = static_cast< uint32_t >(attachments.size());
+        framebufferCreateInfo.pAttachments                     = attachments.data();
         framebufferCreateInfo.width                            = swapchainImageExtent.width;
         framebufferCreateInfo.height                           = swapchainImageExtent.height;
         framebufferCreateInfo.layers                           = 1;
@@ -1278,10 +1302,12 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
         renderPassBeginInfo.renderArea.offset                      = {0, 0};
         renderPassBeginInfo.renderArea.extent                      = swapchainImageExtent;
         
-        VkClearValue clearColor                                    = { 122.0f / 255.0f, 122.0f / 255.0f, 122.0f / 255.0f, 1.0f};
-        
-        renderPassBeginInfo.clearValueCount                        = 1;
-        renderPassBeginInfo.pClearValues                           = &clearColor;
+        std::array< VkClearValue, 2 > clearColorValues             = {}; 
+        clearColorValues[0].color                                  = { 122.0f / 255.0f, 122.0f / 255.0f, 122.0f / 255.0f, 1.0f };
+        clearColorValues[1].depthStencil                           = {1.0f, 0};
+
+        renderPassBeginInfo.clearValueCount                        = static_cast< uint32_t >(clearColorValues.size());
+        renderPassBeginInfo.pClearValues                           = clearColorValues.data();
 
         vkCmdBeginRenderPass(standardCommandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);        // Rendering commands will be embedded in the primary command buffer
 
@@ -1477,6 +1503,7 @@ VK_STATUS_CODE VKEngine::recreateSwapchain() {
 
     ASSERT(createSwapchain(), "Failed to create a swapchain with the given parameters", VK_SC_SWAPCHAIN_CREATION_ERROR);
     ASSERT(createSwapchainImageViews(), "Failed to create swapchain image views", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
+    ASSERT(allocateDepthBuffer(), "Failed to allocate depth buffer", VK_SC_DEPTH_BUFFER_CREATION_ERROR);
     ASSERT(createRenderPasses(), "Failed to create render passes", VK_SC_RENDER_PASS_CREATION_ERROR);
     ASSERT(allocateUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
     ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
@@ -1493,6 +1520,9 @@ VK_STATUS_CODE VKEngine::cleanSwapchain() {
 
     delete mvpBuffer;
     logger::log(EVENT_LOG, "Successfully destroyed uniform buffers");
+
+    delete reinterpret_cast< DepthBuffer* >(depthBuffer);
+    logger::log(EVENT_LOG, "Successfully destroyed depth buffer");
 
     logger::log(EVENT_LOG, "Destroying framebuffers...");
     for (auto framebuffer : swapchainFramebuffers) {
@@ -1690,8 +1720,14 @@ void VKEngine::mouseScrollCallback(GLFWwindow* window_, double xOff_, double yOf
 
 }
 
-VK_STATUS_CODE VKEngine::createDepthBuffer() {
+VK_STATUS_CODE VKEngine::allocateDepthBuffer() {
 
+    logger::log(EVENT_LOG, "Creating depth resources...");
+    
     depthBuffer = new DepthBuffer();
+
+    logger::log(EVENT_LOG, "Successfully created depth resources");
+
+    return vk::errorCodeBuffer;
 
 }

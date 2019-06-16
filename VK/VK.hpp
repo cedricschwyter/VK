@@ -168,12 +168,13 @@ namespace vk {
     /**
         Creates a VkImageView handle
 
-        @param      image_      The VkImage handle to create an image view from
-        @param      format_     The image format
+        @param      image_              The VkImage handle to create an image view from
+        @param      format_             The image format
+        @param      aspectFlags_        The aspect mask to specify in the image view creation process
 
         @return     Returns a valid VkImageView handle
     */
-    VkImageView createImageView(VkImage image_, VkFormat format_);
+    VkImageView createImageView(VkImage image_, VkFormat format_, VkImageAspectFlags aspectFlags_);
 
     /**
         Evaluates the best buffer format to use
@@ -185,5 +186,14 @@ namespace vk {
         @return     Returns the best VkFormat to use
     */
     VkFormat enumerateSupportedBufferFormat(const std::vector< VkFormat >& candidates_, VkImageTiling tiling_, VkFormatFeatureFlags features_);
+
+    /**
+        Checks whether a VkFormat has a stencil component
+
+        @param      format_         The format in question
+
+        @return     Returns true if the format utilizes a stencil component
+    */
+    bool hasStencilBufferComponent(VkFormat format_);
 
 }
