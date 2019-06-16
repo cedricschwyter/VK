@@ -15,9 +15,6 @@ class DepthBuffer :
 {
 public:
 
-    VkFormat            depthFormat;
-    VkImageView         imgView;
-
     /**
         Default constructor
     */
@@ -26,12 +23,9 @@ public:
     /**
         Default destructor
     */
-    ~DepthBuffer(void);
+    ~DepthBuffer(void) = default;
 
 private:
-
-    VkImage             img;
-    VkDeviceMemory      imgMem;
 
     /**
         Evaluates the best depth buffer format to use

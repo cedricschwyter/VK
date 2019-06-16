@@ -251,7 +251,8 @@ namespace vk {
         VkImage         image_,
         VkFormat        format_,
         VkImageLayout   oldLayout_,
-        VkImageLayout   newLayout_
+        VkImageLayout   newLayout_,
+        uint32_t        mipLevels_
         ) {
 
         VkCommandBuffer commandBuffer               = startCommandBuffer();
@@ -316,6 +317,15 @@ namespace vk {
             destinationStage            = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
         
         }
+        else if (oldLayout_ == VK_IMAGE_LAYOUT_UNDEFINED && newLayout_ == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
+
+            barrier.srcAccessMask       = 0;
+            barrier.dstAccessMask       = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+            
+            sourceStage                 = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+            destinationStage            = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+
+        }
         else {
 
             logger::log(ERROR_LOG, "Unsupported layout transition");
@@ -374,7 +384,12 @@ namespace vk {
 
     }
 
-    VkImageView createImageView(VkImage image_, VkFormat format_, VkImageAspectFlags aspectFlags_) {
+    VkImageView createImageView(
+        VkImage                 image_, 
+        VkFormat                format_, 
+        VkImageAspectFlags      aspectFlags_,
+        uint32_t                mipLevels_
+        ) {
 
         logger::log(EVENT_LOG, "Creating image view...");
 

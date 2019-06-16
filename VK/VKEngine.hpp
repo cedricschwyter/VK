@@ -42,11 +42,12 @@
 #include "IndexBuffer.hpp"
 #include "UniformBuffer.hpp"
 #include "MVPBufferObject.cpp"
-#include "ImageObject.hpp"
+#include "TextureImage.hpp"
 #include "BaseCamera.hpp"
 #include "FPSCamera.hpp"
 #include "CenterCamera.hpp"
 #include "DepthBuffer.hpp"
+#include "MSAARenderImage.hpp"
 
 class VKEngine {
 public:
@@ -60,6 +61,7 @@ public:
     VkCommandPool                           standardCommandPool;
     VkQueue                                 graphicsQueue                        = VK_NULL_HANDLE;
     BaseCamera*                             camera;
+    VkSampleCountFlagBits                   maxMSAASamples                          = VK_SAMPLE_COUNT_1_BIT;
 
     /**
         Initializes VKEngine and loads dependencies
@@ -114,10 +116,11 @@ private:
     bool                                    hasFramebufferBeenResized            = false;
     BaseBuffer*                             vertexBuffer;
     BaseBuffer*                             indexBuffer;
-    BaseBuffer*                             depthBuffer;
-    UniformBuffer*                          mvpBuffer;
+    BaseBuffer*                             mvpBuffer;
+    BaseImage*                              depthBuffer;
+    BaseImage*                              msaaBufferImage;
+    BaseImage*                              image;
     bool                                    initialized                          = false;
-    ImageObject*                            image;
 
     /**
         Initializes the logger
@@ -444,5 +447,19 @@ private:
         @return     Returns VK_SC_SUCCESS on success
     */
     VK_STATUS_CODE allocateDepthBuffer(void);
+
+    /**
+        Evaluates the maximum number of samples to use
+
+        @return     Returns the maximum number of samples as VkSampleCountFlagBits
+    */
+    VkSampleCountFlagBits enumerateMaximumMultisamplingSampleCount(void);
+
+    /**
+        Generates some multisampling resources
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE allocateMSAABufferedImage(void);
 
 };

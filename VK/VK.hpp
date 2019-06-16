@@ -142,12 +142,14 @@ namespace vk {
         @param      format_         The image format
         @param      oldLayout_      The old layout
         @param      newLayout_      The new layout
+        @param      mipLevels       The amount of mip levels
     */
     void imageLayoutTransition(
         VkImage         image_,
         VkFormat        format_,
         VkImageLayout   oldLayout_,
-        VkImageLayout   newLayout_
+        VkImageLayout   newLayout_,
+        uint32_t        mipLevels_
         );
 
     /**
@@ -171,10 +173,16 @@ namespace vk {
         @param      image_              The VkImage handle to create an image view from
         @param      format_             The image format
         @param      aspectFlags_        The aspect mask to specify in the image view creation process
+        @param      mipLevels_          The amount of mip levels
 
         @return     Returns a valid VkImageView handle
     */
-    VkImageView createImageView(VkImage image_, VkFormat format_, VkImageAspectFlags aspectFlags_);
+    VkImageView createImageView(
+        VkImage                 image_,
+        VkFormat                format_,
+        VkImageAspectFlags      aspectFlags_,
+        uint32_t                mipLevels_
+        );
 
     /**
         Evaluates the best buffer format to use

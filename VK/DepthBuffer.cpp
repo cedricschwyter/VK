@@ -13,19 +13,25 @@
 
 DepthBuffer::DepthBuffer() {
 
-    depthFormat     = enumerateSupportedDepthBufferFormat();
+    imgFormat = enumerateSupportedDepthBufferFormat();
     createImage(
         vk::engine.swapchainImageExtent.width, 
         vk::engine.swapchainImageExtent.height, 
-        depthFormat, 
+        1,
+        imgFormat, 
         VK_IMAGE_TILING_OPTIMAL, 
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, 
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
-        img, 
-        imgMem
+        vk::engine.maxMSAASamples
         );
-    imgView         = vk::createImageView(img, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
-    vk::imageLayoutTransition(img, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+    imgView = vk::createImageView(img, imgFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
+    vk::imageLayoutTransition(
+        img, 
+        imgFormat, 
+        VK_IMAGE_LAYOUT_UNDEFINED, 
+        VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 
+        1
+        );
 
 }
 
@@ -36,13 +42,5 @@ VkFormat DepthBuffer::enumerateSupportedDepthBufferFormat() {
         VK_IMAGE_TILING_OPTIMAL,
         VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
         );
-
-}
-
-DepthBuffer::~DepthBuffer() {
-
-    vkDestroyImageView(vk::engine.logicalDevice, imgView, vk::engine.allocator);
-    vkDestroyImage(vk::engine.logicalDevice, img, vk::engine.allocator);
-    vkFreeMemory(vk::engine.logicalDevice, imgMem, vk::engine.allocator);
 
 }

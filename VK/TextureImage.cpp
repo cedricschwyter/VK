@@ -1,13 +1,13 @@
 /**
-    Implements the ImageObject class
+    Implements the TextureImage class
 
-    @author        D3PSI
-    @version    0.0.1 02.12.2019
+    @author       D3PSI
+    @version      0.0.1 02.12.2019
 
-    @file        ImageObject.cpp
-    @brief        Implementation of the ImageObject class
+    @file         TextureImage.cpp
+    @brief        Implementation of the TextureImage class
 */
-#include "ImageObject.hpp"
+#include "TextureImage.hpp"
 
 #include <stb_image.h>
 
@@ -44,52 +44,23 @@ TextureImage::TextureImage(
 
     stbi_image_free(pix);
 
-    VkImageCreateInfo imageCreateInfo       = {};
-    imageCreateInfo.sType                   = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-    imageCreateInfo.imageType               = VK_IMAGE_TYPE_2D;
-    imageCreateInfo.extent.width            = w;
-    imageCreateInfo.extent.height           = h;
-    imageCreateInfo.extent.depth            = 1;
-    imageCreateInfo.mipLevels               = 1;
-    imageCreateInfo.arrayLayers             = 1;
-    imageCreateInfo.format                  = format_;
-    imageCreateInfo.tiling                  = tiling_;
-    imageCreateInfo.initialLayout           = VK_IMAGE_LAYOUT_UNDEFINED;
-    imageCreateInfo.usage                   = usage_;
-    imageCreateInfo.samples                 = VK_SAMPLE_COUNT_1_BIT;
-    imageCreateInfo.sharingMode             = VK_SHARING_MODE_EXCLUSIVE;
-   
-    VkResult result = vkCreateImage(
-        vk::engine.logicalDevice, 
-        &imageCreateInfo, 
-        vk::engine.allocator, 
-        &img
+    createImage(
+        w, 
+        h, 
+        1, 
+        VK_FORMAT_R8G8B8A8_UNORM, 
+        VK_IMAGE_TILING_OPTIMAL, 
+        VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        VK_SAMPLE_COUNT_1_BIT
         );
-    ASSERT(result, "Failed to create image", VK_SC_TEXTURE_IMAGE_CREATION_ERROR);
-
-    VkMemoryRequirements memoryRequirements;
-    vkGetImageMemoryRequirements(vk::engine.logicalDevice, img, &memoryRequirements);
-
-    VkMemoryAllocateInfo memoryAllocateInfo             = {};
-    memoryAllocateInfo.sType                            = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    memoryAllocateInfo.allocationSize                   = memoryRequirements.size;
-    memoryAllocateInfo.memoryTypeIndex                  = enumerateSuitableMemoryType(memoryRequirements.memoryTypeBits, properties_);
-
-    result = vkAllocateMemory(
-        vk::engine.logicalDevice,
-        &memoryAllocateInfo,
-        vk::engine.allocator,
-        &mem
-        );
-    ASSERT(result, "Failed to allocate buffer memory", VK_SC_BUFFER_ALLOCATION_ERROR);
-
-    bind();
 
     vk::imageLayoutTransition(
         img,
         VK_FORMAT_R8G8B8A8_UNORM, 
         VK_IMAGE_LAYOUT_UNDEFINED,
-        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        1
         );
 
     vk::copyBufferToImage(
@@ -103,12 +74,13 @@ TextureImage::TextureImage(
         img,
         VK_FORMAT_R8G8B8A8_UNORM, 
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        1
         );
 
     delete stagingBuffer;
 
-    imgView = vk::createImageView(img, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT);
+    imgView = vk::createImageView(img, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 
     VkSamplerCreateInfo samplerCreateInfo           = {};
     samplerCreateInfo.sType                         = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -128,7 +100,7 @@ TextureImage::TextureImage(
     samplerCreateInfo.minLod                        = 0.0f;
     samplerCreateInfo.maxLod                        = 0.0f;
 
-    result = vkCreateSampler(
+    VkResult result = vkCreateSampler(
         vk::engine.logicalDevice,
         &samplerCreateInfo,
         vk::engine.allocator,

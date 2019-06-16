@@ -15,6 +15,7 @@
 */
 typedef enum VK_STATUS_CODE {
 
+    VK_SC_MSAA_BUFFER_CREATION_ERROR                        = -51,
     VK_SC_IMAGE_MEMORY_ALLOCATION_ERROR                     = -50,
     VK_SC_DEPTH_BUFFER_CREATION_ERROR                       = -49,
     VK_SC_IMAGE_CREATION_ERROR                              = -48,

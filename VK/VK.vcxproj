@@ -144,7 +144,8 @@
     <ClCompile Include="DescriptorSet.cpp" />
     <ClCompile Include="FPSCamera.cpp" />
     <ClCompile Include="GraphicsPipeline.cpp" />
-    <ClCompile Include="ImageObject.cpp" />
+    <ClCompile Include="MSAARenderImage.cpp" />
+    <ClCompile Include="TextureImage.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="LoadingScreen.cpp" />
     <ClCompile Include="Logger.cpp" />
@@ -175,7 +176,8 @@
     <ClInclude Include="DescriptorSet.hpp" />
     <ClInclude Include="FPSCamera.hpp" />
     <ClInclude Include="GraphicsPipeline.hpp" />
-    <ClInclude Include="ImageObject.hpp" />
+    <ClInclude Include="MSAARenderImage.hpp" />
+    <ClInclude Include="TextureImage.hpp" />
     <ClInclude Include="IndexBuffer.hpp" />
     <ClInclude Include="LoadingScreen.hpp" />
     <ClInclude Include="Logger.hpp" />
