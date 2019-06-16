@@ -27,7 +27,7 @@ VK_STATUS_CODE VKEngine::init() {
     ASSERT(clean(), "Application cleanup error", VK_SC_CLEANUP_ERROR);
     logger::log(START_LOG, "Shutting down...");
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -116,7 +116,7 @@ VK_STATUS_CODE VKEngine::initWindow() {
     glfwSetScrollCallback(window, mouseScrollCallback);
     logger::log(EVENT_LOG, "Successfully set mouse scroll callback");
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -153,7 +153,7 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 
     }
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -206,7 +206,7 @@ VK_STATUS_CODE VKEngine::loop() {
 
     logger::log(EVENT_LOG, "Terminating...");
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -265,7 +265,7 @@ VK_STATUS_CODE VKEngine::clean() {
     std::cout << "\n\nPress any key to continue...";
     logger::log(EVENT_LOG, "Exit code: " + _getch());
 #endif
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -311,7 +311,7 @@ VK_STATUS_CODE VKEngine::createInstance() {
     VkResult result = vkCreateInstance(&instanceCreateInfo, allocator, &instance);
     ASSERT(result, "Failed to create VkInstance!", VK_SC_INSTANCE_CREATON_ERROR);
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -415,7 +415,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL VKEngine::validationLayerDebugMessageCallback(
 
 VK_STATUS_CODE VKEngine::debugUtilsMessenger() {
 
-    if (!validationLayersEnabled) return VK_SC_SUCCESS;
+    if (!validationLayersEnabled) return vk::errorCodeBuffer;
 
     logger::log(EVENT_LOG, "Creating debug utils messenger...");
 
@@ -441,7 +441,7 @@ VK_STATUS_CODE VKEngine::debugUtilsMessenger() {
 
     logger::log(EVENT_LOG, "Successfully created debug utils messenger");
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -479,7 +479,7 @@ VK_STATUS_CODE VKEngine::selectBestPhysicalDevice() {
         printPhysicalDevicePropertiesAndFeatures(possibleGPUs.rbegin()->second);
         physicalDevice = possibleGPUs.rbegin()->second;
 
-        return VK_SC_SUCCESS;
+        return vk::errorCodeBuffer;
 
     }
     else {
@@ -538,7 +538,7 @@ VK_STATUS_CODE VKEngine::printPhysicalDevicePropertiesAndFeatures(VkPhysicalDevi
 
     logger::log(EVENT_LOG, info);
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -676,7 +676,7 @@ VK_STATUS_CODE VKEngine::createLogicalDeviceFromPhysicalDevice() {
         );
     logger::log(EVENT_LOG, "Successfully retrieved queue handle for transfer queue");
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -689,7 +689,7 @@ VK_STATUS_CODE VKEngine::createSurfaceGLFW() {
         &surface
         ), "GLFW surface creation error", VK_SC_SURFACE_CREATION_ERROR);
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -936,7 +936,7 @@ VK_STATUS_CODE VKEngine::createSwapchain() {
         );
     logger::log(EVENT_LOG, "Successfully retrieved the handles for the swapchain images");
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -954,7 +954,7 @@ VK_STATUS_CODE VKEngine::createSwapchainImageViews() {
 
     logger::log(EVENT_LOG, "Successfully created swapchain image views");
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -1095,7 +1095,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 
     logger::log(EVENT_LOG, "Successfully created graphics pipeline");
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -1151,7 +1151,7 @@ VK_STATUS_CODE VKEngine::createRenderPasses() {
 
     logger::log(EVENT_LOG, "Successfully created render pass");
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -1194,7 +1194,7 @@ VK_STATUS_CODE VKEngine::allocateSwapchainFramebuffers() {
 
     logger::log(EVENT_LOG, "Successfully allocated framebuffers");
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -1233,7 +1233,7 @@ VK_STATUS_CODE VKEngine::allocateCommandPools() {
 
     logger::log(EVENT_LOG, "Successfully allocated command pool");
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -1325,7 +1325,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
     }
     logger::log(EVENT_LOG, "Successfully recorded command buffers");
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -1404,7 +1404,7 @@ VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
 
     currentSwapchainImage = (currentSwapchainImage + 1) % vk::MAX_IN_FLIGHT_FRAMES;
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -1456,7 +1456,7 @@ VK_STATUS_CODE VKEngine::initializeSynchronizationObjects() {
 
     logger::log(EVENT_LOG, "Successfully initialized sync-objects");
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -1483,7 +1483,7 @@ VK_STATUS_CODE VKEngine::recreateSwapchain() {
     ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -1528,7 +1528,7 @@ VK_STATUS_CODE VKEngine::cleanSwapchain() {
 
     logger::log(EVENT_LOG, "Successfully cleaned swapchain");
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -1570,7 +1570,7 @@ VK_STATUS_CODE VKEngine::allocateNecessaryBuffers() {
     res                                                       = indexBuffer->fillS(vk::indices.data(), sizeof(vk::indices[0]) * vk::indices.size());
     ASSERT(res, "Failed to fill index buffer", VK_SC_INDEX_BUFFER_MAP_ERROR);
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -1588,7 +1588,7 @@ VK_STATUS_CODE VKEngine::allocateUniformBuffers() {
 
     logger::log(EVENT_LOG, "Successfully created buffers");
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -1607,7 +1607,7 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers() {
 
     mvpBuffer->fill(&mvp);
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -1625,7 +1625,7 @@ VK_STATUS_CODE VKEngine::createTextureImages() {
 
     logger::log(EVENT_LOG, "Successfully loaded textures");
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -1633,7 +1633,7 @@ VK_STATUS_CODE VKEngine::createCamera() {
 
     camera = new FPSCamera();
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 

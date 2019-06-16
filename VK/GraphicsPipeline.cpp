@@ -95,7 +95,7 @@ VK_STATUS_CODE GraphicsPipeline::destroy() {
     vkDestroyPipelineLayout(vk::engine.logicalDevice, pipelineLayout, vk::engine.allocator);
     logger::log(EVENT_LOG, "Successfully destroyed pipeline layout");
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -112,6 +112,6 @@ VK_STATUS_CODE GraphicsPipeline::bindDescriptors(std::vector< VkCommandBuffer >&
         nullptr
         );
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }

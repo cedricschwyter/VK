@@ -13,7 +13,7 @@
 
 namespace vk {
 
-    int                                 errorCodeBuffer             = VK_SC_ERROR_CODE_BUFFER_NOT_INITIALIZED;
+    VK_STATUS_CODE                      errorCodeBuffer             = VK_SC_ERROR_CODE_BUFFER_NOT_INITIALIZED;
 
     VKEngine                            engine;
     const unsigned int                  WIDTH                       = 1280;
@@ -61,7 +61,7 @@ namespace vk {
 
             std::cerr << e.what() << std::endl;
 
-            return static_cast< VK_STATUS_CODE >(errorCodeBuffer);
+            return errorCodeBuffer;
 
         }
 
@@ -107,7 +107,7 @@ namespace vk {
         if (function != nullptr) {
 
             function(instance_, debugMessenger_, pAllocator_);
-            return VK_SC_SUCCESS;
+            return vk::errorCodeBuffer;
 
         }
         else {

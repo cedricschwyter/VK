@@ -23,7 +23,7 @@
 */
 namespace vk {
 
-    extern int                                  errorCodeBuffer;
+    extern VK_STATUS_CODE                       errorCodeBuffer;
     
     extern VKEngine                             engine;
     extern const unsigned int                   HEIGHT;

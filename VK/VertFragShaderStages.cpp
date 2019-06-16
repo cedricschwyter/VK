@@ -46,7 +46,7 @@ VK_STATUS_CODE VertFragShaderStages::destroyModules() {
     vkDestroyShaderModule(vk::engine.logicalDevice, vertModule, vk::engine.allocator);
     vkDestroyShaderModule(vk::engine.logicalDevice, fragModule, vk::engine.allocator);
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 

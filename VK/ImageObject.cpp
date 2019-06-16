@@ -148,7 +148,7 @@ VK_STATUS_CODE ImageObject::bind() {
         );
     ASSERT(result, "Failed to bind buffer memory", VK_SC_BUFFER_BINDING_ERROR);
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 

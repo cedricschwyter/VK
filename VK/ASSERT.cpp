@@ -29,14 +29,14 @@ inline int ASSERT(int val_, const char* msg_, int ret_) {
 
         logger::log(ERROR_LOG, msg_);
 
-        vk::errorCodeBuffer = ret_;
+        vk::errorCodeBuffer = static_cast< VK_STATUS_CODE >(ret_);
 
         return ret_;
 
     }
     else {
     
-        vk::errorCodeBuffer = val_;
+        vk::errorCodeBuffer = static_cast< VK_STATUS_CODE >(val_);
 
         return val_;
 

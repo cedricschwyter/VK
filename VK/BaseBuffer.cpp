@@ -136,7 +136,7 @@ VK_STATUS_CODE BaseBuffer::bind() {
         );
     ASSERT(result, "Failed to bind buffer memory", VK_SC_BUFFER_BINDING_ERROR);
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -154,7 +154,7 @@ VK_STATUS_CODE BaseBuffer::fill(const void* bufData_) {
     memcpy(data, bufData_, static_cast< size_t >(bufferCreateInfo.size));
     vkUnmapMemory(vk::engine.logicalDevice, mem);
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -172,7 +172,7 @@ VK_STATUS_CODE BaseBuffer::fill(const unsigned char* bufData_) {
     memcpy(data, bufData_, static_cast<size_t>(bufferCreateInfo.size));
     vkUnmapMemory(vk::engine.logicalDevice, mem);
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -207,6 +207,6 @@ VK_STATUS_CODE BaseBuffer::fillS(const void* bufData_, size_t bufSize_) {
 
     delete stagingBuffer;
 
-    return VK_SC_SUCCESS;
+    return vk::errorCodeBuffer;
 
 }
