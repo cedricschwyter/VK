@@ -1,10 +1,10 @@
 /**
     Defines the BaseVertex struct
 
-    @author        D3PSI
-    @version    0.0.1 02.12.2019
+    @author       D3PSI
+    @version      0.0.1 02.12.2019
 
-    @file        BaseVertex.hpp
+    @file         BaseVertex.hpp
     @brief        Definition of the BaseVertex struct
 */
 #pragma once
