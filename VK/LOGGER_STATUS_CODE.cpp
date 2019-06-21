@@ -15,8 +15,8 @@
 */
 typedef enum LOGGER_STATUS_CODE {
 
-    LOGGER_SC_DIRECTORY_CREATION_ERROR        = -2,
-    LOGGER_SC_UNKNOWN_ERROR                   = -1,
-    LOGGER_SC_SUCCESS                         = 0
+    LOGGER_SC_DIRECTORY_CREATION_ERROR              = -2,
+    LOGGER_SC_UNKNOWN_ERROR                         = -1,
+    LOGGER_SC_SUCCESS                               = 0
 
 } LOGGER_STATUS_CODE;

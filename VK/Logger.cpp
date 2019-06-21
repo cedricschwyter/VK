@@ -21,7 +21,7 @@
 
 namespace logger {
 
-    const char*                LOG_DIR             = "logs";
+    const char*              LOG_DIR               = "logs";
 
     const std::string        ERROR_LOG_PATH        = "logs/error.log";
     const std::string        START_LOG_PATH        = "logs/start.log";
