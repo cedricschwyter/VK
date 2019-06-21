@@ -1784,3 +1784,11 @@ VK_STATUS_CODE VKEngine::allocateMSAABufferedImage() {
     return vk::errorCodeBuffer;
 
 }
+
+VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
+
+
+
+    return vk::errorCodeBuffer;
+
+}
