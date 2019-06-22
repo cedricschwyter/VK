@@ -17,5 +17,6 @@ struct TextureObject {
 
     uint32_t            ID;
     TEXTURE_TYPE        type;
+    const char*         path;
 
 };

@@ -104,14 +104,57 @@ Mesh Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
     
     }
 
-    // TODO: process indices
+    for (uint32_t i = 0; i < mesh_->mNumFaces; i++) {
+    
+        aiFace face = mesh_->mFaces[i];
+        
+        for (uint32_t j = 0; j < face.mNumIndices; j++) {
+        
+            indices.push_back(face.mIndices[j]);
+
+        }
+
+    }
 
     if (mesh_->mMaterialIndex >= 0) {
     
-        // TODO: process textures
+        aiMaterial* material = scene_->mMaterials[mesh_->mMaterialIndex];
+        
+        std::vector< TextureObject > diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, TT_DIFFUSE);
+        textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
+        std::vector< TextureObject > specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, TT_SPECULAR);
+        textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+    
     }
 
     return Mesh(vertices.data(), indices.data(), textures.data());
 
+}
+
+std::vector< TextureObject > Model::loadMaterialTextures(aiMaterial* material_, aiTextureType type_, TEXTURE_TYPE typeID_) {
+
+    std::vector< TextureObject > textures;
+
+    for (uint32_t i = 0; i < material_->GetTextureCount(type_); i++) {
+    
+        aiString string;
+        material_->GetTexture(type_, i, &string);
+        
+        TextureObject texture;
+        texture.ID          = textureFromFile(string.C_Str(), directory);
+        texture.type        = typeID_;
+        texture.path        = string.C_Str();
+        textures.push_back(texture);
+
+    }
+
+    return textures;
+
+}
+
+uint32_t Model::textureFromFile(const char *path_, const std::string& directory_, bool gamma_) {
+
+    // TODO
+    
 }
