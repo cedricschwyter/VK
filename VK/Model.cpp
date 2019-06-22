@@ -19,7 +19,11 @@ Model::Model(const char* path_, GraphicsPipeline& pipeline_) : pipeline(pipeline
 
 void Model::bind() {
 
-
+    for (uint32_t i = 0; i < meshes.size(); i++) {
+    
+        meshes[i].bind();
+    
+    }
 
 }
 
