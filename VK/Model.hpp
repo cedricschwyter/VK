@@ -36,8 +36,9 @@ public:
 
 private:
 
-    std::vector< Mesh > meshes;
-    std::string directory;
+    std::vector< Mesh >                 meshes;
+    std::string                         directory;
+    std::vector< TextureObject >        texturesLoaded;
 
     /**
         Handles and coordinates all loading actions for the specified file
@@ -84,9 +85,9 @@ private:
         @param      directory_      A reference to a string containing the directory path
         @param      gamma_          Is the texture file already gamma corrected?
 
-        @return     Returns a handle to the texture
+        @return     Returns a pointer to the texture
     */
-    uint32_t textureFromFile(const char* path_, const std::string& directory_, bool gamma_ = false);
+    TextureImage* textureFromFile(const char* path_, const std::string& directory_, bool gamma_ = false);
 
 };
 

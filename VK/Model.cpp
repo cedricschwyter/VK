@@ -141,11 +141,29 @@ std::vector< TextureObject > Model::loadMaterialTextures(aiMaterial* material_, 
         aiString string;
         material_->GetTexture(type_, i, &string);
         
-        TextureObject texture;
-        texture.ID          = textureFromFile(string.C_Str(), directory);
-        texture.type        = typeID_;
-        texture.path        = string.C_Str();
-        textures.push_back(texture);
+        bool skip = false;
+
+        for (uint32_t j = 0; j < texturesLoaded.size(); j++) {
+
+            if (std::strcmp(texturesLoaded[j].path, string.C_Str()) == 0) {
+
+                textures.push_back(texturesLoaded[j]);
+                skip = true;
+                break;
+
+            }
+
+        }
+        if(!skip) {
+
+            TextureObject texture;
+            texture.img         = textureFromFile(string.C_Str(), directory);
+            texture.type        = typeID_;
+            texture.path        = string.C_Str();
+            textures.push_back(texture);
+            texturesLoaded.push_back(texture);
+
+        }
 
     }
 
@@ -153,8 +171,17 @@ std::vector< TextureObject > Model::loadMaterialTextures(aiMaterial* material_, 
 
 }
 
-uint32_t Model::textureFromFile(const char *path_, const std::string& directory_, bool gamma_) {
+TextureImage* Model::textureFromFile(const char *path_, const std::string& directory_, bool gamma_) {
 
-    // TODO
+    std::string path = std::string(directory + '/' + path_);
+
+    TextureImage* img = new TextureImage(path.c_str(),
+        VK_FORMAT_R8G8B8A8_UNORM,
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+        );
+
+    return img;
     
 }

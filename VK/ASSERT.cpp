@@ -25,9 +25,13 @@
 */
 inline int ASSERT(int val_, const char* msg_, int ret_) {    
 
+    static std::mutex assertMutex;
+
     if (val_ != 0) {
 
-        vk::errorCodeBuffer = static_cast<VK_STATUS_CODE>(ret_);
+        assertMutex.lock();
+        vk::errorCodeBuffer = static_cast< VK_STATUS_CODE >(ret_);
+        assertMutex.unlock();
 
         logger::log(ERROR_LOG, msg_);
 
@@ -36,11 +40,12 @@ inline int ASSERT(int val_, const char* msg_, int ret_) {
     }
     else {
     
+        assertMutex.lock();
         vk::errorCodeBuffer = static_cast< VK_STATUS_CODE >(val_);
+        assertMutex.unlock();
 
         return val_;
 
     }
-
 
 }

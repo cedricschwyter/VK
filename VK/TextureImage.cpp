@@ -14,6 +14,7 @@
 #include "VK.hpp"
 #include "ASSERT.cpp"
 
+
 TextureImage::TextureImage(
     const char*                 path_, 
     VkFormat                    format_, 

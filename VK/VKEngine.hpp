@@ -48,6 +48,7 @@
 #include "CenterCamera.hpp"
 #include "DepthBuffer.hpp"
 #include "MSAARenderImage.hpp"
+#include "Model.hpp"
 
 class VKEngine {
 public:

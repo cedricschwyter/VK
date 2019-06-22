@@ -10,12 +10,13 @@
 #pragma once
 #include <string>
 
+#include "TextureImage.hpp"
 #include "TEXTURE_TYPE.cpp"
 
 
 struct TextureObject {
 
-    uint32_t            ID;
+    TextureImage*       img;
     TEXTURE_TYPE        type;
     const char*         path;
 
