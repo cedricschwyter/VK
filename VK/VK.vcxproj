@@ -195,6 +195,7 @@
     <ClInclude Include="VK_STATUS_CODE.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assimp-vc142-mt.dll" />
     <None Include="libjpeg-9.dll" />
     <None Include="libpng16-16.dll" />
     <None Include="libtiff-5.dll" />
@@ -206,6 +207,7 @@
     <None Include="shaders\standard\shader.frag" />
     <None Include="shaders\standard\shader.vert" />
     <None Include="shaders\standard\vert.spv" />
+    <None Include="zlib.dll" />
     <None Include="zlib1.dll" />
   </ItemGroup>
   <ItemGroup>

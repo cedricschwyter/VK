@@ -10,7 +10,6 @@
 #pragma once
 #include <vector>
 
-#include "BaseVertex.hpp"
 #include "TextureObject.cpp"
 #include "BaseBuffer.hpp"
 #include "VertexBuffer.hpp"

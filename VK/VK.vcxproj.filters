@@ -201,6 +201,8 @@
     <None Include="zlib1.dll" />
     <None Include="shaders\standard\frag.spv" />
     <None Include="shaders\standard\vert.spv" />
+    <None Include="assimp-vc142-mt.dll" />
+    <None Include="zlib.dll" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\textures\application\vulkan.png">
