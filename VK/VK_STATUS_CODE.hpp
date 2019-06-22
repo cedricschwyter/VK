@@ -15,6 +15,8 @@
 */
 typedef enum VK_STATUS_CODE {
 
+    VK_SC_RESOURCE_LOADING_ERROR                            = -53,
+    VK_SC_MODEL_LOADING_ERROR_ASSIMP                        = -52,
     VK_SC_MSAA_BUFFER_CREATION_ERROR                        = -51,
     VK_SC_IMAGE_MEMORY_ALLOCATION_ERROR                     = -50,
     VK_SC_DEPTH_BUFFER_CREATION_ERROR                       = -49,
