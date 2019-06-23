@@ -15,7 +15,7 @@ void FPSCamera::processKeyboardInput(GLFWwindow* window_) {
     static float deltaTime = 0.0f;
     static float lastFrame = 0.0f;
 
-    float currentFrame = static_cast<float>(glfwGetTime());
+    float currentFrame = static_cast< float >(glfwGetTime());
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
 

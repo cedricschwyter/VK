@@ -21,27 +21,36 @@ CenterCamera::CenterCamera(glm::vec3 target_, float radius_) {
 
 void CenterCamera::processKeyboardInput(GLFWwindow* window_) {
 
+    static float deltaTime = 0.0f;
+    static float lastFrame = 0.0f;
+
+    float currentFrame = static_cast< float >(glfwGetTime());
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;
+
+    float camSpeed = 2000.0f * deltaTime;
+
     if (glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS) {
     
-        pitch -= 1.0 * sens;
+        pitch -= 1.0 * sens * camSpeed;
     
     }
 
     if (glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS) {
 
-        pitch += 1.0 * sens;
+        pitch += 1.0 * sens * camSpeed;
 
     }
 
     if (glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS) {
 
-        yaw += 1.0 * sens;
+        yaw += 1.0 * sens * camSpeed;
 
     }
 
     if (glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS) {
 
-        yaw -= 1.0 * sens;
+        yaw -= 1.0 * sens * camSpeed;
 
     }
 
