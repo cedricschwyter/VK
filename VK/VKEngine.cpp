@@ -124,6 +124,7 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 
     allocator = nullptr;
 
+
     ASSERT(createInstance(), "Failed to create instance", VK_SC_INSTANCE_CREATON_ERROR);
     ASSERT(debugUtilsMessenger(), "Failed to create debug utils messenger", VK_SC_DEBUG_UTILS_MESSENGER_CREATION_ERROR);
     ASSERT(createSurfaceGLFW(), "Failed to create GLFW surface", VK_SC_SURFACE_CREATION_ERROR);
@@ -140,6 +141,7 @@ VK_STATUS_CODE VKEngine::initVulkan() {
     ASSERT(createTextureImages(), "Failed to create texture images", VK_SC_TEXTURE_IMAGE_CREATION_ERROR);
     ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
     ASSERT(allocateNecessaryBuffers(), "Failed to create necessary buffers", VK_SC_BUFFER_CREATION_ERROR);
+    ASSERT(loadModelsAndVertexData(), "Failed to load models", VK_SC_RESOURCE_LOADING_ERROR);
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
     ASSERT(initializeSynchronizationObjects(), "Failed to initialize sync-objects", VK_SC_SYNCHRONIZATION_OBJECT_INITIALIZATION_ERROR);
     ASSERT(createCamera(), "Failed to create camera", VK_SC_CAMERA_CREATION_ERROR);
@@ -215,6 +217,8 @@ VK_STATUS_CODE VKEngine::loop() {
 VK_STATUS_CODE VKEngine::clean() {
 
     ASSERT(cleanSwapchain(), "Failed to clean swapchain", VK_SC_SWAPCHAIN_CLEAN_ERROR);
+
+    // TODO: Destroy models and other loaded resources
 
     delete camera;
     logger::log(EVENT_LOG, "Successfully destroyed camera");
@@ -1780,6 +1784,14 @@ VkSampleCountFlagBits VKEngine::enumerateMaximumMultisamplingSampleCount() {
 VK_STATUS_CODE VKEngine::allocateMSAABufferedImage() {
 
     msaaBufferImage = new MSAARenderImage();
+
+    return vk::errorCodeBuffer;
+
+}
+
+VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
+
+    Model* testModel = new Model("res/models/nanosuit/nanosuit.obj", pipeline);
 
     return vk::errorCodeBuffer;
 

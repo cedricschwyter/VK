@@ -63,12 +63,6 @@
     <ClCompile Include="IndexBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="QueueFamily.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MVPBufferObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DescriptorSet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -100,6 +94,24 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MSAARenderImage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="QueueFamily.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MVPBufferObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TEXTURE_TYPE.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -167,6 +179,12 @@
     <ClInclude Include="MSAARenderImage.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Model.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\standard\shader.frag" />
@@ -183,10 +201,83 @@
     <None Include="zlib1.dll" />
     <None Include="shaders\standard\frag.spv" />
     <None Include="shaders\standard\vert.spv" />
+    <None Include="assimp-vc142-mt.dll" />
+    <None Include="zlib.dll" />
+    <None Include="res\models\nanosuit\nanosuit.mtl" />
+    <None Include="res\models\nanosuit\nanosuit.blend" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\textures\application\vulkan.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\textures\loading_screen\vulkan.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\textures\loading_screen\infinity_orig.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\textures\loading_screen\infinity.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\textures\application\infinity_orig.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\textures\application\infinity.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\models\nanosuit\leg_showroom_spec.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\models\nanosuit\leg_showroom_ddn.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\models\nanosuit\leg_dif.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\models\nanosuit\helmet_showroom_spec.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\models\nanosuit\helmet_showroom_ddn.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\models\nanosuit\helmet_diff.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\models\nanosuit\hand_showroom_spec.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\models\nanosuit\hand_showroom_ddn.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\models\nanosuit\hand_dif.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\models\nanosuit\glass_dif.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\models\nanosuit\glass_ddn.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\models\nanosuit\body_showroom_spec.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\models\nanosuit\body_showroom_ddn.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\models\nanosuit\body_dif.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\models\nanosuit\arm_showroom_spec.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\models\nanosuit\arm_showroom_ddn.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\models\nanosuit\arm_dif.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="res\models\nanosuit\LICENSE.txt" />
   </ItemGroup>
 </Project>

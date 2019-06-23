@@ -124,14 +124,14 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\VK\ext\stbimage;$(SolutionDir)\VK\ext\SDL\include;$(SolutionDir)\VK\ext\glm;C:\VulkanSDK\1.1.85.0\Include;$(SolutionDir)\VK\ext\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\VK\ext\assimp-x64\include;$(SolutionDir)\VK\ext\stbimage;$(SolutionDir)\VK\ext\SDL\include;$(SolutionDir)\VK\ext\glm;C:\VulkanSDK\1.1.85.0\Include;$(SolutionDir)\VK\ext\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)\VK\ext\SDL\lib\x64;$(SolutionDir)\VK\ext\glfw\lib-vc2019;C:\VulkanSDK\1.1.85.0\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2_image.lib;SDL2.lib;SDL2main.lib;glfw3.lib;vulkan-1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\VK\ext\assimp-x64\lib;$(SolutionDir)\VK\ext\SDL\lib\x64;$(SolutionDir)\VK\ext\glfw\lib-vc2019;C:\VulkanSDK\1.1.85.0\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp-vc142-mt.lib;SDL2_image.lib;SDL2.lib;SDL2main.lib;glfw3.lib;vulkan-1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -144,6 +144,8 @@
     <ClCompile Include="DescriptorSet.cpp" />
     <ClCompile Include="FPSCamera.cpp" />
     <ClCompile Include="GraphicsPipeline.cpp" />
+    <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="MSAARenderImage.cpp" />
     <ClCompile Include="TextureImage.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
@@ -152,6 +154,8 @@
     <ClCompile Include="LOGGER_STATUS_CODE.cpp" />
     <ClCompile Include="LOG_TYPE.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="TextureObject.cpp" />
+    <ClCompile Include="TEXTURE_TYPE.cpp" />
     <ClCompile Include="UniformBuffer.cpp" />
     <ClCompile Include="QueueFamily.cpp" />
     <ClCompile Include="SDL_STATUS_CODE.cpp" />
@@ -176,6 +180,8 @@
     <ClInclude Include="DescriptorSet.hpp" />
     <ClInclude Include="FPSCamera.hpp" />
     <ClInclude Include="GraphicsPipeline.hpp" />
+    <ClInclude Include="Mesh.hpp" />
+    <ClInclude Include="Model.hpp" />
     <ClInclude Include="MSAARenderImage.hpp" />
     <ClInclude Include="TextureImage.hpp" />
     <ClInclude Include="IndexBuffer.hpp" />
@@ -189,10 +195,13 @@
     <ClInclude Include="VK_STATUS_CODE.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assimp-vc142-mt.dll" />
     <None Include="libjpeg-9.dll" />
     <None Include="libpng16-16.dll" />
     <None Include="libtiff-5.dll" />
     <None Include="libwebp-7.dll" />
+    <None Include="res\models\nanosuit\nanosuit.blend" />
+    <None Include="res\models\nanosuit\nanosuit.mtl" />
     <None Include="SDL2.dll" />
     <None Include="SDL2_image.dll" />
     <None Include="shaders\standard\compile.bat" />
@@ -200,10 +209,36 @@
     <None Include="shaders\standard\shader.frag" />
     <None Include="shaders\standard\shader.vert" />
     <None Include="shaders\standard\vert.spv" />
+    <None Include="zlib.dll" />
     <None Include="zlib1.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\models\nanosuit\arm_dif.png" />
+    <Image Include="res\models\nanosuit\arm_showroom_ddn.png" />
+    <Image Include="res\models\nanosuit\arm_showroom_spec.png" />
+    <Image Include="res\models\nanosuit\body_dif.png" />
+    <Image Include="res\models\nanosuit\body_showroom_ddn.png" />
+    <Image Include="res\models\nanosuit\body_showroom_spec.png" />
+    <Image Include="res\models\nanosuit\glass_ddn.png" />
+    <Image Include="res\models\nanosuit\glass_dif.png" />
+    <Image Include="res\models\nanosuit\hand_dif.png" />
+    <Image Include="res\models\nanosuit\hand_showroom_ddn.png" />
+    <Image Include="res\models\nanosuit\hand_showroom_spec.png" />
+    <Image Include="res\models\nanosuit\helmet_diff.png" />
+    <Image Include="res\models\nanosuit\helmet_showroom_ddn.png" />
+    <Image Include="res\models\nanosuit\helmet_showroom_spec.png" />
+    <Image Include="res\models\nanosuit\leg_dif.png" />
+    <Image Include="res\models\nanosuit\leg_showroom_ddn.png" />
+    <Image Include="res\models\nanosuit\leg_showroom_spec.png" />
+    <Image Include="res\textures\application\infinity.jpg" />
+    <Image Include="res\textures\application\infinity_orig.jpg" />
     <Image Include="res\textures\application\vulkan.png" />
+    <Image Include="res\textures\loading_screen\infinity.jpg" />
+    <Image Include="res\textures\loading_screen\infinity_orig.jpg" />
+    <Image Include="res\textures\loading_screen\vulkan.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="res\models\nanosuit\LICENSE.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

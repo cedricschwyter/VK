@@ -48,6 +48,7 @@
 #include "CenterCamera.hpp"
 #include "DepthBuffer.hpp"
 #include "MSAARenderImage.hpp"
+#include "Model.hpp"
 
 class VKEngine {
 public:
@@ -461,5 +462,12 @@ private:
         @return     Returns VK_SC_SUCCESS on success
     */
     VK_STATUS_CODE allocateMSAABufferedImage(void);
+
+    /**
+        Loads all necessary models and vertex data such as texture coordinates and actual textures
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE loadModelsAndVertexData(void);
 
 };
