@@ -14,6 +14,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
+
 
 VK_STATUS_CODE VKEngine::init() {
 
@@ -140,8 +143,8 @@ VK_STATUS_CODE VKEngine::initVulkan() {
     ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
     ASSERT(createTextureImages(), "Failed to create texture images", VK_SC_TEXTURE_IMAGE_CREATION_ERROR);
     ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
-    ASSERT(allocateNecessaryBuffers(), "Failed to create necessary buffers", VK_SC_BUFFER_CREATION_ERROR);
     ASSERT(loadModelsAndVertexData(), "Failed to load models", VK_SC_RESOURCE_LOADING_ERROR);
+    ASSERT(allocateNecessaryBuffers(), "Failed to create necessary buffers", VK_SC_BUFFER_CREATION_ERROR);
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
     ASSERT(initializeSynchronizationObjects(), "Failed to initialize sync-objects", VK_SC_SYNCHRONIZATION_OBJECT_INITIALIZATION_ERROR);
     ASSERT(createCamera(), "Failed to create camera", VK_SC_CAMERA_CREATION_ERROR);
@@ -1344,7 +1347,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
             vkCmdBindPipeline(standardCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline);
 
-                VkBuffer vertexBuffers[]                           = {vertexBuffer->buf};
+                VkBuffer vertexBuffers[]                           = {vBuffer->buf};
                 VkDeviceSize offsets[]                             = {0};
                 vkCmdBindVertexBuffers(
                     standardCommandBuffers[i],
@@ -1365,7 +1368,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
                 vkCmdDrawIndexed(
                     standardCommandBuffers[i], 
-                    static_cast< uint32_t >(vk::indices.size()),
+                    static_cast< uint32_t >(indices.size()),
                     1,
                     0,
                     0,
@@ -1613,26 +1616,26 @@ VK_STATUS_CODE VKEngine::allocateNecessaryBuffers() {
 
     VkBufferCreateInfo vertexBufferCreateInfo                 = {};
     vertexBufferCreateInfo.sType                              = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    vertexBufferCreateInfo.size                               = sizeof(vk::vertices[0]) * vk::vertices.size();
+    vertexBufferCreateInfo.size                               = sizeof(vertices[0]) * vertices.size();
     vertexBufferCreateInfo.usage                              = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
     vertexBufferCreateInfo.sharingMode                        = VK_SHARING_MODE_CONCURRENT;
     vertexBufferCreateInfo.queueFamilyIndexCount              = static_cast< uint32_t >(queueFamilyIndices.size());
     vertexBufferCreateInfo.pQueueFamilyIndices                = queueFamilyIndices.data();
 
-    vertexBuffer                                              = new VertexBuffer(&vertexBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    VK_STATUS_CODE res                                        = vertexBuffer->fillS(vk::vertices.data(), sizeof(vk::vertices[0]) * vk::vertices.size());
+    vBuffer                                                   = new VertexBuffer(&vertexBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    VK_STATUS_CODE res                                        = vertexBuffer->fillS(vertices.data(), sizeof(vertices[0]) * vertices.size());
     ASSERT(res, "Failed to fill vertex buffer", VK_SC_VERTEX_BUFFER_MAP_ERROR);
 
     VkBufferCreateInfo indexBufferCreateInfo                  = {};
     indexBufferCreateInfo.sType                               = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    indexBufferCreateInfo.size                                = sizeof(vk::indices[0]) * vk::indices.size();
+    indexBufferCreateInfo.size                                = sizeof(indices[0]) * indices.size();
     indexBufferCreateInfo.usage                               = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
     indexBufferCreateInfo.sharingMode                         = VK_SHARING_MODE_CONCURRENT;
     indexBufferCreateInfo.queueFamilyIndexCount               = static_cast< uint32_t >(queueFamilyIndices.size());
     indexBufferCreateInfo.pQueueFamilyIndices                 = queueFamilyIndices.data();
 
-    indexBuffer                                               = new IndexBuffer(&indexBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    res                                                       = indexBuffer->fillS(vk::indices.data(), sizeof(vk::indices[0]) * vk::indices.size());
+    iBuffer                                                   = new IndexBuffer(&indexBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    res                                                       = indexBuffer->fillS(indices.data(), sizeof(indices[0]) * indices.size());
     ASSERT(res, "Failed to fill index buffer", VK_SC_INDEX_BUFFER_MAP_ERROR);
 
     return vk::errorCodeBuffer;
@@ -1795,8 +1798,40 @@ VK_STATUS_CODE VKEngine::allocateMSAABufferedImage() {
 
 VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
-    Model* testModel = new Model("res/models/nanosuit/nanosuit.obj", pipeline);
-    models.push_back(testModel);
+    tinyobj::attrib_t                       attrib;
+    std::vector< tinyobj::shape_t >         shapes;
+    std::vector< tinyobj::material_t >      materials;
+    std::string warn, err;
+    
+    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, "res/models/chalet/chalet.obj")) {
+    
+        logger::log(ERROR_LOG, warn + err);
+    
+    }
+
+    for (const  auto& shape : shapes) {
+    
+        for (const auto& index : shape.mesh.indices) {
+        
+            BaseVertex vertex = {};
+
+            vertex.pos = {
+                attrib.vertices[3 * index.vertex_index + 0],
+                attrib.vertices[3 * index.vertex_index + 1],
+                attrib.vertices[3 * index.vertex_index + 2]
+            };
+
+            vertex.tex = {
+                attrib.texcoords[2 * index.texcoord_index + 0],
+                attrib.texcoords[2 * index.texcoord_index + 1]
+            };
+
+            vertices.push_back(vertex);
+            indices.push_back(static_cast< uint32_t >(indices.size()));
+        
+        }
+    
+    }
 
     return vk::errorCodeBuffer;
 

@@ -172,7 +172,7 @@ VK_STATUS_CODE BaseBuffer::fillS(const void* bufData_, size_t bufSize_) {
         bufSize_,
         0,
         &data
-    );
+        );
     memcpy(data, bufData_, static_cast< size_t >(bufSize_));
     vkUnmapMemory(vk::engine.logicalDevice, stagingBuffer->mem);
 

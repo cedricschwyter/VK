@@ -122,6 +122,10 @@ private:
     BaseImage*                              msaaBufferImage;
     TextureImage*                           image;
     std::vector < Model* >                  models;
+    std::vector< BaseVertex >               vertices;
+    std::vector< uint32_t >                 indices;
+    BaseBuffer*                             vBuffer;
+    BaseBuffer*                             iBuffer;
     bool                                    initialized                          = false;
 
     /**
