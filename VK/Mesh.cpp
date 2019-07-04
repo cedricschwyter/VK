@@ -52,3 +52,10 @@ void Mesh::bind() {
     // TODO: Enumerate correct uniform name and write data to it
 
 }
+
+Mesh::~Mesh() {
+
+    delete vertexBuffer;
+    delete indexBuffer;
+
+}

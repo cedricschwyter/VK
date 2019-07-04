@@ -37,6 +37,11 @@ public:
     */
     void bind(void);
 
+    /**
+        Default destructor
+    */
+    ~Mesh(void);
+
 private:
 
     BaseBuffer* vertexBuffer;

@@ -121,6 +121,7 @@ private:
     BaseImage*                              depthBuffer;
     BaseImage*                              msaaBufferImage;
     TextureImage*                           image;
+    std::vector < Model* >                  models;
     bool                                    initialized                          = false;
 
     /**

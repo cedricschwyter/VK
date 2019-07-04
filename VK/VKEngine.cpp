@@ -218,7 +218,11 @@ VK_STATUS_CODE VKEngine::clean() {
 
     ASSERT(cleanSwapchain(), "Failed to clean swapchain", VK_SC_SWAPCHAIN_CLEAN_ERROR);
 
-    // TODO: Destroy models and other loaded resources
+    for (auto model : models) {
+    
+        delete model;
+    
+    }
 
     delete camera;
     logger::log(EVENT_LOG, "Successfully destroyed camera");
@@ -1792,6 +1796,7 @@ VK_STATUS_CODE VKEngine::allocateMSAABufferedImage() {
 VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
     Model* testModel = new Model("res/models/nanosuit/nanosuit.obj", pipeline);
+    models.push_back(testModel);
 
     return vk::errorCodeBuffer;
 

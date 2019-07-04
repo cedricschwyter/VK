@@ -23,7 +23,7 @@ void Model::bind() {
 
     for (uint32_t i = 0; i < meshes.size(); i++) {
     
-        meshes[i].bind();
+        meshes[i]->bind();
     
     }
 
@@ -71,7 +71,7 @@ void Model::processASSIMPNode(aiNode* node_, const aiScene* scene_) {
 }
 
 
-Mesh Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
+Mesh* Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
 
     std::vector< BaseVertex >       vertices;
     std::vector< uint32_t >         indices;
@@ -128,7 +128,7 @@ Mesh Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
     
     }
 
-    return Mesh(vertices.data(), indices.data(), textures.data());
+    return new Mesh(vertices.data(), indices.data(), textures.data());
 
 }
 
@@ -184,4 +184,21 @@ TextureImage* Model::textureFromFile(const char *path_, const std::string& direc
 
     return img;
     
+}
+
+
+Model::~Model() {
+
+    for (auto img : texturesLoaded) {
+    
+        delete img.img;
+    
+    }
+
+    for (auto mesh : meshes) {
+    
+        delete mesh;
+    
+    }
+
 }

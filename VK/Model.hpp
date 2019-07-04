@@ -34,9 +34,14 @@ public:
     */
     void bind(void);
 
+    /**
+        Default destructor
+    */
+    ~Model(void);
+
 private:
 
-    std::vector< Mesh >                 meshes;
+    std::vector< Mesh* >                meshes;
     std::string                         directory;
     std::vector< TextureObject >        texturesLoaded;
 
@@ -63,9 +68,9 @@ private:
         @param      mesh_       A pointer to ASSIMP's mesh
         @param      scene_      A pointer to ASSIMP's scene
 
-        @return     Returns a (parsed) Mesh-object that VKEngine can work with
+        @return     Returns a (parsed) Mesh-object pointer that VKEngine can work with
     */
-    Mesh processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_);
+    Mesh* processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_);
 
     /**
         Helper function for ASSIMP's texture loading system

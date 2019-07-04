@@ -124,7 +124,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\VK\ext\assimp-x64\include;$(SolutionDir)\VK\ext\stbimage;$(SolutionDir)\VK\ext\SDL\include;$(SolutionDir)\VK\ext\glm;C:\VulkanSDK\1.1.85.0\Include;$(SolutionDir)\VK\ext\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\VK\ext\tinyobjloader;$(SolutionDir)\VK\ext\assimp-x64\include;$(SolutionDir)\VK\ext\stbimage;$(SolutionDir)\VK\ext\SDL\include;$(SolutionDir)\VK\ext\glm;C:\VulkanSDK\1.1.85.0\Include;$(SolutionDir)\VK\ext\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
