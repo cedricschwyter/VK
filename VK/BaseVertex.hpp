@@ -48,6 +48,9 @@ struct BaseVertex {
     
     }
 
+    /**
+        Overload comparison-operator
+    */
     bool operator==(const BaseVertex& otherVertex) const {
     
         return pos == otherVertex.pos && tex == otherVertex.tex;
