@@ -15,6 +15,13 @@
 #include "GraphicsPipeline.hpp"
 #include "Mesh.hpp"
 
+typedef enum VKEngineModelLoadingLib {
+
+    VKEngineModelLoadingLibASSIMP,
+    VKEngineModelLoadingLibTINYOBJ
+
+} VKEngineModelLoadingLib;
+
 class Model
 {
 public:
@@ -26,8 +33,9 @@ public:
 
         @param      path_           The path to the .obj-file
         @param      pipeline_       The pipeline to render the model with
+        @param      lib_            The VKEngineModelLoadingLib flag to tell the Model loader which library to use
     */
-    Model(const char* path_, GraphicsPipeline& pipeline_);
+    Model(const char* path_, GraphicsPipeline& pipeline_, VKEngineModelLoadingLib lib_);
 
     /**
         Binds the model and the correct uniforms
@@ -46,13 +54,22 @@ private:
     std::vector< TextureObject >        texturesLoaded;
 
     /**
-        Handles and coordinates all loading actions for the specified file
+        Handles and coordinates all loading actions for the specified file, using ASSIMP
 
         @param      path_       The path to the .obj-file to load
 
         @return     Returns VK_SC_SUCCESS on success
     */
-    VK_STATUS_CODE loadOBJ(const char* path_);
+    VK_STATUS_CODE loadOBJASSIMP(const char* path_);
+
+    /**
+        Handler and coordinates all loading actions for the specified file, using tinyobjloader
+
+        @param      path_       The path to the .obj-file to load
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE loadOBJTINYOBJ(const char* path_);
 
     /**
         Helper function for ASSIMP's node-loading system
@@ -73,6 +90,16 @@ private:
     Mesh* processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_);
 
     /**
+        Helper function for tinyobj's mesh-loading system
+
+        @param      mesh_       A pointer to tinyobj's mesh
+        @param      attrib_     A pointer to tinyobj's attrib
+
+        @return     Returns a (parsed) Mesh-object pointer that VKEngine can work with
+    */
+    Mesh* processTINYOBJMesh(void* mesh_, void* attrib_);
+
+    /**
         Helper function for ASSIMP's texture loading system
 
         @param      material_       A pointer to ASSIMP's material
@@ -81,7 +108,7 @@ private:
 
         @return     Returns an std::vector of TextureObjects
     */
-    std::vector< TextureObject > loadMaterialTextures(aiMaterial* material_, aiTextureType type_, TEXTURE_TYPE typeID_);
+    std::vector< TextureObject > loadASSIMPMaterialTextures(aiMaterial* material_, aiTextureType type_, TEXTURE_TYPE typeID_);
 
     /**
         Loads a texture from a file

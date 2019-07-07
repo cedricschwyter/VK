@@ -11,10 +11,25 @@
 #include "VK.hpp"
 #include "ASSERT.cpp"
 
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
 
-Model::Model(const char* path_, GraphicsPipeline& pipeline_) : pipeline(pipeline_) {
 
-    VK_STATUS_CODE result = loadOBJ(path_);
+Model::Model(const char* path_, GraphicsPipeline& pipeline_, VKEngineModelLoadingLib lib_) : pipeline(pipeline_) {
+
+    VK_STATUS_CODE result;
+
+    if (lib_ == VKEngineModelLoadingLibASSIMP) {
+
+        result = loadOBJASSIMP(path_);
+
+    }
+    else if (lib_ == VKEngineModelLoadingLibTINYOBJ) {
+    
+        result = loadOBJTINYOBJ(path_);
+    
+    }
+
     ASSERT(result, "Error loading model using ASSIMP", VK_SC_RESOURCE_LOADING_ERROR);
 
 }
@@ -29,7 +44,31 @@ void Model::bind() {
 
 }
 
-VK_STATUS_CODE Model::loadOBJ(const char* path_) {
+VK_STATUS_CODE Model::loadOBJTINYOBJ(const char* path_) {
+
+    tinyobj::attrib_t                       attrib;
+    std::vector< tinyobj::shape_t >         shapes;
+    std::vector< tinyobj::material_t >      materials;
+    std::string warn, err;
+
+    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path_)) {
+
+        logger::log(ERROR_LOG, warn + err);
+
+    }
+
+    for (const auto& shape : shapes) {
+    
+        tinyobj::mesh_t mesh = (shape.mesh);
+        meshes.push_back(processTINYOBJMesh(reinterpret_cast< void* >(&mesh), &attrib));
+    
+    }
+
+    return vk::errorCodeBuffer;
+
+}
+
+VK_STATUS_CODE Model::loadOBJASSIMP(const char* path_) {
 
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path_, aiProcess_Triangulate);
@@ -97,7 +136,8 @@ Mesh* Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
         }
         else {
 
-            vertex.tex      = glm::vec2(0.0f, 0.0f);        
+            vertex.tex      = glm::vec2(0.0f, 0.0f);
+        
         }
 
         vertices.push_back(vertex);
@@ -120,10 +160,10 @@ Mesh* Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
     
         aiMaterial* material = scene_->mMaterials[mesh_->mMaterialIndex];
         
-        std::vector< TextureObject > diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, TT_DIFFUSE);
+        std::vector< TextureObject > diffuseMaps = loadASSIMPMaterialTextures(material, aiTextureType_DIFFUSE, TT_DIFFUSE);
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
-        std::vector< TextureObject > specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, TT_SPECULAR);
+        std::vector< TextureObject > specularMaps = loadASSIMPMaterialTextures(material, aiTextureType_SPECULAR, TT_SPECULAR);
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
     
     }
@@ -132,7 +172,47 @@ Mesh* Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
 
 }
 
-std::vector< TextureObject > Model::loadMaterialTextures(aiMaterial* material_, aiTextureType type_, TEXTURE_TYPE typeID_) {
+Mesh* Model::processTINYOBJMesh(void* mesh_, void* attrib_) {
+
+    tinyobj::mesh_t*        mesh        = reinterpret_cast< tinyobj::mesh_t* >(mesh_);
+    tinyobj::attrib_t*      attrib      = reinterpret_cast< tinyobj::attrib_t* >(attrib_);
+
+    std::vector< BaseVertex >       vertices;
+    std::vector< uint32_t >         indices;
+    std::vector< TextureObject >    textures;
+    std::unordered_map< BaseVertex, uint32_t > uniqueVertices = {};
+
+    for (const auto& index : mesh->indices) {
+
+        BaseVertex vertex = {};
+
+        vertex.pos = {
+            attrib->vertices[3 * index.vertex_index + 0],
+            attrib->vertices[3 * index.vertex_index + 1],
+            attrib->vertices[3 * index.vertex_index + 2]
+        };
+
+        vertex.tex = {
+            attrib->texcoords[2 * index.texcoord_index + 0],
+            1.0f - attrib->texcoords[2 * index.texcoord_index + 1]
+        };
+
+        if (uniqueVertices.count(vertex) == 0) {
+
+            uniqueVertices[vertex] = static_cast< uint32_t >(vertices.size());
+            vertices.push_back(vertex);
+
+        }
+
+        indices.push_back(uniqueVertices[vertex]);
+
+    }
+
+    return new Mesh(vertices.data(), indices.data(), textures.data());
+
+}
+
+std::vector< TextureObject > Model::loadASSIMPMaterialTextures(aiMaterial* material_, aiTextureType type_, TEXTURE_TYPE typeID_) {
 
     std::vector< TextureObject > textures;
 
@@ -153,7 +233,8 @@ std::vector< TextureObject > Model::loadMaterialTextures(aiMaterial* material_, 
 
             }
 
-        }
+        }
+
         if(!skip) {
 
             TextureObject texture;

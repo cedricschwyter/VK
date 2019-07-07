@@ -14,7 +14,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-#define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
 
@@ -232,8 +231,8 @@ VK_STATUS_CODE VKEngine::clean() {
 
     delete image;
 
-    delete iBuffer;
-    delete vBuffer;
+    delete indexBuffer;
+    delete vertexBuffer;
     logger::log(EVENT_LOG, "Successfully destroyed buffers, textures and samplers");
 
     for (size_t i = 0; i < vk::MAX_IN_FLIGHT_FRAMES; i++) {
@@ -1347,7 +1346,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
             vkCmdBindPipeline(standardCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline);
 
-                VkBuffer vertexBuffers[]                           = {vBuffer->buf};
+                VkBuffer vertexBuffers[]                           = {vertexBuffer->buf};
                 VkDeviceSize offsets[]                             = {0};
                 vkCmdBindVertexBuffers(
                     standardCommandBuffers[i],
@@ -1359,7 +1358,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
                 vkCmdBindIndexBuffer(
                     standardCommandBuffers[i],
-                    iBuffer->buf,
+                    indexBuffer->buf,
                     0,
                     VK_INDEX_TYPE_UINT32
                     );
@@ -1622,8 +1621,8 @@ VK_STATUS_CODE VKEngine::allocateNecessaryBuffers() {
     vertexBufferCreateInfo.queueFamilyIndexCount              = static_cast< uint32_t >(queueFamilyIndices.size());
     vertexBufferCreateInfo.pQueueFamilyIndices                = queueFamilyIndices.data();
 
-    vBuffer                                                   = new VertexBuffer(&vertexBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    VK_STATUS_CODE res                                        = vBuffer->fillS(vertices.data(), sizeof(vertices[0]) * vertices.size());
+    vertexBuffer                                              = new VertexBuffer(&vertexBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    VK_STATUS_CODE res                                        = vertexBuffer->fillS(vertices.data(), sizeof(vertices[0]) * vertices.size());
     ASSERT(res, "Failed to fill vertex buffer", VK_SC_VERTEX_BUFFER_MAP_ERROR);
 
     VkBufferCreateInfo indexBufferCreateInfo                  = {};
@@ -1634,8 +1633,8 @@ VK_STATUS_CODE VKEngine::allocateNecessaryBuffers() {
     indexBufferCreateInfo.queueFamilyIndexCount               = static_cast< uint32_t >(queueFamilyIndices.size());
     indexBufferCreateInfo.pQueueFamilyIndices                 = queueFamilyIndices.data();
 
-    iBuffer                                                   = new IndexBuffer(&indexBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    res                                                       = iBuffer->fillS(indices.data(), sizeof(indices[0]) * indices.size());
+    indexBuffer                                               = new IndexBuffer(&indexBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    res                                                       = indexBuffer->fillS(indices.data(), sizeof(indices[0]) * indices.size());
     ASSERT(res, "Failed to fill index buffer", VK_SC_INDEX_BUFFER_MAP_ERROR);
 
     return vk::errorCodeBuffer;
@@ -1798,6 +1797,9 @@ VK_STATUS_CODE VKEngine::allocateMSAABufferedImage() {
 }
 
 VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
+
+    /*Model* testModel = new Model("res/models/chalet/chalet.obj", pipeline, VKEngineModelLoadingLibTINYOBJ);
+    models.push_back(testModel);*/
 
     tinyobj::attrib_t                       attrib;
     std::vector< tinyobj::shape_t >         shapes;
