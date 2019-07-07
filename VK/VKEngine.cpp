@@ -1809,6 +1809,8 @@ VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
     
     }
 
+    std::unordered_map< BaseVertex, uint32_t > uniqueVertices = {};
+
     for (const  auto& shape : shapes) {
     
         for (const auto& index : shape.mesh.indices) {
@@ -1826,8 +1828,14 @@ VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
                 1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
             };
 
-            vertices.push_back(vertex);
-            indices.push_back(static_cast< uint32_t >(indices.size()));
+            if (uniqueVertices.count(vertex) == 0) {
+            
+                uniqueVertices[vertex] = static_cast< uint32_t >(vertices.size());
+                vertices.push_back(vertex);
+            
+            }
+
+            indices.push_back(uniqueVertices[vertex]);
         
         }
     

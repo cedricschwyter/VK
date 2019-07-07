@@ -29,6 +29,8 @@
 #include <conio.h>
 #endif
 #include <chrono>
+#include <map>
+#include <unordered_map>
 
 #include "VK_STATUS_CODE.hpp"
 #include "Logger.hpp"

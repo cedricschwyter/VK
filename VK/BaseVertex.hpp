@@ -9,8 +9,11 @@
 */
 #pragma once
 #include <glm/glm.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
 
 #include <array>
+#include <functional>
 
 struct BaseVertex {
 
@@ -45,5 +48,31 @@ struct BaseVertex {
     
     }
 
+    bool operator==(const BaseVertex& otherVertex) const {
+    
+        return pos == otherVertex.pos && tex == otherVertex.tex;
+    
+    }
+
 };
 
+/**
+    Expand standard namespace
+*/
+namespace std {
+
+    /**
+        Hash-function for vertex !!!This is some high level C++!!! (following recommended approach for hash-functions on cppreference.com's std::hash page)
+    */
+    template<  > struct hash< BaseVertex > {
+
+        size_t operator()(BaseVertex const& vertex) const noexcept {
+        
+            return (std::hash< glm::vec3 >()(vertex.pos) ^
+                (std::hash< glm::vec2 >()(vertex.tex)) << 1);
+
+        }
+
+    };
+
+}
