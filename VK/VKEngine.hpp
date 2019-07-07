@@ -115,8 +115,6 @@ private:
     std::vector< VkFence >                  inFlightFences;
     size_t                                  currentSwapchainImage                = 0;
     bool                                    hasFramebufferBeenResized            = false;
-    BaseBuffer*                             vertexBuffer;
-    BaseBuffer*                             indexBuffer;
     BaseBuffer*                             mvpBuffer;
     BaseImage*                              depthBuffer;
     BaseImage*                              msaaBufferImage;

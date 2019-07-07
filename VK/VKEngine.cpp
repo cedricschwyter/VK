@@ -232,8 +232,8 @@ VK_STATUS_CODE VKEngine::clean() {
 
     delete image;
 
-    delete indexBuffer;
-    delete vertexBuffer;
+    delete iBuffer;
+    delete vBuffer;
     logger::log(EVENT_LOG, "Successfully destroyed buffers, textures and samplers");
 
     for (size_t i = 0; i < vk::MAX_IN_FLIGHT_FRAMES; i++) {
@@ -1359,7 +1359,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
                 vkCmdBindIndexBuffer(
                     standardCommandBuffers[i],
-                    indexBuffer->buf,
+                    iBuffer->buf,
                     0,
                     VK_INDEX_TYPE_UINT32
                     );
@@ -1623,7 +1623,7 @@ VK_STATUS_CODE VKEngine::allocateNecessaryBuffers() {
     vertexBufferCreateInfo.pQueueFamilyIndices                = queueFamilyIndices.data();
 
     vBuffer                                                   = new VertexBuffer(&vertexBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    VK_STATUS_CODE res                                        = vertexBuffer->fillS(vertices.data(), sizeof(vertices[0]) * vertices.size());
+    VK_STATUS_CODE res                                        = vBuffer->fillS(vertices.data(), sizeof(vertices[0]) * vertices.size());
     ASSERT(res, "Failed to fill vertex buffer", VK_SC_VERTEX_BUFFER_MAP_ERROR);
 
     VkBufferCreateInfo indexBufferCreateInfo                  = {};
@@ -1635,7 +1635,7 @@ VK_STATUS_CODE VKEngine::allocateNecessaryBuffers() {
     indexBufferCreateInfo.pQueueFamilyIndices                 = queueFamilyIndices.data();
 
     iBuffer                                                   = new IndexBuffer(&indexBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    res                                                       = indexBuffer->fillS(indices.data(), sizeof(indices[0]) * indices.size());
+    res                                                       = iBuffer->fillS(indices.data(), sizeof(indices[0]) * indices.size());
     ASSERT(res, "Failed to fill index buffer", VK_SC_INDEX_BUFFER_MAP_ERROR);
 
     return vk::errorCodeBuffer;
@@ -1684,7 +1684,7 @@ VK_STATUS_CODE VKEngine::createTextureImages() {
     logger::log(EVENT_LOG, "Loading textures...");
     
     image = new TextureImage(
-        "res/textures/application/infinity.jpg",
+        "res/models/chalet/chalet.jpg",
         VK_FORMAT_R8G8B8A8_UNORM,
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
@@ -1823,7 +1823,7 @@ VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
             vertex.tex = {
                 attrib.texcoords[2 * index.texcoord_index + 0],
-                attrib.texcoords[2 * index.texcoord_index + 1]
+                1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
             };
 
             vertices.push_back(vertex);
