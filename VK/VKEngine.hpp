@@ -62,9 +62,9 @@ public:
     VkFormat                                swapchainImageFormat;
     VkExtent2D                              swapchainImageExtent;
     VkCommandPool                           standardCommandPool;
-    VkQueue                                 graphicsQueue                        = VK_NULL_HANDLE;
+    VkQueue                                 graphicsQueue                       = VK_NULL_HANDLE;
     BaseCamera*                             camera;
-    VkSampleCountFlagBits                   maxMSAASamples                          = VK_SAMPLE_COUNT_1_BIT;
+    VkSampleCountFlagBits                   maxMSAASamples                      = VK_SAMPLE_COUNT_1_BIT;
 
     /**
         Initializes VKEngine and loads dependencies
@@ -86,27 +86,27 @@ private:
 
     GLFWwindow*                             window;
     GLFWmonitor*                            monitor;
-    VkInstance                              instance                             = VK_NULL_HANDLE;
-    const std::vector< const char* >        validationLayers                     = {
+    VkInstance                              instance                            = VK_NULL_HANDLE;
+    const std::vector< const char* >        validationLayers                    = {
     
         "VK_LAYER_LUNARG_standard_validation"
     
     };
 #ifdef VK_DEVELOPMENT
-    const bool                              validationLayersEnabled              = true;
+    const bool                              validationLayersEnabled             = true;
 #else
-    const bool                              validationLayersEnabled              = false;
+    const bool                              validationLayersEnabled             = false;
 #endif
-    VkDebugUtilsMessengerEXT                validationLayerDebugMessenger        = VK_NULL_HANDLE;
-    VkQueue                                 presentationQueue                    = VK_NULL_HANDLE;
-    VkSurfaceKHR                            surface                              = VK_NULL_HANDLE;
-    const std::vector< const char* >        requiredExtensions                   = {
+    VkDebugUtilsMessengerEXT                validationLayerDebugMessenger       = VK_NULL_HANDLE;
+    VkQueue                                 presentationQueue                   = VK_NULL_HANDLE;
+    VkSurfaceKHR                            surface                             = VK_NULL_HANDLE;
+    const std::vector< const char* >        requiredExtensions                  = {
     
         VK_KHR_SWAPCHAIN_EXTENSION_NAME
     
     };
-    LoadingScreen*                          loadingScreen                        = nullptr;
-    VkSwapchainKHR                          swapchain                            = VK_NULL_HANDLE;
+    LoadingScreen*                          loadingScreen                       = nullptr;
+    VkSwapchainKHR                          swapchain                           = VK_NULL_HANDLE;
     std::vector< VkImageView >              swapchainImageViews;
     std::vector< VkFramebuffer >            swapchainFramebuffers;
     VkRenderPass                            renderPass;
@@ -117,18 +117,18 @@ private:
     std::vector< VkSemaphore >              swapchainImageAvailableSemaphores;
     std::vector< VkSemaphore >              renderingCompletedSemaphores;
     std::vector< VkFence >                  inFlightFences;
-    size_t                                  currentSwapchainImage                = 0;
-    bool                                    hasFramebufferBeenResized            = false;
+    size_t                                  currentSwapchainImage               = 0;
+    bool                                    hasFramebufferBeenResized           = false;
     BaseBuffer*                             vertexBuffer;
     BaseBuffer*                             indexBuffer;
     BaseBuffer*                             mvpBuffer;
     BaseImage*                              depthBuffer;
+    DescriptorSet*                          mvpBufferDescriptorSet;
     BaseImage*                              msaaBufferImage;
     TextureImage*                           image;
-    std::vector < Model* >                  models;
-    std::vector< BaseVertex >               vertices;
-    std::vector< uint32_t >                 indices;
-    bool                                    initialized                          = false;
+    bool                                    initialized                         = false;
+    std::vector< Model* >                   models;
+    bool                                    firstTimeRecreation = true;
 
     /**
         Initializes the logger
@@ -476,5 +476,15 @@ private:
         @return     Returns VK_SC_SUCCESS on success
     */
     VK_STATUS_CODE loadModelsAndVertexData(void);
+
+    /**
+        Binds the uniform buffer descriptor
+
+        @param      commandBuffers_     The command buffers to record
+        @param      imageIndex_         The swapchain image index
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE bindMVPDescriptor(std::vector< VkCommandBuffer >& commandBuffers_, uint32_t imageIndex_);
 
 };
