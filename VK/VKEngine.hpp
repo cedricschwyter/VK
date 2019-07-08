@@ -111,6 +111,8 @@ private:
     std::vector< VkFramebuffer >            swapchainFramebuffers;
     VkRenderPass                            renderPass;
     GraphicsPipeline                        pipeline;
+    std::vector< Descriptor >               standardDescriptors;
+    DescriptorSetLayout*                    standardDescriptorLayout;
     std::vector< VkCommandBuffer >          standardCommandBuffers;
     std::vector< VkSemaphore >              swapchainImageAvailableSemaphores;
     std::vector< VkSemaphore >              renderingCompletedSemaphores;

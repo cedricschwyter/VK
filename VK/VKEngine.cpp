@@ -1077,37 +1077,41 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     dynamicStateCreateInfo.dynamicStateCount                                        = static_cast< uint32_t >(dynamicStates.size());
     dynamicStateCreateInfo.pDynamicStates                                           = dynamicStates.data();
                                                                                     
-    VkDescriptorBufferInfo mvpBufferInfo                                            = {};
-    mvpBufferInfo.buffer                                                            = mvpBuffer->buf;
-    mvpBufferInfo.offset                                                            = 0;
-    mvpBufferInfo.range                                                             = sizeof(MVPBufferObject);
-                                                                                    
-    UniformInfo mvpInfo                                                             = {};
-    mvpInfo.binding                                                                 = 0;
-    mvpInfo.stageFlags                                                              = VK_SHADER_STAGE_VERTEX_BIT;
-    mvpInfo.bufferInfo                                                              = mvpBufferInfo;
-    mvpInfo.type                                                                    = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                                                                                    
-    VkDescriptorImageInfo imageInfo                                                 = {};
-    imageInfo.sampler                                                               = reinterpret_cast< TextureImage* >(image)->imgSampler;
-    imageInfo.imageLayout                                                           = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView                                                             = image->imgView;
-                                                                                    
-    UniformInfo samplerInfo                                                         = {};
-    samplerInfo.binding                                                             = 1;
-    samplerInfo.stageFlags                                                          = VK_SHADER_STAGE_FRAGMENT_BIT;
-    samplerInfo.imageInfo                                                           = imageInfo;
-    samplerInfo.type                                                                = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-                                                                                    
-    std::vector< UniformInfo > bindings                                             = {
-    
-        mvpInfo,
-        samplerInfo
-    
-    };
+    /* UNIFORM BINDINGS */
+
+    VkDescriptorBufferInfo mvpBufferInfo    = {};
+    mvpBufferInfo.buffer                    = mvpBuffer->buf;
+    mvpBufferInfo.offset                    = 0;
+    mvpBufferInfo.range                     = sizeof(MVPBufferObject);
+
+    UniformInfo mvpInfo                     = {};
+    mvpInfo.binding                         = 0;
+    mvpInfo.stageFlags                      = VK_SHADER_STAGE_VERTEX_BIT;
+    mvpInfo.bufferInfo                      = mvpBufferInfo;
+    mvpInfo.type                            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+
+    Descriptor mvpDescriptor                = Descriptor(&mvpInfo);
+
+    VkDescriptorImageInfo imageInfo         = {};
+    imageInfo.sampler                       = reinterpret_cast< TextureImage* >(image)->imgSampler;
+    imageInfo.imageLayout                   = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageInfo.imageView                     = image->imgView;
+
+    UniformInfo samplerInfo                 = {};
+    samplerInfo.binding                     = 1;
+    samplerInfo.stageFlags                  = VK_SHADER_STAGE_FRAGMENT_BIT;
+    samplerInfo.imageInfo                   = imageInfo;
+    samplerInfo.type                        = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+
+    Descriptor samplerDescriptor            = Descriptor(&samplerInfo);
+
+    standardDescriptors.push_back(mvpDescriptor);
+    standardDescriptors.push_back(samplerDescriptor);
+
+    standardDescriptorLayout                = new DescriptorSetLayout(standardDescriptors);
 
     pipeline = GraphicsPipeline(
-        "shaders/standard/vert.spv", 
+        "shaders/standard/vert.spv",
         "shaders/standard/frag.spv",
         &vertexInputStateCreateInfo,
         &inputAssemblyStateCreateInfo,
@@ -1118,10 +1122,9 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
         &colorBlendAttachmentState,
         &colorBlendStateCreateInfo,
         nullptr,                        // Defined, but not referenced
-        bindings,
-        static_cast< uint32_t >(bindings.size()),
+        standardDescriptorLayout,
         renderPass
-        );
+    );
 
     logger::log(EVENT_LOG, "Successfully created graphics pipeline");
 
