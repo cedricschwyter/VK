@@ -14,28 +14,42 @@
 #include "BaseBuffer.hpp"
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
+#include "GraphicsPipeline.hpp"
 
 class Mesh
 {
 public:
 
-    void*        vertices;
-    void*        indices;
-    void*        textures;
+    GraphicsPipeline                                        pipeline;
+
+    std::vector< BaseVertex >                               vertices;
+    std::vector< uint32_t >                                 indices;
+    std::vector< std::pair< TextureObject, Descriptor > >   textures;
+    BaseBuffer*                                             vertexBuffer;
+    BaseBuffer*                                             indexBuffer;
 
     /**
         Constructor
 
-        @param      vertices_       Pointer to vertex data of mesh
-        @param      indices_        Pointer to index data of mesh
-        @param      textures_       Pointer to texturing data of mesh
+        @param      pipeline_               The graphics pipeline to render the mesh with
+        @param      vertices_               Reference to vertex data of mesh
+        @param      indices_                Reference to index data of mesh
+        @param      textures_               Reference to texturing data of mesh
     */
-    Mesh(void* vertices_, void* indices_, void* textures_);
+    Mesh(
+        GraphicsPipeline&                                               pipeline_,
+        std::vector< BaseVertex >&                                      vertices_,
+        std::vector< uint32_t >&                                        indices_,
+        std::vector< std::pair< TextureObject, Descriptor > >&          textures_
+        );
 
     /**
         Binds the vertex and index data for command buffer recording
+
+        @param      commandBuffers_     The command buffers to be recorded
+        @param      imageIndex_         The swapchain image index
     */
-    void bind(void);
+    void bindDescriptors(std::vector< VkCommandBuffer >& commandBuffers_, uint32_t imageIndex_);
 
     /**
         Default destructor
@@ -44,8 +58,7 @@ public:
 
 private:
 
-    BaseBuffer* vertexBuffer;
-    BaseBuffer* indexBuffer;
+    std::vector< DescriptorSet* >   descriptors;
 
 };
 
