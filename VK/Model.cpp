@@ -112,9 +112,9 @@ void Model::processASSIMPNode(aiNode* node_, const aiScene* scene_) {
 
 Mesh* Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
 
-    std::vector< BaseVertex >       vertices;
-    std::vector< uint32_t >         indices;
-    std::vector< TextureObject >    textures;
+    std::vector< BaseVertex >                                vertices;
+    std::vector< uint32_t >                                  indices;
+    std::vector< std::pair< TextureObject, Descriptor > >    textures;
 
     for (uint32_t i = 0; i < mesh_->mNumVertices; i++) {
 
@@ -177,10 +177,10 @@ Mesh* Model::processTINYOBJMesh(void* mesh_, void* attrib_) {
     tinyobj::mesh_t*        mesh        = reinterpret_cast< tinyobj::mesh_t* >(mesh_);
     tinyobj::attrib_t*      attrib      = reinterpret_cast< tinyobj::attrib_t* >(attrib_);
 
-    std::vector< BaseVertex >       vertices;
-    std::vector< uint32_t >         indices;
-    std::vector< TextureObject >    textures;
-    std::unordered_map< BaseVertex, uint32_t > uniqueVertices = {};
+    std::vector< BaseVertex >                                vertices;
+    std::vector< uint32_t >                                  indices;
+    std::vector< std::pair< TextureObject, Descriptor > >    textures;
+    std::unordered_map< BaseVertex, uint32_t >               uniqueVertices         = {};
 
     for (const auto& index : mesh->indices) {
 
