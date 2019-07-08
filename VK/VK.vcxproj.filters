@@ -114,13 +114,13 @@
     <ClCompile Include="TEXTURE_TYPE.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Descriptor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DescriptorPool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DescriptorSetLayout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Descriptor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

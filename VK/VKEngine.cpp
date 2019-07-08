@@ -14,8 +14,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-#include <tiny_obj_loader.h>
-
 
 VK_STATUS_CODE VKEngine::init() {
 
@@ -126,12 +124,6 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 
     allocator = nullptr;
 
-
-    std::thread t0 = std::thread([=]() {
-
-        ASSERT(loadModelsAndVertexData(), "Failed to load models", VK_SC_RESOURCE_LOADING_ERROR);
-        
-    });
     ASSERT(createInstance(), "Failed to create instance", VK_SC_INSTANCE_CREATON_ERROR);
     ASSERT(debugUtilsMessenger(), "Failed to create debug utils messenger", VK_SC_DEBUG_UTILS_MESSENGER_CREATION_ERROR);
     ASSERT(createSurfaceGLFW(), "Failed to create GLFW surface", VK_SC_SURFACE_CREATION_ERROR);
@@ -147,8 +139,8 @@ VK_STATUS_CODE VKEngine::initVulkan() {
     ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
     ASSERT(createTextureImages(), "Failed to create texture images", VK_SC_TEXTURE_IMAGE_CREATION_ERROR);
     ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
-    t0.join();
     ASSERT(allocateNecessaryBuffers(), "Failed to create necessary buffers", VK_SC_BUFFER_CREATION_ERROR);
+    ASSERT(loadModelsAndVertexData(), "Failed to load models", VK_SC_RESOURCE_LOADING_ERROR);
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
     ASSERT(initializeSynchronizationObjects(), "Failed to initialize sync-objects", VK_SC_SYNCHRONIZATION_OBJECT_INITIALIZATION_ERROR);
     ASSERT(createCamera(), "Failed to create camera", VK_SC_CAMERA_CREATION_ERROR);
@@ -228,16 +220,18 @@ VK_STATUS_CODE VKEngine::clean() {
     for (auto model : models) {
     
         delete model;
+        logger::log(EVENT_LOG, "Successfully destroyed model");
     
     }
+    logger::log(EVENT_LOG, "Successfully destroyed models");
 
     delete camera;
     logger::log(EVENT_LOG, "Successfully destroyed camera");
 
     delete image;
 
-    delete indexBuffer;
     delete vertexBuffer;
+    delete indexBuffer;
     logger::log(EVENT_LOG, "Successfully destroyed buffers, textures and samplers");
 
     for (size_t i = 0; i < vk::MAX_IN_FLIGHT_FRAMES; i++) {
@@ -1025,7 +1019,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     rasterizationStateCreateInfo.sType                                              = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizationStateCreateInfo.depthClampEnable                                   = VK_FALSE;
     rasterizationStateCreateInfo.rasterizerDiscardEnable                            = VK_FALSE;
-    rasterizationStateCreateInfo.polygonMode                                        = VK_POLYGON_MODE_LINE;
+    rasterizationStateCreateInfo.polygonMode                                        = VK_POLYGON_MODE_FILL;
     rasterizationStateCreateInfo.lineWidth                                          = 1.0f;
     rasterizationStateCreateInfo.cullMode                                           = VK_CULL_MODE_NONE;
     rasterizationStateCreateInfo.frontFace                                          = VK_FRONT_FACE_COUNTER_CLOCKWISE;
@@ -1076,42 +1070,42 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     dynamicStateCreateInfo.sType                                                    = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
     dynamicStateCreateInfo.dynamicStateCount                                        = static_cast< uint32_t >(dynamicStates.size());
     dynamicStateCreateInfo.pDynamicStates                                           = dynamicStates.data();
+                             
+    /* UNIFORM BINDINGS */    
+
+    VkDescriptorBufferInfo mvpBufferInfo                                            = {};
+    mvpBufferInfo.buffer                                                            = mvpBuffer->buf;
+    mvpBufferInfo.offset                                                            = 0;
+    mvpBufferInfo.range                                                             = sizeof(MVPBufferObject);
                                                                                     
-    /* UNIFORM BINDINGS */
+    UniformInfo mvpInfo                                                             = {};
+    mvpInfo.binding                                                                 = 0;
+    mvpInfo.stageFlags                                                              = VK_SHADER_STAGE_VERTEX_BIT;
+    mvpInfo.bufferInfo                                                              = mvpBufferInfo;
+    mvpInfo.type                                                                    = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    
+    Descriptor mvpDescriptor                                                        = Descriptor(&mvpInfo);
 
-    VkDescriptorBufferInfo mvpBufferInfo    = {};
-    mvpBufferInfo.buffer                    = mvpBuffer->buf;
-    mvpBufferInfo.offset                    = 0;
-    mvpBufferInfo.range                     = sizeof(MVPBufferObject);
-
-    UniformInfo mvpInfo                     = {};
-    mvpInfo.binding                         = 0;
-    mvpInfo.stageFlags                      = VK_SHADER_STAGE_VERTEX_BIT;
-    mvpInfo.bufferInfo                      = mvpBufferInfo;
-    mvpInfo.type                            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-
-    Descriptor mvpDescriptor                = Descriptor(&mvpInfo);
-
-    VkDescriptorImageInfo imageInfo         = {};
-    imageInfo.sampler                       = reinterpret_cast< TextureImage* >(image)->imgSampler;
-    imageInfo.imageLayout                   = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView                     = image->imgView;
-
-    UniformInfo samplerInfo                 = {};
-    samplerInfo.binding                     = 1;
-    samplerInfo.stageFlags                  = VK_SHADER_STAGE_FRAGMENT_BIT;
-    samplerInfo.imageInfo                   = imageInfo;
-    samplerInfo.type                        = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-
-    Descriptor samplerDescriptor            = Descriptor(&samplerInfo);
+    VkDescriptorImageInfo imageInfo                                                 = {};
+    imageInfo.sampler                                                               = reinterpret_cast< TextureImage* >(image)->imgSampler;
+    imageInfo.imageLayout                                                           = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageInfo.imageView                                                             = image->imgView;
+                                                                                    
+    UniformInfo samplerInfo                                                         = {};
+    samplerInfo.binding                                                             = 1;
+    samplerInfo.stageFlags                                                          = VK_SHADER_STAGE_FRAGMENT_BIT;
+    samplerInfo.imageInfo                                                           = imageInfo;
+    samplerInfo.type                                                                = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+               
+    Descriptor samplerDescriptor                                                    = Descriptor(&samplerInfo);
 
     standardDescriptors.push_back(mvpDescriptor);
     standardDescriptors.push_back(samplerDescriptor);
 
-    standardDescriptorLayout                = new DescriptorSetLayout(standardDescriptors);
+    standardDescriptorLayout = new DescriptorSetLayout(standardDescriptors);
 
     pipeline = GraphicsPipeline(
-        "shaders/standard/vert.spv",
+        "shaders/standard/vert.spv", 
         "shaders/standard/frag.spv",
         &vertexInputStateCreateInfo,
         &inputAssemblyStateCreateInfo,
@@ -1124,7 +1118,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
         nullptr,                        // Defined, but not referenced
         standardDescriptorLayout,
         renderPass
-    );
+        );
 
     logger::log(EVENT_LOG, "Successfully created graphics pipeline");
 
@@ -1355,33 +1349,22 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
             vkCmdBindPipeline(standardCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline);
 
-                VkBuffer vertexBuffers[]                           = {vertexBuffer->buf};
-                VkDeviceSize offsets[]                             = {0};
-                vkCmdBindVertexBuffers(
-                    standardCommandBuffers[i],
-                    0, 
-                    1, 
-                    vertexBuffers,
-                    offsets
-                    );
+                std::vector< VkBuffer >                                 vertexBuffers               = {vertexBuffer->buf};
+                std::vector< uint32_t >                                 indexBuffers                = {vk::indices};
 
-                vkCmdBindIndexBuffer(
-                    standardCommandBuffers[i],
-                    indexBuffer->buf,
-                    0,
-                    VK_INDEX_TYPE_UINT32
-                    );
+                size_t indexBufferSize = static_cast< size_t >(sizeof(vk::indices[0]) * vk::indices.size());
 
-                pipeline.bindDescriptors(standardCommandBuffers, static_cast< uint32_t >(i));
+                for (Model* model : models) {
+                
+                    for (Mesh* mesh : model->meshes) {
 
-                vkCmdDrawIndexed(
-                    standardCommandBuffers[i], 
-                    static_cast< uint32_t >(indices.size()),
-                    1,
-                    0,
-                    0,
-                    0
-                    );
+                        bindMVPDescriptor(standardCommandBuffers, static_cast< uint32_t >(i));
+
+                        mesh->bindDescriptors(standardCommandBuffers, static_cast< uint32_t >(i));
+
+                    }
+                
+                }
 
         vkCmdEndRenderPass(standardCommandBuffers[i]);
 
@@ -1391,6 +1374,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
         logger::log(EVENT_LOG, "Successfully recorded command buffer");
 
     }
+
     logger::log(EVENT_LOG, "Successfully recorded command buffers");
 
     return vk::errorCodeBuffer;
@@ -1530,28 +1514,34 @@ VK_STATUS_CODE VKEngine::initializeSynchronizationObjects() {
 
 VK_STATUS_CODE VKEngine::recreateSwapchain() {
 
-    int width = 0;
-    int height = 0;
-    while (width == 0 || height == 0) {
+    if (!firstTimeRecreation) {
 
-        glfwGetFramebufferSize(window, &width, &height);
-        glfwWaitEvents();
+        int width = 0;
+        int height = 0;
+        while (width == 0 || height == 0) {
+
+            glfwGetFramebufferSize(window, &width, &height);
+            glfwWaitEvents();
+
+        }
+
+        vkDeviceWaitIdle(logicalDevice);
+
+        cleanSwapchain();
+
+        ASSERT(createSwapchain(), "Failed to create a swapchain with the given parameters", VK_SC_SWAPCHAIN_CREATION_ERROR);
+        ASSERT(createSwapchainImageViews(), "Failed to create swapchain image views", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
+        ASSERT(allocateMSAABufferedImage(), "Failed to allocate multisampling-buffer", VK_SC_MSAA_BUFFER_CREATION_ERROR);
+        ASSERT(allocateDepthBuffer(), "Failed to allocate depth buffer", VK_SC_DEPTH_BUFFER_CREATION_ERROR);
+        ASSERT(createRenderPasses(), "Failed to create render passes", VK_SC_RENDER_PASS_CREATION_ERROR);
+        ASSERT(allocateUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
+        ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
+        ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
+        ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
+
+        firstTimeRecreation = false;
 
     }
-
-    vkDeviceWaitIdle(logicalDevice);
-
-    cleanSwapchain();
-
-    ASSERT(createSwapchain(), "Failed to create a swapchain with the given parameters", VK_SC_SWAPCHAIN_CREATION_ERROR);
-    ASSERT(createSwapchainImageViews(), "Failed to create swapchain image views", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
-    ASSERT(allocateMSAABufferedImage(), "Failed to allocate multisampling-buffer", VK_SC_MSAA_BUFFER_CREATION_ERROR);
-    ASSERT(allocateDepthBuffer(), "Failed to allocate depth buffer", VK_SC_DEPTH_BUFFER_CREATION_ERROR);
-    ASSERT(createRenderPasses(), "Failed to create render passes", VK_SC_RENDER_PASS_CREATION_ERROR);
-    ASSERT(allocateUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
-    ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
-    ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
-    ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 
     return vk::errorCodeBuffer;
 
@@ -1560,6 +1550,9 @@ VK_STATUS_CODE VKEngine::recreateSwapchain() {
 VK_STATUS_CODE VKEngine::cleanSwapchain() {
 
     logger::log(EVENT_LOG, "Cleaning swapchain...");
+
+    delete standardDescriptorLayout;
+    logger::log(EVENT_LOG, "Successfully destroyed descriptor set layout");
 
     delete mvpBuffer;
     logger::log(EVENT_LOG, "Successfully destroyed uniform buffers");
@@ -1624,43 +1617,47 @@ VK_STATUS_CODE VKEngine::allocateNecessaryBuffers() {
 
     VkBufferCreateInfo vertexBufferCreateInfo                 = {};
     vertexBufferCreateInfo.sType                              = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    vertexBufferCreateInfo.size                               = sizeof(vertices[0]) * vertices.size();
+    vertexBufferCreateInfo.size                               = sizeof(vk::vertices[0]) * vk::vertices.size();
     vertexBufferCreateInfo.usage                              = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
     vertexBufferCreateInfo.sharingMode                        = VK_SHARING_MODE_CONCURRENT;
     vertexBufferCreateInfo.queueFamilyIndexCount              = static_cast< uint32_t >(queueFamilyIndices.size());
     vertexBufferCreateInfo.pQueueFamilyIndices                = queueFamilyIndices.data();
 
     vertexBuffer                                              = new VertexBuffer(&vertexBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    VK_STATUS_CODE res                                        = vertexBuffer->fillS(vertices.data(), sizeof(vertices[0]) * vertices.size());
+    VK_STATUS_CODE res                                        = vertexBuffer->fillS(vk::vertices.data(), sizeof(vk::vertices[0]) * vk::vertices.size());
     ASSERT(res, "Failed to fill vertex buffer", VK_SC_VERTEX_BUFFER_MAP_ERROR);
-
-    VkBufferCreateInfo indexBufferCreateInfo                  = {};
-    indexBufferCreateInfo.sType                               = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    indexBufferCreateInfo.size                                = sizeof(indices[0]) * indices.size();
-    indexBufferCreateInfo.usage                               = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-    indexBufferCreateInfo.sharingMode                         = VK_SHARING_MODE_CONCURRENT;
-    indexBufferCreateInfo.queueFamilyIndexCount               = static_cast< uint32_t >(queueFamilyIndices.size());
-    indexBufferCreateInfo.pQueueFamilyIndices                 = queueFamilyIndices.data();
-
-    indexBuffer                                               = new IndexBuffer(&indexBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    res                                                       = indexBuffer->fillS(indices.data(), sizeof(indices[0]) * indices.size());
-    ASSERT(res, "Failed to fill index buffer", VK_SC_INDEX_BUFFER_MAP_ERROR);
 
     return vk::errorCodeBuffer;
 
 }
 
 VK_STATUS_CODE VKEngine::allocateUniformBuffers() {
-        
+
     VkDeviceSize bufferSize = sizeof(MVPBufferObject);
 
-    VkBufferCreateInfo mvpBufferCreateInfo          = {};
-    mvpBufferCreateInfo.sType                       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    mvpBufferCreateInfo.size                        = bufferSize;
-    mvpBufferCreateInfo.usage                       = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-    mvpBufferCreateInfo.sharingMode                 = VK_SHARING_MODE_EXCLUSIVE;
+    VkBufferCreateInfo mvpBufferCreateInfo      = {};
+    mvpBufferCreateInfo.sType                   = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    mvpBufferCreateInfo.size                    = bufferSize;
+    mvpBufferCreateInfo.usage                   = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+    mvpBufferCreateInfo.sharingMode             = VK_SHARING_MODE_EXCLUSIVE;
 
     mvpBuffer = new UniformBuffer(&mvpBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+    VkDescriptorBufferInfo mvpBufferInfo        = {};
+    mvpBufferInfo.buffer                        = mvpBuffer->buf;
+    mvpBufferInfo.offset                        = 0;
+    mvpBufferInfo.range                         = sizeof(MVPBufferObject);
+
+    UniformInfo mvpInfo                         = {};
+    mvpInfo.binding                             = 0;
+    mvpInfo.stageFlags                          = VK_SHADER_STAGE_VERTEX_BIT;
+    mvpInfo.bufferInfo                          = mvpBufferInfo;
+    mvpInfo.type                                = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+
+    Descriptor mvpDescriptor                    = Descriptor(&mvpInfo);
+    std::vector< Descriptor > desc              = { mvpDescriptor };
+
+    mvpBufferDescriptorSet = new DescriptorSet(desc);
 
     logger::log(EVENT_LOG, "Successfully created buffers");
 
@@ -1677,7 +1674,7 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers() {
     
     MVPBufferObject mvp                             = {};
 
-    mvp.model                                       = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    mvp.model                                       = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     mvp.view                                        = camera->getViewMatrix();
     mvp.proj                                        = glm::perspective(static_cast< float >(glm::radians(camera->fov)), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 100.0f);
 
@@ -1692,7 +1689,7 @@ VK_STATUS_CODE VKEngine::createTextureImages() {
     logger::log(EVENT_LOG, "Loading textures...");
     
     image = new TextureImage(
-        "res/models/chalet/chalet.jpg",
+        "res/textures/application/infinity.jpg",
         VK_FORMAT_R8G8B8A8_UNORM,
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
@@ -1708,6 +1705,23 @@ VK_STATUS_CODE VKEngine::createTextureImages() {
 VK_STATUS_CODE VKEngine::createCamera() {
 
     camera = new FPSCamera();
+
+    return vk::errorCodeBuffer;
+
+}
+
+VK_STATUS_CODE VKEngine::bindMVPDescriptor(std::vector< VkCommandBuffer >& commandBuffers_, uint32_t imageIndex_) {
+
+    vkCmdBindDescriptorSets(
+        commandBuffers_[imageIndex_],
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        pipeline.pipelineLayout,
+        0,
+        1,
+        &(mvpBufferDescriptorSet->descriptorSets[imageIndex_]),
+        0,
+        nullptr
+    );
 
     return vk::errorCodeBuffer;
 
@@ -1806,51 +1820,8 @@ VK_STATUS_CODE VKEngine::allocateMSAABufferedImage() {
 
 VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
-    /*Model* testModel = new Model("res/models/chalet/chalet.obj", pipeline, VKEngineModelLoadingLibTINYOBJ);
+    /*Model* testModel = new Model("res/models/nanosuit/nanosuit.obj", pipeline);
     models.push_back(testModel);*/
-
-    tinyobj::attrib_t                       attrib;
-    std::vector< tinyobj::shape_t >         shapes;
-    std::vector< tinyobj::material_t >      materials;
-    std::string warn, err;
-    
-    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, "res/models/chalet/chalet.obj")) {
-    
-        logger::log(ERROR_LOG, warn + err);
-    
-    }
-
-    std::unordered_map< BaseVertex, uint32_t > uniqueVertices = {};
-
-    for (const  auto& shape : shapes) {
-    
-        for (const auto& index : shape.mesh.indices) {
-        
-            BaseVertex vertex = {};
-
-            vertex.pos = {
-                attrib.vertices[3 * index.vertex_index + 0],
-                attrib.vertices[3 * index.vertex_index + 1],
-                attrib.vertices[3 * index.vertex_index + 2]
-            };
-
-            vertex.tex = {
-                attrib.texcoords[2 * index.texcoord_index + 0],
-                1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
-            };
-
-            if (uniqueVertices.count(vertex) == 0) {
-            
-                uniqueVertices[vertex] = static_cast< uint32_t >(vertices.size());
-                vertices.push_back(vertex);
-            
-            }
-
-            indices.push_back(uniqueVertices[vertex]);
-        
-        }
-    
-    }
 
     return vk::errorCodeBuffer;
 
