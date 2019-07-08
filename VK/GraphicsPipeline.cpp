@@ -24,19 +24,16 @@ GraphicsPipeline::GraphicsPipeline(
     const VkPipelineColorBlendAttachmentState*             colorBlendAttachmentState_,
     const VkPipelineColorBlendStateCreateInfo*             colorBlendStateCreateInfo_,
     const VkPipelineDynamicStateCreateInfo*                dynamicStateCreateInfo_,
-    const std::vector< UniformInfo >&                      uniformBindings_,
-    uint32_t                                               numUniforms_,
+    const DescriptorSetLayout*                             descriptorSetLayout_,
     VkRenderPass                                           renderPass_
     ) {
 
     stages = VertFragShaderStages(vertPath_, fragPath_);
 
-    descriptorSets = new DescriptorSet(uniformBindings_, numUniforms_);
-
     VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo         = {};
     pipelineLayoutCreateInfo.sType                              = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutCreateInfo.setLayoutCount                     = 1;
-    pipelineLayoutCreateInfo.pSetLayouts                        = &(descriptorSets->descriptorSetLayout);
+    pipelineLayoutCreateInfo.pSetLayouts                        = &(descriptorSetLayout_->descriptorSetLayout);
 
     VkResult result = vkCreatePipelineLayout(
         vk::engine.logicalDevice,
@@ -87,30 +84,11 @@ VK_STATUS_CODE GraphicsPipeline::destroyShaderModules() {
 
 VK_STATUS_CODE GraphicsPipeline::destroy() {
 
-    delete descriptorSets;
-
     vkDestroyPipeline(vk::engine.logicalDevice, pipeline, vk::engine.allocator);
     logger::log(EVENT_LOG, "Successfully destroyed graphics pipeline");
 
     vkDestroyPipelineLayout(vk::engine.logicalDevice, pipelineLayout, vk::engine.allocator);
     logger::log(EVENT_LOG, "Successfully destroyed pipeline layout");
-
-    return vk::errorCodeBuffer;
-
-}
-
-VK_STATUS_CODE GraphicsPipeline::bindDescriptors(std::vector< VkCommandBuffer >& commandBuffers_, uint32_t imageIndex_) {
-
-    vkCmdBindDescriptorSets(
-        commandBuffers_[imageIndex_],
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        pipelineLayout,
-        0,
-        1,
-        &(descriptorSets->descriptorSets[imageIndex_]),
-        0,
-        nullptr
-        );
 
     return vk::errorCodeBuffer;
 
