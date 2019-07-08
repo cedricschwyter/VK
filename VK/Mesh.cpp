@@ -62,10 +62,10 @@ void Mesh::bindDescriptors(std::vector< VkCommandBuffer >& commandBuffers_, uint
 
     std::vector< VkDeviceSize >                             offsets = { 0 };
 
-    for (uint32_t i = 0; i < textures.size(); i++) {
+    for (uint32_t i = 0; i < descriptors.size(); i++) {
     
-        TextureImage* img = textures[i].first.img;
-        img->bind();
+        //TextureImage* img = textures[i].first.img;
+        //img->bind();
 
         vkCmdBindDescriptorSets(
             commandBuffers_[imageIndex_],

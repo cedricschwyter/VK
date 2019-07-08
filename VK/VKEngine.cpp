@@ -1349,17 +1349,12 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
             vkCmdBindPipeline(standardCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline);
 
-                std::vector< VkBuffer >                                 vertexBuffers               = {vertexBuffer->buf};
-                std::vector< uint32_t >                                 indexBuffers                = {vk::indices};
-
-                size_t indexBufferSize = static_cast< size_t >(sizeof(vk::indices[0]) * vk::indices.size());
-
                 for (Model* model : models) {
                 
                     for (Mesh* mesh : model->meshes) {
 
                         bindMVPDescriptor(standardCommandBuffers, static_cast< uint32_t >(i));
-
+                        image->bind();
                         mesh->bindDescriptors(standardCommandBuffers, static_cast< uint32_t >(i));
 
                     }
@@ -1689,7 +1684,7 @@ VK_STATUS_CODE VKEngine::createTextureImages() {
     logger::log(EVENT_LOG, "Loading textures...");
     
     image = new TextureImage(
-        "res/textures/application/infinity.jpg",
+        "res/models/chalet/chalet.jpg",
         VK_FORMAT_R8G8B8A8_UNORM,
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
@@ -1721,7 +1716,7 @@ VK_STATUS_CODE VKEngine::bindMVPDescriptor(std::vector< VkCommandBuffer >& comma
         &(mvpBufferDescriptorSet->descriptorSets[imageIndex_]),
         0,
         nullptr
-    );
+        );
 
     return vk::errorCodeBuffer;
 
@@ -1820,8 +1815,8 @@ VK_STATUS_CODE VKEngine::allocateMSAABufferedImage() {
 
 VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
-    /*Model* testModel = new Model("res/models/nanosuit/nanosuit.obj", pipeline);
-    models.push_back(testModel);*/
+    Model* testModel = new Model("res/models/chalet/chalet.obj", pipeline, VKEngineModelLoadingLibTINYOBJ);
+    models.push_back(testModel);
 
     return vk::errorCodeBuffer;
 
