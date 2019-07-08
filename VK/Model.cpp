@@ -160,10 +160,10 @@ Mesh* Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
     
         aiMaterial* material = scene_->mMaterials[mesh_->mMaterialIndex];
         
-        std::vector< TextureObject > diffuseMaps = loadASSIMPMaterialTextures(material, aiTextureType_DIFFUSE, TT_DIFFUSE);
+        std::vector< std::pair< TextureObject, Descriptor > > diffuseMaps = loadASSIMPMaterialTextures(material, aiTextureType_DIFFUSE, TT_DIFFUSE);
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
-        std::vector< TextureObject > specularMaps = loadASSIMPMaterialTextures(material, aiTextureType_SPECULAR, TT_SPECULAR);
+        std::vector< std::pair< TextureObject, Descriptor > > specularMaps = loadASSIMPMaterialTextures(material, aiTextureType_SPECULAR, TT_SPECULAR);
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
     
     }
@@ -212,20 +212,20 @@ Mesh* Model::processTINYOBJMesh(void* mesh_, void* attrib_) {
 
 }
 
-std::vector< TextureObject > Model::loadASSIMPMaterialTextures(aiMaterial* material_, aiTextureType type_, TEXTURE_TYPE typeID_) {
+std::vector< std::pair< TextureObject, Descriptor > > Model::loadASSIMPMaterialTextures(aiMaterial* material_, aiTextureType type_, TEXTURE_TYPE typeID_) {
 
-    std::vector< TextureObject > textures;
+    std::vector< std::pair< TextureObject, Descriptor > > textures;
 
     for (uint32_t i = 0; i < material_->GetTextureCount(type_); i++) {
-    
+
         aiString string;
         material_->GetTexture(type_, i, &string);
-        
+
         bool skip = false;
 
         for (uint32_t j = 0; j < texturesLoaded.size(); j++) {
 
-            if (std::strcmp(texturesLoaded[j].path, string.C_Str()) == 0) {
+            if (std::strcmp(texturesLoaded[j].first.path, string.C_Str()) == 0) {
 
                 textures.push_back(texturesLoaded[j]);
                 skip = true;
@@ -235,14 +235,30 @@ std::vector< TextureObject > Model::loadASSIMPMaterialTextures(aiMaterial* mater
 
         }
 
-        if(!skip) {
+        if (!skip) {
 
             TextureObject texture;
-            texture.img         = textureFromFile(string.C_Str(), directory);
-            texture.type        = typeID_;
-            texture.path        = string.C_Str();
-            textures.push_back(texture);
-            texturesLoaded.push_back(texture);
+            texture.img                         = textureFromFile(string.C_Str(), directory);
+            texture.type                        = typeID_;
+            texture.path                        = string.C_Str();
+
+            VkDescriptorImageInfo imageInfo     = {};
+            imageInfo.sampler                   = reinterpret_cast< TextureImage* >(texture.img)->imgSampler;
+            imageInfo.imageLayout               = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            imageInfo.imageView                 = reinterpret_cast< TextureImage* >(texture.img)->imgView;
+
+            UniformInfo samplerInfo             = {};
+            samplerInfo.binding                 = 1;
+            samplerInfo.stageFlags              = VK_SHADER_STAGE_FRAGMENT_BIT;
+            samplerInfo.imageInfo               = imageInfo;
+            samplerInfo.type                    = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+
+            Descriptor samplerDescriptor        = Descriptor(&samplerInfo);
+
+            textures.push_back(std::make_pair(texture, samplerDescriptor));
+            texturesLoaded.push_back(std::make_pair(texture, samplerDescriptor));
+
+            descriptors.push_back(samplerDescriptor);
 
         }
 
@@ -272,7 +288,7 @@ Model::~Model() {
 
     for (auto img : texturesLoaded) {
     
-        delete img.img;
+        delete img.first.img;
     
     }
 
