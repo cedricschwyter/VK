@@ -26,7 +26,7 @@ class Model
 {
 public:
 
-    GraphicsPipeline pipeline;
+    GraphicsPipeline                    pipeline;
     std::vector< Mesh* >                meshes;
 
     /**

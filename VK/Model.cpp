@@ -38,7 +38,7 @@ void Model::bind() {
 
     for (uint32_t i = 0; i < meshes.size(); i++) {
     
-        meshes[i]->bind();
+        //meshes[i]->bind();
     
     }
 
@@ -168,7 +168,7 @@ Mesh* Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
     
     }
 
-    return new Mesh(vertices.data(), indices.data(), textures.data());
+    return new Mesh(pipeline, vertices, indices, textures);
 
 }
 
@@ -208,7 +208,7 @@ Mesh* Model::processTINYOBJMesh(void* mesh_, void* attrib_) {
 
     }
 
-    return new Mesh(vertices.data(), indices.data(), textures.data());
+    return new Mesh(pipeline, vertices, indices, textures);
 
 }
 
