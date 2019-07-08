@@ -127,6 +127,11 @@ VK_STATUS_CODE VKEngine::initVulkan() {
     allocator = nullptr;
 
 
+    std::thread t0 = std::thread([=]() {
+
+        ASSERT(loadModelsAndVertexData(), "Failed to load models", VK_SC_RESOURCE_LOADING_ERROR);
+        
+    });
     ASSERT(createInstance(), "Failed to create instance", VK_SC_INSTANCE_CREATON_ERROR);
     ASSERT(debugUtilsMessenger(), "Failed to create debug utils messenger", VK_SC_DEBUG_UTILS_MESSENGER_CREATION_ERROR);
     ASSERT(createSurfaceGLFW(), "Failed to create GLFW surface", VK_SC_SURFACE_CREATION_ERROR);
@@ -142,7 +147,7 @@ VK_STATUS_CODE VKEngine::initVulkan() {
     ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
     ASSERT(createTextureImages(), "Failed to create texture images", VK_SC_TEXTURE_IMAGE_CREATION_ERROR);
     ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
-    ASSERT(loadModelsAndVertexData(), "Failed to load models", VK_SC_RESOURCE_LOADING_ERROR);
+    t0.join();
     ASSERT(allocateNecessaryBuffers(), "Failed to create necessary buffers", VK_SC_BUFFER_CREATION_ERROR);
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
     ASSERT(initializeSynchronizationObjects(), "Failed to initialize sync-objects", VK_SC_SYNCHRONIZATION_OBJECT_INITIALIZATION_ERROR);
@@ -632,6 +637,7 @@ VK_STATUS_CODE VKEngine::createLogicalDeviceFromPhysicalDevice() {
 
     VkPhysicalDeviceFeatures physicalDeviceFeatures            = {};
     physicalDeviceFeatures.samplerAnisotropy                   = VK_TRUE;
+    physicalDeviceFeatures.fillModeNonSolid                    = VK_TRUE;
 
     VkDeviceCreateInfo deviceCreateInfo                        = {};
     deviceCreateInfo.sType                                     = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -1019,7 +1025,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     rasterizationStateCreateInfo.sType                                              = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizationStateCreateInfo.depthClampEnable                                   = VK_FALSE;
     rasterizationStateCreateInfo.rasterizerDiscardEnable                            = VK_FALSE;
-    rasterizationStateCreateInfo.polygonMode                                        = VK_POLYGON_MODE_FILL;
+    rasterizationStateCreateInfo.polygonMode                                        = VK_POLYGON_MODE_LINE;
     rasterizationStateCreateInfo.lineWidth                                          = 1.0f;
     rasterizationStateCreateInfo.cullMode                                           = VK_CULL_MODE_NONE;
     rasterizationStateCreateInfo.frontFace                                          = VK_FRONT_FACE_COUNTER_CLOCKWISE;
@@ -1668,8 +1674,7 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers() {
     
     MVPBufferObject mvp                             = {};
 
-    mvp.model                                       = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    mvp.model                                       = glm::rotate(mvp.model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    mvp.model                                       = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     mvp.view                                        = camera->getViewMatrix();
     mvp.proj                                        = glm::perspective(static_cast< float >(glm::radians(camera->fov)), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 100.0f);
 
