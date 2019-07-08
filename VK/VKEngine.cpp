@@ -1792,23 +1792,6 @@ VK_STATUS_CODE VKEngine::allocateDepthBuffer() {
 
 }
 
-VK_STATUS_CODE VKEngine::bindMVPDescriptor(std::vector< VkCommandBuffer >& commandBuffers_, uint32_t imageIndex_) {
-
-    vkCmdBindDescriptorSets(
-        commandBuffers_[imageIndex_],
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        pipeline.pipelineLayout,
-        0,
-        1,
-        &(mvpBufferDescriptorSet->descriptorSets[imageIndex_]),
-        0,
-        nullptr
-        );
-
-    return vk::errorCodeBuffer;
-
-}
-
 VkSampleCountFlagBits VKEngine::enumerateMaximumMultisamplingSampleCount() {
 
     VkPhysicalDeviceProperties physicalDeviceProps;

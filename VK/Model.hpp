@@ -27,6 +27,7 @@ class Model
 public:
 
     GraphicsPipeline pipeline;
+    std::vector< Mesh* >                meshes;
 
     /**
         Constructor
@@ -49,7 +50,6 @@ public:
 
 private:
 
-    std::vector< Mesh* >                meshes;
     std::string                         directory;
     std::vector< TextureObject >        texturesLoaded;
 
