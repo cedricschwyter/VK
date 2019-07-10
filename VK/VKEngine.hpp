@@ -50,6 +50,7 @@
 #include "MSAARenderImage.hpp"
 #include "Model.hpp"
 #include "Descriptor.hpp"
+#include "DescriptorSet.hpp"
 
 class VKEngine {
 public:
@@ -119,20 +120,22 @@ private:
     std::vector< VkImageView >              swapchainImageViews;
     std::vector< VkFramebuffer >            swapchainFramebuffers;
     VkRenderPass                            renderPass;
-    GraphicsPipeline                        pipeline;
+    GraphicsPipeline                        standardPipeline;
     std::vector< Descriptor >               standardDescriptors;
     DescriptorSetLayout*                    standardDescriptorLayout;
+    DescriptorSet                           standardDescriptorSet;
     std::vector< VkCommandBuffer >          standardCommandBuffers;
     std::vector< VkSemaphore >              swapchainImageAvailableSemaphores;
     std::vector< VkSemaphore >              renderingCompletedSemaphores;
     std::vector< VkFence >                  inFlightFences;
     size_t                                  currentSwapchainImage                = 0;
     bool                                    hasFramebufferBeenResized            = false;
-    BaseBuffer*                             mvpBuffer; 
-    DescriptorSet*                          mvpBufferDescriptorSet;
+    BaseBuffer*                             mvpBuffer;  
+    Descriptor                              mvpDescriptor;
     BaseImage*                              depthBuffer;
     BaseImage*                              msaaBufferImage;
     TextureImage*                           image;
+    Descriptor                              samplerDescriptor;
     bool                                    initialized                          = false;
     std::vector< Model* >                   models;
     bool                                    firstTimeRecreation                  = true;
@@ -476,15 +479,5 @@ private:
         @return     Returns VK_SC_SUCCESS on success
     */
     VK_STATUS_CODE loadModelsAndVertexData(void);
-
-    /**
-        Binds the uniform buffer descriptor
-
-        @param      commandBuffers_     The command buffers to record
-        @param      imageIndex_         The swapchain image index
-
-        @return     Returns VK_SC_SUCCESS on success
-    */
-    VK_STATUS_CODE bindMVPDescriptor(std::vector< VkCommandBuffer >& commandBuffers_, uint32_t imageIndex_);
 
 };

@@ -17,6 +17,11 @@ public:
     UniformInfo* info;
 
     /**
+        Default constructor
+    */
+    Descriptor(void) = default;
+
+    /**
         Constructor
 
         @param      info_       A pointer to a UniformInfo structure

@@ -1078,7 +1078,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     mvpInfo.bufferInfo                                                              = mvpBufferInfo;
     mvpInfo.type                                                                    = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     
-    Descriptor mvpDescriptor                                                        = Descriptor(&mvpInfo);
+    mvpDescriptor                                                                   = Descriptor(&mvpInfo);
 
     VkDescriptorImageInfo imageInfo                                                 = {};
     imageInfo.sampler                                                               = reinterpret_cast< TextureImage* >(image)->imgSampler;
@@ -1091,14 +1091,14 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     samplerInfo.imageInfo                                                           = imageInfo;
     samplerInfo.type                                                                = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
                
-    Descriptor samplerDescriptor                                                    = Descriptor(&samplerInfo);
+    samplerDescriptor                                                               = Descriptor(&samplerInfo);
 
     standardDescriptors.push_back(mvpDescriptor);
     standardDescriptors.push_back(samplerDescriptor);
 
     standardDescriptorLayout = new DescriptorSetLayout(standardDescriptors);
 
-    pipeline = GraphicsPipeline(
+    standardPipeline = GraphicsPipeline(
         "shaders/standard/vert.spv", 
         "shaders/standard/frag.spv",
         &vertexInputStateCreateInfo,
@@ -1341,14 +1341,23 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
         vkCmdBeginRenderPass(standardCommandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);        // Rendering commands will be embedded in the primary command buffer
 
-            vkCmdBindPipeline(standardCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline);
+            vkCmdBindPipeline(standardCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, standardPipeline.pipeline);
 
                 for (Model* model : models) {
                 
                     for (Mesh* mesh : model->meshes) {
 
-                        bindMVPDescriptor(standardCommandBuffers, static_cast< uint32_t >(i));
-                        image->bind();
+                        std::vector< Descriptor > meshDescriptors;
+
+                        meshDescriptors.push_back(mvpDescriptor);
+
+                        samplerDescriptor = mesh->getDescriptor();
+                        meshDescriptors.push_back(samplerDescriptor);
+
+                        standardDescriptorSet.update(meshDescriptors);
+
+                        standardDescriptorSet.bind(standardCommandBuffers, static_cast<uint32_t>(i), standardPipeline);
+
                         mesh->draw(standardCommandBuffers, static_cast< uint32_t >(i));
 
                     }
@@ -1569,7 +1578,7 @@ VK_STATUS_CODE VKEngine::cleanSwapchain() {
         );
     logger::log(EVENT_LOG, "Successfully freed command buffers");
 
-    pipeline.destroy();
+    standardPipeline.destroy();
 
     vkDestroyRenderPass(logicalDevice, renderPass, allocator);
     logger::log(EVENT_LOG, "Successfully destroyed render pass");
@@ -1608,22 +1617,6 @@ VK_STATUS_CODE VKEngine::allocateUniformBuffers() {
     mvpBufferCreateInfo.sharingMode             = VK_SHARING_MODE_EXCLUSIVE;
 
     mvpBuffer = new UniformBuffer(&mvpBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-    VkDescriptorBufferInfo mvpBufferInfo        = {};
-    mvpBufferInfo.buffer                        = mvpBuffer->buf;
-    mvpBufferInfo.offset                        = 0;
-    mvpBufferInfo.range                         = sizeof(MVPBufferObject);
-
-    UniformInfo mvpInfo                         = {};
-    mvpInfo.binding                             = 0;
-    mvpInfo.stageFlags                          = VK_SHADER_STAGE_VERTEX_BIT;
-    mvpInfo.bufferInfo                          = mvpBufferInfo;
-    mvpInfo.type                                = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-
-    Descriptor mvpDescriptor                    = Descriptor(&mvpInfo);
-    std::vector< Descriptor > desc              = { mvpDescriptor };
-
-    mvpBufferDescriptorSet = new DescriptorSet(desc);
 
     logger::log(EVENT_LOG, "Successfully created buffers");
 
@@ -1671,23 +1664,6 @@ VK_STATUS_CODE VKEngine::createTextureImages() {
 VK_STATUS_CODE VKEngine::createCamera() {
 
     camera = new FPSCamera();
-
-    return vk::errorCodeBuffer;
-
-}
-
-VK_STATUS_CODE VKEngine::bindMVPDescriptor(std::vector< VkCommandBuffer >& commandBuffers_, uint32_t imageIndex_) {
-
-    vkCmdBindDescriptorSets(
-        commandBuffers_[imageIndex_],
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        pipeline.pipelineLayout,
-        0,
-        1,
-        &(mvpBufferDescriptorSet->descriptorSets[imageIndex_]),
-        0,
-        nullptr
-        );
 
     return vk::errorCodeBuffer;
 
@@ -1786,7 +1762,7 @@ VK_STATUS_CODE VKEngine::allocateMSAABufferedImage() {
 
 VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
-    Model* testModel = new Model("res/models/chalet/chalet.obj", pipeline, VKEngineModelLoadingLibTINYOBJ);
+    Model* testModel = new Model("res/models/nanosuit/nanosuit.obj", standardPipeline, VKEngineModelLoadingLibASSIMP);
     models.push_back(testModel);
 
     return vk::errorCodeBuffer;

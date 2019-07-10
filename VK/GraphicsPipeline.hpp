@@ -11,7 +11,7 @@
 #include <vulkan/vulkan.h>
 
 #include "VertFragShaderStages.hpp"
-#include "DescriptorSet.hpp"
+#include "DescriptorSetLayout.hpp"
 
 class GraphicsPipeline
 {

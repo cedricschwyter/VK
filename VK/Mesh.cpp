@@ -49,39 +49,22 @@ Mesh::Mesh(
     ASSERT(res, "Failed to fill index buffer", VK_SC_INDEX_BUFFER_MAP_ERROR);
 
     for(auto texture : textures_) {
-    
-        std::vector< Descriptor > desc = { texture.second };
 
-        descriptors.push_back(new DescriptorSet(desc));
+        descriptors.push_back(texture.second);
     
     }
 
 }
 
-std::vector< DescriptorSet* > Mesh::getDescriptorSets() {
+Descriptor Mesh::getDescriptor() {
 
-    return descriptors;
+    return descriptors[0];
 
 }
 
 void Mesh::draw(std::vector< VkCommandBuffer >& commandBuffers_, uint32_t imageIndex_) {
 
-    std::vector< VkDeviceSize >                             offsets = { 0 };
-
-    /*for (uint32_t i = 0; i < descriptors.size(); i++) {
-
-        vkCmdBindDescriptorSets(
-            commandBuffers_[imageIndex_],
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            pipeline.pipelineLayout,
-            0,
-            1,
-            &(descriptors[i]->descriptorSets[imageIndex_]),
-            0,
-            nullptr
-            );
-    
-    }*/
+    std::vector< VkDeviceSize > offsets = { 0 };
 
     vkCmdBindVertexBuffers(
         commandBuffers_[imageIndex_],
@@ -113,11 +96,5 @@ Mesh::~Mesh() {
 
     delete vertexBuffer;
     delete indexBuffer;
-    
-    for (auto desc : descriptors) {
-    
-        delete desc;
-    
-    }
 
 }

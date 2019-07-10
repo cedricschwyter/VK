@@ -32,17 +32,17 @@ DescriptorSet::DescriptorSet(std::vector< Descriptor > descriptors_) {
 
     for (size_t i = 0; i < vk::engine->swapchainImages.size(); i++) {
 
-        for (size_t j = 0; j < descriptorSetLayout->descriptors.size(); j++) {
+        for (size_t j = 0; j < descriptors_.size(); j++) {
         
             VkWriteDescriptorSet writeDescriptorSet         = {};
             writeDescriptorSet.sType                        = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             writeDescriptorSet.dstSet                       = descriptorSets[i];
-            writeDescriptorSet.dstBinding                   = descriptorSetLayout->descriptors[j].info->binding;
+            writeDescriptorSet.dstBinding                   = descriptors_[j].info->binding;
             writeDescriptorSet.dstArrayElement              = 0;
-            writeDescriptorSet.descriptorType               = descriptorSetLayout->descriptors[j].info->type;
+            writeDescriptorSet.descriptorType               = descriptors_[j].info->type;
             writeDescriptorSet.descriptorCount              = 1;
-            writeDescriptorSet.pBufferInfo                  = &(descriptorSetLayout->descriptors[j].info->bufferInfo);
-            writeDescriptorSet.pImageInfo                   = &(descriptorSetLayout->descriptors[j].info->imageInfo);
+            writeDescriptorSet.pBufferInfo                  = &(descriptors_[j].info->bufferInfo);
+            writeDescriptorSet.pImageInfo                   = &(descriptors_[j].info->imageInfo);
 
             vkUpdateDescriptorSets(
                 vk::engine->logicalDevice,
@@ -55,6 +55,51 @@ DescriptorSet::DescriptorSet(std::vector< Descriptor > descriptors_) {
         }
 
     }
+
+}
+
+void DescriptorSet::update(std::vector< Descriptor > descriptors_) {
+
+    for (size_t i = 0; i < vk::engine->swapchainImages.size(); i++) {
+
+        for (size_t j = 0; j < descriptors_.size(); j++) {
+
+            VkWriteDescriptorSet writeDescriptorSet         = {};
+            writeDescriptorSet.sType                        = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            writeDescriptorSet.dstSet                       = descriptorSets[i];
+            writeDescriptorSet.dstBinding                   = descriptors_[j].info->binding;
+            writeDescriptorSet.dstArrayElement              = 0;
+            writeDescriptorSet.descriptorType               = descriptors_[j].info->type;
+            writeDescriptorSet.descriptorCount              = 1;
+            writeDescriptorSet.pBufferInfo                  = &(descriptors_[j].info->bufferInfo);
+            writeDescriptorSet.pImageInfo                   = &(descriptors_[j].info->imageInfo);
+
+            vkUpdateDescriptorSets(
+                vk::engine->logicalDevice,
+                1,
+                &writeDescriptorSet,
+                0,
+                nullptr
+                );
+
+        }
+
+    }
+
+}
+
+void DescriptorSet::bind(std::vector< VkCommandBuffer >& commandBuffers_, uint32_t imageIndex_, GraphicsPipeline pipeline_) {
+
+    vkCmdBindDescriptorSets(
+        commandBuffers_[imageIndex_],
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        pipeline_.pipelineLayout,
+        0,
+        1,
+        &(descriptorSets[imageIndex_]),
+        0,
+        nullptr
+        );
 
 }
 

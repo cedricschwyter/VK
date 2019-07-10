@@ -44,11 +44,11 @@ public:
         );
 
     /**
-        Returns an std::vector of descriptors of the meshes textures/materials
+        Returns a descriptor of the meshes textures/materials
 
-        @return     Returns an std::vector of descriptors set pointers
+        @return     Returns a descriptor
     */
-    std::vector< DescriptorSet* > getDescriptorSets(void);
+    Descriptor getDescriptor(void);
 
     /**
         Binds the vertex and index data for command buffer recording and executes the draw call
@@ -65,7 +65,7 @@ public:
 
 private:
 
-    std::vector< DescriptorSet* >   descriptors;
+    std::vector< Descriptor > descriptors;
 
 };
 
