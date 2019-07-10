@@ -139,7 +139,6 @@ VK_STATUS_CODE VKEngine::initVulkan() {
     ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
     ASSERT(createTextureImages(), "Failed to create texture images", VK_SC_TEXTURE_IMAGE_CREATION_ERROR);
     ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
-    ASSERT(allocateNecessaryBuffers(), "Failed to create necessary buffers", VK_SC_BUFFER_CREATION_ERROR);
     ASSERT(loadModelsAndVertexData(), "Failed to load models", VK_SC_RESOURCE_LOADING_ERROR);
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
     ASSERT(initializeSynchronizationObjects(), "Failed to initialize sync-objects", VK_SC_SYNCHRONIZATION_OBJECT_INITIALIZATION_ERROR);
@@ -229,9 +228,6 @@ VK_STATUS_CODE VKEngine::clean() {
     logger::log(EVENT_LOG, "Successfully destroyed camera");
 
     delete image;
-
-    delete vertexBuffer;
-    delete indexBuffer;
     logger::log(EVENT_LOG, "Successfully destroyed buffers, textures and samplers");
 
     for (size_t i = 0; i < vk::MAX_IN_FLIGHT_FRAMES; i++) {
@@ -1600,29 +1596,6 @@ void VKEngine::framebufferResizeCallback(GLFWwindow* window_, int width_, int he
 
     auto vkengine = reinterpret_cast< VKEngine* >(glfwGetWindowUserPointer(window_));
     vkengine->hasFramebufferBeenResized = true;
-
-}
-
-VK_STATUS_CODE VKEngine::allocateNecessaryBuffers() {
-
-    logger::log(EVENT_LOG, "Creating buffers...");
-    QueueFamily family                                        = findSuitableQueueFamily(physicalDevice);
-
-    std::vector< uint32_t > queueFamilyIndices                = {family.graphicsFamilyIndex.value(), family.transferFamilyIndex.value()};
-
-    VkBufferCreateInfo vertexBufferCreateInfo                 = {};
-    vertexBufferCreateInfo.sType                              = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    vertexBufferCreateInfo.size                               = sizeof(vk::vertices[0]) * vk::vertices.size();
-    vertexBufferCreateInfo.usage                              = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-    vertexBufferCreateInfo.sharingMode                        = VK_SHARING_MODE_CONCURRENT;
-    vertexBufferCreateInfo.queueFamilyIndexCount              = static_cast< uint32_t >(queueFamilyIndices.size());
-    vertexBufferCreateInfo.pQueueFamilyIndices                = queueFamilyIndices.data();
-
-    vertexBuffer                                              = new VertexBuffer(&vertexBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    VK_STATUS_CODE res                                        = vertexBuffer->fillS(vk::vertices.data(), sizeof(vk::vertices[0]) * vk::vertices.size());
-    ASSERT(res, "Failed to fill vertex buffer", VK_SC_VERTEX_BUFFER_MAP_ERROR);
-
-    return vk::errorCodeBuffer;
 
 }
 

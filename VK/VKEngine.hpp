@@ -118,8 +118,6 @@ private:
     std::vector< VkFence >                  inFlightFences;
     size_t                                  currentSwapchainImage                = 0;
     bool                                    hasFramebufferBeenResized            = false;
-    BaseBuffer*                             vertexBuffer;
-    BaseBuffer*                             indexBuffer;
     BaseBuffer*                             mvpBuffer; 
     DescriptorSet*                          mvpBufferDescriptorSet;
     BaseImage*                              depthBuffer;
@@ -390,13 +388,6 @@ private:
         @param         height_        The new height of the GLFWwindow
     */
     static void framebufferResizeCallback(GLFWwindow* window_, int width_, int height_);
-
-    /**
-        Allocates the necessary buffers (vertex data, index data, etc.)
-
-        @return        Returns VK_SC_SUCCESS on success
-    */
-    VK_STATUS_CODE allocateNecessaryBuffers(void);
 
     /**
         Creates uniform buffers
