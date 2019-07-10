@@ -34,9 +34,9 @@ DescriptorSetLayout::DescriptorSetLayout(const std::vector< Descriptor >& descri
     layoutCreateInfo.pBindings                          = bindings.data();
 
     VkResult result = vkCreateDescriptorSetLayout(
-        vk::engine.logicalDevice,
+        vk::engine->logicalDevice,
         &layoutCreateInfo,
-        vk::engine.allocator,
+        vk::engine->allocator,
         &descriptorSetLayout
         );
     ASSERT(result, "Failed to create descriptor set layout", VK_SC_DESCRIPTOR_SET_LAYOUT_CREATION_ERROR);
@@ -45,7 +45,7 @@ DescriptorSetLayout::DescriptorSetLayout(const std::vector< Descriptor >& descri
 
 DescriptorSetLayout::~DescriptorSetLayout() {
 
-    vkDestroyDescriptorSetLayout(vk::engine.logicalDevice, descriptorSetLayout, vk::engine.allocator);
+    vkDestroyDescriptorSetLayout(vk::engine->logicalDevice, descriptorSetLayout, vk::engine->allocator);
     logger::log(EVENT_LOG, "Successfully destroyed descriptor set layout");
 
 }

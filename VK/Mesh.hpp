@@ -44,12 +44,19 @@ public:
         );
 
     /**
-        Binds the vertex and index data for command buffer recording
+        Returns an std::vector of descriptors of the meshes textures/materials
+
+        @return     Returns an std::vector of descriptors set pointers
+    */
+    std::vector< DescriptorSet* > getDescriptorSets(void);
+
+    /**
+        Binds the vertex and index data for command buffer recording and executes the draw call
 
         @param      commandBuffers_     The command buffers to be recorded
         @param      imageIndex_         The swapchain image index
     */
-    void bindDescriptors(std::vector< VkCommandBuffer >& commandBuffers_, uint32_t imageIndex_);
+    void draw(std::vector< VkCommandBuffer >& commandBuffers_, uint32_t imageIndex_);
 
     /**
         Default destructor

@@ -20,7 +20,7 @@ Mesh::Mesh(
     )
     : pipeline(pipeline_), vertices(vertices_), indices(indices_), textures(textures_) {
 
-    QueueFamily family                                          = vk::engine.findSuitableQueueFamily(vk::engine.physicalDevice);
+    QueueFamily family                                          = vk::engine->findSuitableQueueFamily(vk::engine->physicalDevice);
 
     std::vector< uint32_t > queueFamilyIndices                  = { family.graphicsFamilyIndex.value(), family.transferFamilyIndex.value() };
 
@@ -58,14 +58,17 @@ Mesh::Mesh(
 
 }
 
-void Mesh::bindDescriptors(std::vector< VkCommandBuffer >& commandBuffers_, uint32_t imageIndex_) {
+std::vector< DescriptorSet* > Mesh::getDescriptorSets() {
+
+    return descriptors;
+
+}
+
+void Mesh::draw(std::vector< VkCommandBuffer >& commandBuffers_, uint32_t imageIndex_) {
 
     std::vector< VkDeviceSize >                             offsets = { 0 };
 
-    for (uint32_t i = 0; i < descriptors.size(); i++) {
-    
-        //TextureImage* img = textures[i].first.img;
-        //img->bind();
+    /*for (uint32_t i = 0; i < descriptors.size(); i++) {
 
         vkCmdBindDescriptorSets(
             commandBuffers_[imageIndex_],
@@ -78,7 +81,7 @@ void Mesh::bindDescriptors(std::vector< VkCommandBuffer >& commandBuffers_, uint
             nullptr
             );
     
-    }
+    }*/
 
     vkCmdBindVertexBuffers(
         commandBuffers_[imageIndex_],

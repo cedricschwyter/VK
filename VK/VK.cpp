@@ -15,7 +15,7 @@ namespace vk {
 
     VK_STATUS_CODE                      errorCodeBuffer             = VK_SC_ERROR_CODE_BUFFER_NOT_INITIALIZED;
 
-    VKEngine                            engine;
+    VKEngine*                           engine;
     const unsigned int                  WIDTH                       = 1280;
     const unsigned int                  HEIGHT                      = 720;
     const char*                         TITLE                       = "VK by D3PSI";
@@ -54,7 +54,13 @@ namespace vk {
 
         try {
 
-            return engine.init();
+            engine = new VKEngine();
+
+            VK_STATUS_CODE* returnAddr;
+            std::thread t0(&VKEngine::init, engine, returnAddr);
+            t0.join();
+
+            return *returnAddr;
 
         }
         catch (const std::exception& e) {
@@ -171,7 +177,7 @@ namespace vk {
         allocateInfo.commandBufferCount                     = 1;
 
         VkCommandBuffer commandBuffer;
-        vkAllocateCommandBuffers(engine.logicalDevice, &allocateInfo, &commandBuffer);
+        vkAllocateCommandBuffers(engine->logicalDevice, &allocateInfo, &commandBuffer);
 
         VkCommandBufferBeginInfo commandBufferBeginInfo     = {};
         commandBufferBeginInfo.sType                        = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -195,7 +201,7 @@ namespace vk {
         vkQueueSubmit(transferQueue, 1, &submitInfo, VK_NULL_HANDLE);
         vkQueueWaitIdle(transferQueue);
 
-        vkFreeCommandBuffers(engine.logicalDevice, transferCommandPool, 1, &commandBuffer);
+        vkFreeCommandBuffers(engine->logicalDevice, transferCommandPool, 1, &commandBuffer);
 
     }
 
@@ -204,11 +210,11 @@ namespace vk {
         VkCommandBufferAllocateInfo allocInfo   = {};
         allocInfo.sType                         = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.level                         = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandPool                   = vk::engine.standardCommandPool;
+        allocInfo.commandPool                   = vk::engine->standardCommandPool;
         allocInfo.commandBufferCount            = 1;
 
         VkCommandBuffer commandBuffer;
-        vkAllocateCommandBuffers(engine.logicalDevice, &allocInfo, &commandBuffer);
+        vkAllocateCommandBuffers(engine->logicalDevice, &allocInfo, &commandBuffer);
 
         VkCommandBufferBeginInfo beginInfo      = {};
         beginInfo.sType                         = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -230,17 +236,17 @@ namespace vk {
         submitInfo.pCommandBuffers = &commandBuffer_;
 
         vkQueueSubmit(
-            vk::engine.graphicsQueue,
+            vk::engine->graphicsQueue,
             1,
             &submitInfo,
             VK_NULL_HANDLE
             );
 
-        vkQueueWaitIdle(vk::engine.graphicsQueue);
+        vkQueueWaitIdle(vk::engine->graphicsQueue);
 
         vkFreeCommandBuffers(
-            engine.logicalDevice,
-            vk::engine.standardCommandPool,
+            engine->logicalDevice,
+            vk::engine->standardCommandPool,
             1,
             &commandBuffer_
             );
@@ -410,9 +416,9 @@ namespace vk {
 
         VkImageView imgView;
         VkResult result = vkCreateImageView(
-            engine.logicalDevice,
+            engine->logicalDevice,
             &imageViewCreateInfo,
-            engine.allocator,
+            engine->allocator,
             &imgView
             );
         ASSERT(result, "Failed to create image view", VK_SC_IMAGE_VIEW_CREATION_ERROR);
@@ -428,7 +434,7 @@ namespace vk {
         for (VkFormat format : candidates_) {
 
             VkFormatProperties properties;
-            vkGetPhysicalDeviceFormatProperties(engine.physicalDevice, format, &properties);
+            vkGetPhysicalDeviceFormatProperties(engine->physicalDevice, format, &properties);
 
             if (tiling_ == VK_IMAGE_TILING_LINEAR && (properties.linearTilingFeatures & features_) == features_) {      // Does the format support linear tiling?
 
@@ -452,7 +458,7 @@ namespace vk {
     uint32_t enumerateSuitableMemoryType(uint32_t typeFilter_, VkMemoryPropertyFlags memoryPropertyFlags_) {
 
         VkPhysicalDeviceMemoryProperties memProp;
-        vkGetPhysicalDeviceMemoryProperties(engine.physicalDevice, &memProp);
+        vkGetPhysicalDeviceMemoryProperties(engine->physicalDevice, &memProp);
 
         for (uint32_t i = 0; i < memProp.memoryTypeCount; i++) {
             // Does the memory type have all of the necessary properties?
@@ -499,15 +505,15 @@ namespace vk {
         imgCreateInfo.sharingMode               = VK_SHARING_MODE_EXCLUSIVE;
 
         VkResult result = vkCreateImage(
-            vk::engine.logicalDevice,
+            vk::engine->logicalDevice,
             &imgCreateInfo,
-            vk::engine.allocator,
+            vk::engine->allocator,
             &img_
             );
         ASSERT(result, "Failed to create image from the given parameters", VK_SC_IMAGE_CREATION_ERROR);
 
         VkMemoryRequirements memReqs;
-        vkGetImageMemoryRequirements(vk::engine.logicalDevice, img_, &memReqs);
+        vkGetImageMemoryRequirements(vk::engine->logicalDevice, img_, &memReqs);
 
         VkMemoryAllocateInfo memoryAllocInfo        = {};
         memoryAllocInfo.sType                       = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -515,15 +521,15 @@ namespace vk {
         memoryAllocInfo.memoryTypeIndex             = vk::enumerateSuitableMemoryType(memReqs.memoryTypeBits, properties_);
 
         result = vkAllocateMemory(
-            vk::engine.logicalDevice,
+            vk::engine->logicalDevice,
             &memoryAllocInfo,
-            vk::engine.allocator,
+            vk::engine->allocator,
             &imgMem_
             );
         ASSERT(result, "Failed to allocate image memory", VK_SC_IMAGE_MEMORY_ALLOCATION_ERROR);
 
         vkBindImageMemory(
-            vk::engine.logicalDevice,
+            vk::engine->logicalDevice,
             img_,
             imgMem_,
             0

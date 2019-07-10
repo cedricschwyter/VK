@@ -66,11 +66,21 @@ public:
     VkSampleCountFlagBits                   maxMSAASamples                          = VK_SAMPLE_COUNT_1_BIT;
 
     /**
+        Default constructor
+    */
+    VKEngine(void) = default;
+
+    /**
+        Default destructor
+    */
+    ~VKEngine(void) = default;
+
+    /**
         Initializes VKEngine and loads dependencies
 
-        @return        Returns VK_SC_SUCCESS on success
+        @param      returnCodeAddr_     A VK_STATUS_CODE pointer to which the return code of this multithreaded function will be written
     */
-    VK_STATUS_CODE init(void);
+    void init(VK_STATUS_CODE* returnCodeAddr_);
 
     /**
         Finds queue families that are suitable for the operations that are about to be performed on them

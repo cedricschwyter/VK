@@ -15,7 +15,7 @@
 #include <stb_image.h>
 
 
-VK_STATUS_CODE VKEngine::init() {
+void VKEngine::init(VK_STATUS_CODE* returnCodeAddr_) {
 
     ASSERT(initLogger(), "Logger initialization error", LOGGER_SC_UNKNOWN_ERROR);
     logger::log(START_LOG, "Initializing...");
@@ -27,7 +27,9 @@ VK_STATUS_CODE VKEngine::init() {
     ASSERT(clean(), "Application cleanup error", VK_SC_CLEANUP_ERROR);
     logger::log(START_LOG, "Shutting down...");
 
-    return vk::errorCodeBuffer;
+    VK_STATUS_CODE* returnCode;
+    returnCode          = returnCodeAddr_;
+    *returnCode         = vk::errorCodeBuffer;
 
 }
 
@@ -1347,7 +1349,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
                         bindMVPDescriptor(standardCommandBuffers, static_cast< uint32_t >(i));
                         image->bind();
-                        mesh->bindDescriptors(standardCommandBuffers, static_cast< uint32_t >(i));
+                        mesh->draw(standardCommandBuffers, static_cast< uint32_t >(i));
 
                     }
                 

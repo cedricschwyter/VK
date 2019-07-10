@@ -14,8 +14,8 @@
 
 BaseImage::~BaseImage() {
 
-    vkDestroyImageView(vk::engine.logicalDevice, imgView, vk::engine.allocator);
-    vkDestroyImage(vk::engine.logicalDevice, img, vk::engine.allocator);
-    vkFreeMemory(vk::engine.logicalDevice, imgMem, vk::engine.allocator);
+    vkDestroyImageView(vk::engine->logicalDevice, imgView, vk::engine->allocator);
+    vkDestroyImage(vk::engine->logicalDevice, img, vk::engine->allocator);
+    vkFreeMemory(vk::engine->logicalDevice, imgMem, vk::engine->allocator);
 
 }
