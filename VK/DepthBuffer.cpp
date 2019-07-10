@@ -35,12 +35,6 @@ DepthBuffer::DepthBuffer() {
         1
         );
 
-    if (img == VK_NULL_HANDLE) {
-    
-        std::cout << "DEPTH\n";
-
-    }
-
     vk::imageLayoutTransition(
         img, 
         imgFormat, 

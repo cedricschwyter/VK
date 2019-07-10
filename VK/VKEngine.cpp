@@ -272,10 +272,6 @@ VK_STATUS_CODE VKEngine::clean() {
 
     logger::log(EVENT_LOG, "Successfully cleaned allocated resources, shutting down...");
 
-#if defined VK_DEVELOPMENT && (defined WIN_64 || defined WIN_32)
-    std::cout << "\n\nPress any key to continue...";
-    logger::log(EVENT_LOG, "Exit code: " + _getch());
-#endif
     return vk::errorCodeBuffer;
 
 }
