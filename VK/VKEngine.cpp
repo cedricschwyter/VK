@@ -1762,8 +1762,21 @@ VK_STATUS_CODE VKEngine::allocateMSAABufferedImage() {
 
 VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
-    Model* testModel = new Model("res/models/nanosuit/nanosuit.obj", standardPipeline, VKEngineModelLoadingLibASSIMP);
-    models.push_back(testModel);
+    for (const char* path : modelLoadingQueue) {
+    
+        Model* model = new Model(path, standardPipeline, VKEngineModelLoadingLibASSIMP);
+        models.push_back(model);
+    
+    }
+
+    return vk::errorCodeBuffer;
+
+}
+
+
+VK_STATUS_CODE VKEngine::add(const char* path_) {
+
+    modelLoadingQueue.push_back(path_);
 
     return vk::errorCodeBuffer;
 

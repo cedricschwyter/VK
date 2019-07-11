@@ -54,8 +54,6 @@ namespace vk {
 
         try {
 
-            engine = new VKEngine();
-
             VK_STATUS_CODE* returnAddr;
             std::thread t0(&VKEngine::init, engine, returnAddr);
             t0.join();

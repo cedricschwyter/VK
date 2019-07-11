@@ -14,6 +14,8 @@
 */
 int main() {
 
+    vk::engine = new VKEngine();
+
     return vk::init();
 
 }

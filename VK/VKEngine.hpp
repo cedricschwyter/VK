@@ -84,6 +84,13 @@ public:
     void init(VK_STATUS_CODE* returnCodeAddr_);
 
     /**
+        Adds a model to the model loading queue
+
+        @param      path_       The path to the model
+    */
+    VK_STATUS_CODE add(const char* path_);
+
+    /**
         Finds queue families that are suitable for the operations that are about to be performed on them
 
         @param         device_        A valid VkPhysicalDevice handle whose queue families are to be tested
@@ -139,6 +146,7 @@ private:
     bool                                    initialized                          = false;
     std::vector< Model* >                   models;
     bool                                    firstTimeRecreation                  = true;
+    std::vector< const char* >              modelLoadingQueue;
 
     /**
         Initializes the logger
