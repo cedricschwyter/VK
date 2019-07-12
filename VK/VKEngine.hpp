@@ -23,6 +23,7 @@
 #include <map>
 #include <thread>
 #include <algorithm>
+#include <mutex>
 #include <fstream>
 #include <string>
 #if defined WIN_64 || defined WIN_32
@@ -51,6 +52,7 @@
 #include "Model.hpp"
 #include "Descriptor.hpp"
 #include "DescriptorSet.hpp"
+#include "ModelInfo.cpp"
 
 class VKEngine {
 public:
@@ -88,7 +90,14 @@ public:
 
         @param      path_       The path to the model
     */
-    VK_STATUS_CODE add(const char* path_);
+    VK_STATUS_CODE push(const char* path_);
+
+    /**
+        Adds a model to the model loading queue
+
+        @param      info_       A model info struct
+    */
+    VK_STATUS_CODE push(ModelInfo info_);
 
     /**
         Finds queue families that are suitable for the operations that are about to be performed on them
@@ -145,8 +154,11 @@ private:
     Descriptor                              samplerDescriptor;
     bool                                    initialized                          = false;
     std::vector< Model* >                   models;
+    std::mutex                              modelsPushBackMutex;
     bool                                    firstTimeRecreation                  = true;
-    std::vector< const char* >              modelLoadingQueue;
+
+    std::vector< ModelInfo >                modelLoadingQueue;
+    std::vector< std::thread* >             modelLoadingQueueThreads;
 
     /**
         Initializes the logger
@@ -218,10 +230,10 @@ private:
 
     */
     static VKAPI_ATTR VkBool32 VKAPI_CALL validationLayerDebugMessageCallback(
-        VkDebugUtilsMessageSeverityFlagBitsEXT            messageSeverity_,
-        VkDebugUtilsMessageTypeFlagsEXT                    messageType_,
-        const VkDebugUtilsMessengerCallbackDataEXT*        pCallbackData_,
-        void*                                            pUserData_
+        VkDebugUtilsMessageSeverityFlagBitsEXT              messageSeverity_,
+        VkDebugUtilsMessageTypeFlagsEXT                     messageType_,
+        const VkDebugUtilsMessengerCallbackDataEXT*         pCallbackData_,
+        void*                                               pUserData_
         );
 
     /**

@@ -14,8 +14,10 @@
 */
 int main() {
 
-    vk::engine = new VKEngine();
+    vk::init();
 
-    return vk::init();
+    vk::push("res/models/chalet/chalet.obj");
+
+    return vk::run();
 
 }

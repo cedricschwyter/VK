@@ -23,6 +23,9 @@
 //#define MACOSX              // macOS X 64-bit
 //#define LINUX               // Linux 64-bit
 
+#define VK_STANDARD_MODEL_LOADING_LIB VKEngineModelLoadingLibTINYOBJ
+//#define VK_STANDARD_MODEL_LOADING_LIB VKEngineModelLoadingLibASSIMP
+
 // Default values
 #if !defined VK_DEVELOPMENT && !defined VK_RELEASE
     #define VK_DEVELOPMENT

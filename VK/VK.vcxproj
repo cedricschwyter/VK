@@ -149,6 +149,7 @@
     <ClCompile Include="GraphicsPipeline.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="ModelInfo.cpp" />
     <ClCompile Include="MSAARenderImage.cpp" />
     <ClCompile Include="TextureImage.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />

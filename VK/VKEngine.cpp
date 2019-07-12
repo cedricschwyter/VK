@@ -126,6 +126,12 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 
     allocator = nullptr;
 
+    std::thread t0 = std::thread([=]() {
+        
+            ASSERT(loadModelsAndVertexData(), "Failed to load assets", VK_SC_RESOURCE_LOADING_ERROR);
+        
+        });
+
     ASSERT(createInstance(), "Failed to create instance", VK_SC_INSTANCE_CREATON_ERROR);
     ASSERT(debugUtilsMessenger(), "Failed to create debug utils messenger", VK_SC_DEBUG_UTILS_MESSENGER_CREATION_ERROR);
     ASSERT(createSurfaceGLFW(), "Failed to create GLFW surface", VK_SC_SURFACE_CREATION_ERROR);
@@ -141,7 +147,7 @@ VK_STATUS_CODE VKEngine::initVulkan() {
     ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
     ASSERT(createTextureImages(), "Failed to create texture images", VK_SC_TEXTURE_IMAGE_CREATION_ERROR);
     ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
-    ASSERT(loadModelsAndVertexData(), "Failed to load models", VK_SC_RESOURCE_LOADING_ERROR);
+    t0.join();
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
     ASSERT(initializeSynchronizationObjects(), "Failed to initialize sync-objects", VK_SC_SYNCHRONIZATION_OBJECT_INITIALIZATION_ERROR);
     ASSERT(createCamera(), "Failed to create camera", VK_SC_CAMERA_CREATION_ERROR);
@@ -1762,10 +1768,24 @@ VK_STATUS_CODE VKEngine::allocateMSAABufferedImage() {
 
 VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
-    for (const char* path : modelLoadingQueue) {
+    for (auto info : modelLoadingQueue) {
     
-        Model* model = new Model(path, standardPipeline, VKEngineModelLoadingLibASSIMP);
-        models.push_back(model);
+        std::thread* t0 = new std::thread([=]() {
+            
+                Model* model = new Model(info.path, info.pipeline, info.lib);
+
+                modelsPushBackMutex.lock();
+                models.push_back(model);
+                modelsPushBackMutex.unlock();
+            
+            });
+        modelLoadingQueueThreads.push_back(t0);
+    
+    }
+
+    for (auto thread : modelLoadingQueueThreads) {
+    
+        thread->join();
     
     }
 
@@ -1774,9 +1794,17 @@ VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 }
 
 
-VK_STATUS_CODE VKEngine::add(const char* path_) {
+VK_STATUS_CODE VKEngine::push(const char* path_) {
 
-    modelLoadingQueue.push_back(path_);
+    modelLoadingQueue.push_back({ path_, standardPipeline, VK_STANDARD_MODEL_LOADING_LIB });
+
+    return vk::errorCodeBuffer;
+
+}
+
+VK_STATUS_CODE VKEngine::push(ModelInfo info_) {
+
+    modelLoadingQueue.push_back(info_);
 
     return vk::errorCodeBuffer;
 

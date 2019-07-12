@@ -51,6 +51,14 @@ namespace vk {
     };
 
     VK_STATUS_CODE init() {
+    
+        engine = new VKEngine();
+    
+        return VK_SC_SUCCESS;
+
+    }
+
+    VK_STATUS_CODE run() {
 
         try {
 
@@ -541,6 +549,22 @@ namespace vk {
     bool hasStencilBufferComponent(VkFormat format_) {
 
         return format_ == VK_FORMAT_D32_SFLOAT_S8_UINT || format_ == VK_FORMAT_D24_UNORM_S8_UINT;
+
+    }
+
+    VK_STATUS_CODE push(const char* path_) {
+
+        engine->push(path_);
+
+        return vk::errorCodeBuffer;
+
+    }
+
+    VK_STATUS_CODE push(ModelInfo info_) {
+
+        engine->push(info_);
+
+        return vk::errorCodeBuffer;
 
     }
 

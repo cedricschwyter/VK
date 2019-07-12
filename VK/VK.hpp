@@ -44,12 +44,19 @@ namespace vk {
     extern const double                         FOV;
 
     /**
+        Initializes the VKEngine object
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE init(void);
+
+    /**
         Handles main initialization of everything
 
         @return        Returns VK_SC_SUCCESS on success
         @return        Returns VK_SC_UNKNOWN_ERROR on error
     */
-    VK_STATUS_CODE init(void);
+    VK_STATUS_CODE run(void);
 
     /**
         Helper function to create a VkDebugUtilsMessengerEXT
@@ -242,5 +249,19 @@ namespace vk {
         @return     Returns true if the format utilizes a stencil component
     */
     bool hasStencilBufferComponent(VkFormat format_);
+
+    /**
+        Adds a model to the model loading queue
+
+        @param      path_       The path to the model
+    */
+    VK_STATUS_CODE push(const char* path_);
+
+    /**
+        Adds a model to the model loading queue
+
+        @param      info_       A model info struct
+    */
+    VK_STATUS_CODE push(ModelInfo info_);
 
 }
