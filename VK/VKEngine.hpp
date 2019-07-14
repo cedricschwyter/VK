@@ -86,6 +86,14 @@ public:
     void init(VK_STATUS_CODE* returnCodeAddr_);
 
     /**
+        Initializes the logger
+
+        @return        Returns LOGGER_SC_SUCCESS on success
+        @return        Returns LOGGER_SC_UNKNOWN_ERROR on error
+    */
+    LOGGER_STATUS_CODE initLogger(void);
+    
+    /**
         Adds a model to the model loading queue
 
         @param      path_       The path to the model
@@ -159,14 +167,6 @@ private:
 
     std::vector< ModelInfo >                modelLoadingQueue;
     std::vector< std::thread* >             modelLoadingQueueThreads;
-
-    /**
-        Initializes the logger
-
-        @return        Returns LOGGER_SC_SUCCESS on success
-        @return        Returns LOGGER_SC_UNKNOWN_ERROR on error
-    */
-    LOGGER_STATUS_CODE initLogger(void);
 
     /**
         Initializes the windowing library

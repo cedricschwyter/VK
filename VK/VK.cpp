@@ -29,30 +29,10 @@ namespace vk {
     const double                        SENS                        = 0.1;
     const double                        FOV                         = 45.0;
 
-    const std::vector< BaseVertex >     vertices                    = {
-
-        {{-0.5f, -0.5f,  0.0f}, {0.0f, 0.0f}},
-        {{ 0.5f, -0.5f,  0.0f}, {1.0f, 0.0f}},
-        {{ 0.5f,  0.5f,  0.0f}, {1.0f, 1.0f}},
-        {{-0.5f,  0.5f,  0.0f}, {0.0f, 1.0f}},
-
-        {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
-        {{ 0.5f, -0.5f, -0.5f}, {1.0f, 0.0f}},
-        {{ 0.5f,  0.5f, -0.5f}, {1.0f, 1.0f}},
-        {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f}}
-
-    };
-
-    const std::vector< uint32_t >       indices                     = {
-
-        0, 1, 2, 2, 3, 0,
-        4, 5, 6, 6, 7, 4
-
-    };
-
     VK_STATUS_CODE init() {
     
         engine = new VKEngine();
+        ASSERT(engine->initLogger(), "Logger initialization error", LOGGER_SC_UNKNOWN_ERROR);
     
         return VK_SC_SUCCESS;
 
@@ -69,9 +49,9 @@ namespace vk {
             return *returnAddr;
 
         }
-        catch (const std::exception& e) {
+        catch (std::exception& e) {
 
-            std::cerr << e.what() << std::endl;
+            logger::log(ERROR_LOG, e.what());
 
             return errorCodeBuffer;
 
@@ -80,10 +60,10 @@ namespace vk {
     }
 
     VkResult createDebugUtilsMessenger(
-        VkInstance                                       instance_,
-        const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo_,
-        const VkAllocationCallbacks* pAllocator_,
-        VkDebugUtilsMessengerEXT* pDebugMessenger_
+        VkInstance                                      instance_,
+        const VkDebugUtilsMessengerCreateInfoEXT*       pCreateInfo_,
+        const VkAllocationCallbacks*                    pAllocator_,
+        VkDebugUtilsMessengerEXT*                       pDebugMessenger_
         ) {
 
         logger::log(EVENT_LOG, "Gathering proc-address for 'vkCreateDebugUtilsMessengerEXT'");
@@ -111,7 +91,7 @@ namespace vk {
     VK_STATUS_CODE destroyDebugUtilsMessenger(
         VkInstance                          instance_,
         VkDebugUtilsMessengerEXT            debugMessenger_,
-        const VkAllocationCallbacks* pAllocator_
+        const VkAllocationCallbacks*        pAllocator_
         ) {
 
         logger::log(EVENT_LOG, "Gathering proc-address for 'vkDestroyDebugUtilsMessengerEXT'");

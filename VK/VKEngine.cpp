@@ -17,7 +17,6 @@
 
 void VKEngine::init(VK_STATUS_CODE* returnCodeAddr_) {
 
-    ASSERT(initLogger(), "Logger initialization error", LOGGER_SC_UNKNOWN_ERROR);
     logger::log(START_LOG, "Initializing...");
     logger::log(EVENT_LOG, "Initializing loading screen...");
     initLoadingScreen();
@@ -126,12 +125,6 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 
     allocator = nullptr;
 
-    std::thread t0 = std::thread([=]() {
-        
-            ASSERT(loadModelsAndVertexData(), "Failed to load assets", VK_SC_RESOURCE_LOADING_ERROR);
-        
-        });
-
     ASSERT(createInstance(), "Failed to create instance", VK_SC_INSTANCE_CREATON_ERROR);
     ASSERT(debugUtilsMessenger(), "Failed to create debug utils messenger", VK_SC_DEBUG_UTILS_MESSENGER_CREATION_ERROR);
     ASSERT(createSurfaceGLFW(), "Failed to create GLFW surface", VK_SC_SURFACE_CREATION_ERROR);
@@ -147,7 +140,7 @@ VK_STATUS_CODE VKEngine::initVulkan() {
     ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
     ASSERT(createTextureImages(), "Failed to create texture images", VK_SC_TEXTURE_IMAGE_CREATION_ERROR);
     ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
-    t0.join();
+    ASSERT(loadModelsAndVertexData(), "Failed to load assets", VK_SC_RESOURCE_LOADING_ERROR);
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
     ASSERT(initializeSynchronizationObjects(), "Failed to initialize sync-objects", VK_SC_SYNCHRONIZATION_OBJECT_INITIALIZATION_ERROR);
     ASSERT(createCamera(), "Failed to create camera", VK_SC_CAMERA_CREATION_ERROR);
@@ -1349,6 +1342,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
             vkCmdBindPipeline(standardCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, standardPipeline.pipeline);
 
+                // TODO: Fix lol
                 for (Model* model : models) {
                 
                     for (Mesh* mesh : model->meshes) {
@@ -1362,7 +1356,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
                         standardDescriptorSet.update(meshDescriptors);
 
-                        standardDescriptorSet.bind(standardCommandBuffers, static_cast<uint32_t>(i), standardPipeline);
+                        standardDescriptorSet.bind(standardCommandBuffers, static_cast< uint32_t >(i), standardPipeline);
 
                         mesh->draw(standardCommandBuffers, static_cast< uint32_t >(i));
 

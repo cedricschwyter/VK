@@ -30,8 +30,6 @@ namespace vk {
     extern const unsigned int                   WIDTH;
     extern const char*                          TITLE;
     extern const unsigned int                   MAX_IN_FLIGHT_FRAMES;
-    extern const std::vector< BaseVertex >      vertices;
-    extern const std::vector< uint32_t >        indices;
     extern VkQueue                              transferQueue;
     extern VkCommandPool                        transferCommandPool;
 
