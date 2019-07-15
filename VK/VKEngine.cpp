@@ -138,7 +138,6 @@ VK_STATUS_CODE VKEngine::initVulkan() {
     ASSERT(createRenderPasses(), "Failed to create render passes", VK_SC_RENDER_PASS_CREATION_ERROR);
     ASSERT(allocateUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
     ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
-    ASSERT(createTextureImages(), "Failed to create texture images", VK_SC_TEXTURE_IMAGE_CREATION_ERROR);
     ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
     ASSERT(loadModelsAndVertexData(), "Failed to load assets", VK_SC_RESOURCE_LOADING_ERROR);
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
@@ -227,9 +226,6 @@ VK_STATUS_CODE VKEngine::clean() {
 
     delete camera;
     logger::log(EVENT_LOG, "Successfully destroyed camera");
-
-    delete image;
-    logger::log(EVENT_LOG, "Successfully destroyed buffers, textures and samplers");
 
     for (size_t i = 0; i < vk::MAX_IN_FLIGHT_FRAMES; i++) {
 
@@ -1080,9 +1076,9 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     mvpDescriptor                                                                   = Descriptor(&mvpInfo);
 
     VkDescriptorImageInfo imageInfo                                                 = {};
-    imageInfo.sampler                                                               = reinterpret_cast< TextureImage* >(image)->imgSampler;
+    imageInfo.sampler                                                               = VK_NULL_HANDLE;
     imageInfo.imageLayout                                                           = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView                                                             = image->imgView;
+    imageInfo.imageView                                                             = VK_NULL_HANDLE;
                                                                                     
     UniformInfo samplerInfo                                                         = {};
     samplerInfo.binding                                                             = 1;
@@ -1343,16 +1339,16 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
             vkCmdBindPipeline(standardCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, standardPipeline.pipeline);
 
-                // TODO: Fix lol
                 for (Model* model : models) {
                 
                     for (Mesh* mesh : model->meshes) {
 
-                        std::vector< Descriptor > meshDescriptors;
+                        std::vector< Descriptor > descriptors;
 
-                        meshDescriptors.push_back(mvpDescriptor);
+                        descriptors.push_back(mvpDescriptor);
+                        descriptors.push_back(mesh->getDescriptor());
 
-                        standardDescriptorSet.update(meshDescriptors);
+                        standardDescriptorSet.update(descriptors);
 
                         standardDescriptorSet.bind(standardCommandBuffers, static_cast< uint32_t >(i), standardPipeline);
 
@@ -1636,24 +1632,6 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers() {
     mvp.proj                                        = glm::perspective(static_cast< float >(glm::radians(camera->fov)), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 100.0f);
 
     mvpBuffer->fill(&mvp);
-
-    return vk::errorCodeBuffer;
-
-}
-
-VK_STATUS_CODE VKEngine::createTextureImages() {
-
-    logger::log(EVENT_LOG, "Loading textures...");
-    
-    image = new TextureImage(
-        "res/models/chalet/chalet.jpg",
-        VK_FORMAT_R8G8B8A8_UNORM,
-        VK_IMAGE_TILING_OPTIMAL,
-        VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-        );
-
-    logger::log(EVENT_LOG, "Successfully loaded textures");
 
     return vk::errorCodeBuffer;
 

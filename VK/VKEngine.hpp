@@ -158,7 +158,6 @@ private:
     Descriptor                              mvpDescriptor;
     BaseImage*                              depthBuffer;
     BaseImage*                              msaaBufferImage;
-    TextureImage*                           image;
     Descriptor                              samplerDescriptor;
     bool                                    initialized                          = false;
     std::vector< Model* >                   models;
@@ -435,13 +434,6 @@ private:
         @return        Returns VK_SC_SUCCESS on success
     */
     VK_STATUS_CODE updateUniformBuffers();
-
-    /**
-        Loads and generates necessary textures
-
-        @return        Returns VK_SC_SUCCESS on success
-    */
-    VK_STATUS_CODE createTextureImages(void);
 
     /**
         Creates a camera object

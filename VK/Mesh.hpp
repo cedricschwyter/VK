@@ -34,11 +34,11 @@ class Mesh
 public:
 
     GraphicsPipeline                                        pipeline;
-
     std::vector< BaseVertex >                               vertices;
     std::vector< uint32_t >                                 indices;
     BaseBuffer*                                             vertexBuffer;
     BaseBuffer*                                             indexBuffer;
+    std::vector< std::pair< TextureObject, Descriptor > >   textures;
 
     MeshVertexInfo                                          vertexInfo;
 
@@ -54,8 +54,16 @@ public:
         GraphicsPipeline&                                               pipeline_,
         std::vector< BaseVertex >&                                      vertices_,
         std::vector< uint32_t >&                                        indices_,
+        std::vector< std::pair< TextureObject, Descriptor > >           textures_,
         MeshVertexInfo                                                  vertexInfo_
         );
+
+    /**
+        Returns the correct descriptor to bind
+
+        @return     Returns a descriptor object
+    */
+    Descriptor getDescriptor();
 
     /**
         Binds the vertex and index data for command buffer recording and executes the draw call

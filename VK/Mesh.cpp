@@ -16,9 +16,10 @@ Mesh::Mesh(
     GraphicsPipeline&                                               pipeline_, 
     std::vector< BaseVertex >&                                      vertices_, 
     std::vector< uint32_t >&                                        indices_, 
+    std::vector< std::pair< TextureObject, Descriptor > >           textures_,
     MeshVertexInfo                                                  vertexInfo_
     )
-    : pipeline(pipeline_), vertices(vertices_), indices(indices_), vertexInfo(vertexInfo_) {
+    : pipeline(pipeline_), vertices(vertices_), indices(indices_), textures(textures_), vertexInfo(vertexInfo_) {
 
     QueueFamily family                                          = vk::engine->findSuitableQueueFamily(vk::engine->physicalDevice);
 
@@ -50,6 +51,12 @@ Mesh::Mesh(
 
 }
 
+Descriptor Mesh::getDescriptor() {
+
+    return textures[0].second;
+
+}
+
 void Mesh::draw(std::vector< VkCommandBuffer >& commandBuffers_, uint32_t imageIndex_) {
 
     std::vector< VkDeviceSize > offsets = { 0 };
@@ -71,9 +78,9 @@ void Mesh::draw(std::vector< VkCommandBuffer >& commandBuffers_, uint32_t imageI
 
     vkCmdDrawIndexed(
         commandBuffers_[imageIndex_],
-        vertexInfo.indexCount,
+        static_cast< uint32_t >(indices.size()),
         1,
-        vertexInfo.indexBase,
+        0,
         0,
         0
         );

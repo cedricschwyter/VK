@@ -162,21 +162,17 @@ Mesh* Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
     
     }
 
-    if (scene_->HasMaterials()) {
+    std::vector< std::pair< TextureObject, Descriptor > > textures;
 
-        for (uint32_t i = 0; i < scene_->mNumMaterials; i++) {
-
-            aiMaterial* material = scene_->mMaterials[i];
-            std::vector< std::pair< TextureObject, Descriptor > > diffuse = loadASSIMPMaterialTextures(material, aiTextureType_DIFFUSE, TT_DIFFUSE);
-
-        }
-
-    }
+    aiMaterial* material = scene_->mMaterials[mesh_->mMaterialIndex];
+    std::vector< std::pair< TextureObject, Descriptor > > diffuseMaps = loadASSIMPMaterialTextures(material, aiTextureType_DIFFUSE, TT_DIFFUSE);
+    textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
     return new Mesh(
         pipeline, 
         vertices, 
         indices, 
+        textures,
         vertexInfo
         );
 
@@ -220,10 +216,13 @@ Mesh* Model::processTINYOBJMesh(void* mesh_, void* attrib_) {
 
     }
 
+    std::vector< std::pair< TextureObject, Descriptor > > textures;
+
     return new Mesh(
         pipeline, 
         vertices, 
         indices, 
+        textures,
         vertexInfo
         );
 

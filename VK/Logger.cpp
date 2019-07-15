@@ -87,7 +87,7 @@ namespace logger {
                 << msg_ << std::endl;
 
                 stream.close();
-#if defined VK_DEVELOPMENT && (defined WIN_64 || WIN_32)
+#if (defined VK_DEVELOPMENT || defined VK_RELEASE_CONSOLE) && (defined WIN_64 || WIN_32)
                 std::cerr << green << Day << white << ":"
                     << green << Month << white << ":"
                     << green << Year << white << "   "
@@ -124,7 +124,7 @@ namespace logger {
                     << msg_ << std::endl;
 
                 stream.close();
-#if defined VK_DEVELOPMENT && (defined WIN_64 || WIN_32)
+#if (defined VK_DEVELOPMENT || defined VK_RELEASE_CONSOLE) && (defined WIN_64 || WIN_32)
                 std::cerr << green << Day << white << ":"
                     << green << Month << white << ":"
                     << green << Year << white << "   "
@@ -177,7 +177,7 @@ namespace logger {
                     << msg_ << std::endl;
 
                 stream.close();
-#if defined VK_DEVELOPMENT && (defined WIN_64 || WIN_32)
+#if (defined VK_DEVELOPMENT || defined VK_RELEASE_CONSOLE) && (defined WIN_64 || WIN_32)
                 std::cout << green << Day << white << ":"
                     << green << Month << white << ":"
                     << green << Year << white << "   "
@@ -211,7 +211,7 @@ namespace logger {
                     << msg_ << std::endl;
 
                 stream.close();
-#if defined VK_DEVELOPMENT && (defined WIN_64 || WIN_32)
+#if (defined VK_DEVELOPMENT || defined VK_RELEASE_CONSOLE) && (defined WIN_64 || WIN_32)
                 std::cout << green << Day << white << ":"
                     << green << Month << white << ":"
                     << green << Year << white << "   "

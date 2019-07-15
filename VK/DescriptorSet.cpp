@@ -15,7 +15,6 @@
 DescriptorSet::DescriptorSet(std::vector< Descriptor > descriptors_) {
 
     descriptorSetLayout = new DescriptorSetLayout(descriptors_);
-
     descriptorPool = new DescriptorPool(descriptorSetLayout);
 
     std::vector< VkDescriptorSetLayout > layouts(vk::engine->swapchainImages.size(), descriptorSetLayout->descriptorSetLayout);
@@ -29,15 +28,13 @@ DescriptorSet::DescriptorSet(std::vector< Descriptor > descriptors_) {
     descriptorSets.resize(vk::engine->swapchainImages.size());
     VkResult result = vkAllocateDescriptorSets(vk::engine->logicalDevice, &allocateInfo, descriptorSets.data());
     ASSERT(result, "Failed to allocate descriptor sets", VK_SC_DESCRIPTOR_SET_CREATION_ERROR);
-    
-    update(descriptors_);
 
 }
 
 void DescriptorSet::update(std::vector< Descriptor > descriptors_) {
 
     for (size_t i = 0; i < vk::engine->swapchainImages.size(); i++) {
-
+        
         for (size_t j = 0; j < descriptors_.size(); j++) {
 
             VkWriteDescriptorSet writeDescriptorSet         = {};
