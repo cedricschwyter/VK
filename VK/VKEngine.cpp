@@ -1096,6 +1096,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     standardDescriptors.push_back(samplerDescriptor);
 
     standardDescriptorLayout = new DescriptorSetLayout(standardDescriptors);
+    standardDescriptorSet = DescriptorSet(standardDescriptors);
 
     standardPipeline = GraphicsPipeline(
         "shaders/standard/vert.spv", 
@@ -1350,9 +1351,6 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
                         std::vector< Descriptor > meshDescriptors;
 
                         meshDescriptors.push_back(mvpDescriptor);
-
-                        samplerDescriptor = mesh->getDescriptor();
-                        meshDescriptors.push_back(samplerDescriptor);
 
                         standardDescriptorSet.update(meshDescriptors);
 

@@ -16,6 +16,19 @@
 #include "IndexBuffer.hpp"
 #include "GraphicsPipeline.hpp"
 
+/**
+    Defines a structure to hold information about meshes first vertex and vertex indices
+*/
+struct MeshVertexInfo {
+
+    uint32_t vertexBase;
+    uint32_t vertexCount;
+
+    uint32_t indexBase;
+    uint32_t indexCount;
+
+};
+
 class Mesh
 {
 public:
@@ -24,9 +37,10 @@ public:
 
     std::vector< BaseVertex >                               vertices;
     std::vector< uint32_t >                                 indices;
-    std::vector< std::pair< TextureObject, Descriptor > >   textures;
     BaseBuffer*                                             vertexBuffer;
     BaseBuffer*                                             indexBuffer;
+
+    MeshVertexInfo                                          vertexInfo;
 
     /**
         Constructor
@@ -34,21 +48,14 @@ public:
         @param      pipeline_               The graphics pipeline to render the mesh with
         @param      vertices_               Reference to vertex data of mesh
         @param      indices_                Reference to index data of mesh
-        @param      textures_               Reference to texturing data of mesh
+        @param      vertexInfo_             A MeshVertexInfo structure
     */
     Mesh(
         GraphicsPipeline&                                               pipeline_,
         std::vector< BaseVertex >&                                      vertices_,
         std::vector< uint32_t >&                                        indices_,
-        std::vector< std::pair< TextureObject, Descriptor > >&          textures_
+        MeshVertexInfo                                                  vertexInfo_
         );
-
-    /**
-        Returns a descriptor of the meshes textures/materials
-
-        @return     Returns a descriptor
-    */
-    Descriptor getDescriptor(void);
 
     /**
         Binds the vertex and index data for command buffer recording and executes the draw call
@@ -62,10 +69,6 @@ public:
         Default destructor
     */
     ~Mesh(void);
-
-private:
-
-    std::vector< Descriptor > descriptors;
 
 };
 

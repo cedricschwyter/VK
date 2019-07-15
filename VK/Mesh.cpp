@@ -16,9 +16,9 @@ Mesh::Mesh(
     GraphicsPipeline&                                               pipeline_, 
     std::vector< BaseVertex >&                                      vertices_, 
     std::vector< uint32_t >&                                        indices_, 
-    std::vector< std::pair< TextureObject, Descriptor > >&          textures_
+    MeshVertexInfo                                                  vertexInfo_
     )
-    : pipeline(pipeline_), vertices(vertices_), indices(indices_), textures(textures_) {
+    : pipeline(pipeline_), vertices(vertices_), indices(indices_), vertexInfo(vertexInfo_) {
 
     QueueFamily family                                          = vk::engine->findSuitableQueueFamily(vk::engine->physicalDevice);
 
@@ -48,18 +48,6 @@ Mesh::Mesh(
     res                                                         = indexBuffer->fillS(indices.data(), sizeof(indices[0]) * indices.size());
     ASSERT(res, "Failed to fill index buffer", VK_SC_INDEX_BUFFER_MAP_ERROR);
 
-    for(auto texture : textures_) {
-
-        descriptors.push_back(texture.second);
-    
-    }
-
-}
-
-Descriptor Mesh::getDescriptor() {
-
-    return descriptors[0];
-
 }
 
 void Mesh::draw(std::vector< VkCommandBuffer >& commandBuffers_, uint32_t imageIndex_) {
@@ -83,9 +71,9 @@ void Mesh::draw(std::vector< VkCommandBuffer >& commandBuffers_, uint32_t imageI
 
     vkCmdDrawIndexed(
         commandBuffers_[imageIndex_],
-        static_cast< uint32_t >(indices.size()),
+        vertexInfo.indexCount,
         1,
-        0,
+        vertexInfo.indexBase,
         0,
         0
         );

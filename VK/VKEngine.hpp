@@ -126,7 +126,7 @@ private:
         "VK_LAYER_LUNARG_standard_validation"
     
     };
-#ifdef VK_DEVELOPMENT
+#ifndef VK_RELEASE
     const bool                              validationLayersEnabled              = true;
 #else
     const bool                              validationLayersEnabled              = false;

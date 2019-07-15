@@ -29,32 +29,8 @@ DescriptorSet::DescriptorSet(std::vector< Descriptor > descriptors_) {
     descriptorSets.resize(vk::engine->swapchainImages.size());
     VkResult result = vkAllocateDescriptorSets(vk::engine->logicalDevice, &allocateInfo, descriptorSets.data());
     ASSERT(result, "Failed to allocate descriptor sets", VK_SC_DESCRIPTOR_SET_CREATION_ERROR);
-
-    for (size_t i = 0; i < vk::engine->swapchainImages.size(); i++) {
-
-        for (size_t j = 0; j < descriptors_.size(); j++) {
-        
-            VkWriteDescriptorSet writeDescriptorSet         = {};
-            writeDescriptorSet.sType                        = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            writeDescriptorSet.dstSet                       = descriptorSets[i];
-            writeDescriptorSet.dstBinding                   = descriptors_[j].info->binding;
-            writeDescriptorSet.dstArrayElement              = 0;
-            writeDescriptorSet.descriptorType               = descriptors_[j].info->type;
-            writeDescriptorSet.descriptorCount              = 1;
-            writeDescriptorSet.pBufferInfo                  = &(descriptors_[j].info->bufferInfo);
-            writeDescriptorSet.pImageInfo                   = &(descriptors_[j].info->imageInfo);
-
-            vkUpdateDescriptorSets(
-                vk::engine->logicalDevice,
-                1,
-                &writeDescriptorSet,
-                0,
-                nullptr
-                );
-
-        }
-
-    }
+    
+    update(descriptors_);
 
 }
 
