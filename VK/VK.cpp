@@ -42,11 +42,14 @@ namespace vk {
 
         try {
 
-            VK_STATUS_CODE* returnAddr;
+            VK_STATUS_CODE* returnAddr = new VK_STATUS_CODE();
             std::thread t0(&VKEngine::init, engine, returnAddr);
             t0.join();
 
-            return *returnAddr;
+            VK_STATUS_CODE retCode = *returnAddr;
+            delete returnAddr;
+
+            return retCode;
 
         }
         catch (std::exception& e) {
