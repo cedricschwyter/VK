@@ -9,6 +9,7 @@
 */
 #include "MSAARenderImage.hpp"
 #include "VK.hpp"
+#include "ASSERT.cpp"
 
 
 MSAARenderImage::MSAARenderImage() {
@@ -27,7 +28,7 @@ MSAARenderImage::MSAARenderImage() {
         img,
         imgMem
         );
-    
+
     imgView = vk::createImageView(
         img, 
         imgFormat, 

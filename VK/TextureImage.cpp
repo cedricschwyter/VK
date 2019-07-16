@@ -111,6 +111,8 @@ TextureImage::TextureImage(
         );
     ASSERT(result, "Failed to create sampler", VK_SC_SAMPLER_CREATION_ERROR);
 
+    logger::log(EVENT_LOG, "Successfully created sampler");
+
 }
 
 VK_STATUS_CODE TextureImage::bind() {

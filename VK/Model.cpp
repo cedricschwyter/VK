@@ -153,16 +153,18 @@ Mesh* Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
             uniqueVertices[vertex] = static_cast< uint32_t >(vertices.size());
             vertices.push_back(vertex);
 
+            indices.push_back(uniqueVertices[vertex]);
+            vertexInfo.indexCount++;
+            indexCount++;
+
         }
-
-        indices.push_back(uniqueVertices[vertex]);
-
-        vertexInfo.indexCount++;
-        indexCount++;
     
     }
 
     std::vector< std::pair< TextureObject, Descriptor > > textures;
+
+    static uint32_t meshIndex = 0;
+    meshIndex++;
 
     aiMaterial* material = scene_->mMaterials[mesh_->mMaterialIndex];
     std::vector< std::pair< TextureObject, Descriptor > > diffuseMaps = loadASSIMPMaterialTextures(material, aiTextureType_DIFFUSE, TT_DIFFUSE);
@@ -172,7 +174,7 @@ Mesh* Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
         pipeline, 
         vertices, 
         indices, 
-        textures,
+        textures[meshIndex - 1],
         vertexInfo
         );
 
@@ -216,13 +218,11 @@ Mesh* Model::processTINYOBJMesh(void* mesh_, void* attrib_) {
 
     }
 
-    std::vector< std::pair< TextureObject, Descriptor > > textures;
-
     return new Mesh(
         pipeline, 
         vertices, 
         indices, 
-        textures,
+        texture,
         vertexInfo
         );
 
@@ -290,7 +290,8 @@ TextureImage* Model::textureFromFile(const char *path_, const std::string& direc
 
     std::string path = std::string(directory + '/' + path_);
 
-    TextureImage* img = new TextureImage(path.c_str(),
+    TextureImage* img = new TextureImage(
+        path.c_str(),
         VK_FORMAT_R8G8B8A8_UNORM,
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,

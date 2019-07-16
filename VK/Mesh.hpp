@@ -38,7 +38,7 @@ public:
     std::vector< uint32_t >                                 indices;
     BaseBuffer*                                             vertexBuffer;
     BaseBuffer*                                             indexBuffer;
-    std::vector< std::pair< TextureObject, Descriptor > >   textures;
+    std::pair< TextureObject, Descriptor >                  texture;
 
     MeshVertexInfo                                          vertexInfo;
 
@@ -54,7 +54,7 @@ public:
         GraphicsPipeline&                                               pipeline_,
         std::vector< BaseVertex >&                                      vertices_,
         std::vector< uint32_t >&                                        indices_,
-        std::vector< std::pair< TextureObject, Descriptor > >           textures_,
+        std::pair< TextureObject, Descriptor >                          texture_,
         MeshVertexInfo                                                  vertexInfo_
         );
 

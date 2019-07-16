@@ -16,10 +16,10 @@ Mesh::Mesh(
     GraphicsPipeline&                                               pipeline_, 
     std::vector< BaseVertex >&                                      vertices_, 
     std::vector< uint32_t >&                                        indices_, 
-    std::vector< std::pair< TextureObject, Descriptor > >           textures_,
+    std::pair< TextureObject, Descriptor >                          texture_,
     MeshVertexInfo                                                  vertexInfo_
     )
-    : pipeline(pipeline_), vertices(vertices_), indices(indices_), textures(textures_), vertexInfo(vertexInfo_) {
+    : pipeline(pipeline_), vertices(vertices_), indices(indices_), texture(texture_), vertexInfo(vertexInfo_) {
 
     QueueFamily family                                          = vk::engine->findSuitableQueueFamily(vk::engine->physicalDevice);
 
@@ -53,7 +53,7 @@ Mesh::Mesh(
 
 Descriptor Mesh::getDescriptor() {
 
-    return textures[0].second;
+    return texture.second;
 
 }
 

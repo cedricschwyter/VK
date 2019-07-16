@@ -22,6 +22,11 @@ public:
     VkSampler           imgSampler;
 
     /**
+        Default constructor
+    */
+    TextureImage(void) = default;
+
+    /**
         Constructor
 
         @param      path_           (Relative) filepath to image resource

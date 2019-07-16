@@ -235,8 +235,8 @@ namespace vk {
         VkImageUsageFlags           usage_,
         VkMemoryPropertyFlags       properties_,
         VkSampleCountFlagBits       samples_,
-        VkImage& img_,
-        VkDeviceMemory& imgMem_
+        VkImage&                    img_,
+        VkDeviceMemory&             imgMem_
         );
 
     /**
