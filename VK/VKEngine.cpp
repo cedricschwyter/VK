@@ -224,8 +224,13 @@ VK_STATUS_CODE VKEngine::clean() {
     }
     logger::log(EVENT_LOG, "Successfully destroyed models");
 
-    delete standardDescriptorSet;
-    logger::log(EVENT_LOG, "Successfully destroyed descriptor set");
+    for (auto descSet : descriptorSets) {
+     
+        delete descSet;
+        logger::log(EVENT_LOG, "Successfully destroyed descriptor set");
+
+    }
+    logger::log(EVENT_LOG, "Successfully destroyed descriptor sets");
 
     delete camera;
     logger::log(EVENT_LOG, "Successfully destroyed camera");
@@ -1094,7 +1099,6 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     standardDescriptors.push_back(samplerDescriptor);
 
     standardDescriptorLayout = new DescriptorSetLayout(standardDescriptors);
-    standardDescriptorSet = new DescriptorSet(standardDescriptors);
 
     standardPipeline = GraphicsPipeline(
         "shaders/standard/vert.spv", 
@@ -1352,11 +1356,11 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
                         auto meshDescriptors = mesh->getDescriptors();
                         descriptors.insert(descriptors.end(), meshDescriptors.begin(), meshDescriptors.end());
 
-                        //standardDescriptorSet->update(descriptors);
                         DescriptorSet* descSet = new DescriptorSet(descriptors);
                         descSet->update(descriptors);
 
                         descSet->bind(standardCommandBuffers, static_cast< uint32_t >(i), standardPipeline);
+                        descriptorSets.push_back(descSet);
 
                         mesh->draw(standardCommandBuffers, static_cast< uint32_t >(i));
 
@@ -1662,21 +1666,54 @@ void VKEngine::processKeyboardInput() {
     if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
 
         polygonMode = VK_POLYGON_MODE_FILL;
-        recreateSwapchain();
+        vkDeviceWaitIdle(logicalDevice);
+        vkFreeCommandBuffers(
+            logicalDevice,
+            standardCommandPool,
+            static_cast<uint32_t>(standardCommandBuffers.size()),
+            standardCommandBuffers.data()
+        );
+        logger::log(EVENT_LOG, "Successfully freed command buffers");
+        standardDescriptors.clear();
+        standardPipeline.destroy();
+        ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
+        ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 
     }
 
     if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
 
         polygonMode = VK_POLYGON_MODE_LINE;
-        recreateSwapchain();
+        vkDeviceWaitIdle(logicalDevice);
+        vkFreeCommandBuffers(
+            logicalDevice,
+            standardCommandPool,
+            static_cast<uint32_t>(standardCommandBuffers.size()),
+            standardCommandBuffers.data()
+        );
+        logger::log(EVENT_LOG, "Successfully freed command buffers");
+        standardDescriptors.clear();
+        standardPipeline.destroy();
+        ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
+        ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 
     }
 
     if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
 
         polygonMode = VK_POLYGON_MODE_POINT;
-        recreateSwapchain();
+        vkDeviceWaitIdle(logicalDevice);
+        vkFreeCommandBuffers(
+            logicalDevice,
+            standardCommandPool,
+            static_cast<uint32_t>(standardCommandBuffers.size()),
+            standardCommandBuffers.data()
+        );
+        logger::log(EVENT_LOG, "Successfully freed command buffers");
+        standardDescriptors.clear();
+        standardPipeline.destroy();
+        ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
+        ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 
     }
 

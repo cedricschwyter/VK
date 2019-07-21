@@ -26,7 +26,7 @@ Model::Model(const char* path_, GraphicsPipeline& pipeline_, VKEngineModelLoadin
     }
     else if (lib_ == VKEngineModelLoadingLibTINYOBJ) {
     
-        //result = loadOBJTINYOBJ(path_);
+        result = loadOBJTINYOBJ(path_);
     
     }
 
@@ -152,11 +152,12 @@ Mesh* Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
             uniqueVertices[vertex] = static_cast< uint32_t >(vertices.size());
             vertices.push_back(vertex);
 
-            indices.push_back(uniqueVertices[vertex]);
             vertexInfo.indexCount++;
             indexCount++;
 
         }
+
+        indices.push_back(uniqueVertices[vertex]);
     
     }
 

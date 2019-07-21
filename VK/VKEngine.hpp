@@ -149,7 +149,6 @@ private:
     GraphicsPipeline                        standardPipeline;
     std::vector< Descriptor >               standardDescriptors;
     DescriptorSetLayout*                    standardDescriptorLayout;
-    DescriptorSet*                          standardDescriptorSet;
     std::vector< VkCommandBuffer >          standardCommandBuffers;
     std::vector< VkSemaphore >              swapchainImageAvailableSemaphores;
     std::vector< VkSemaphore >              renderingCompletedSemaphores;
@@ -166,6 +165,7 @@ private:
     std::vector< Model* >                   models;
     std::mutex                              modelsPushBackMutex;
     bool                                    firstTimeRecreation                  = true;
+    std::vector< DescriptorSet* >           descriptorSets;
 
     std::vector< ModelInfo >                modelLoadingQueue;
     std::vector< std::thread* >             modelLoadingQueueThreads;
