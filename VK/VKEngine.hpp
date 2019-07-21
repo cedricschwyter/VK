@@ -117,6 +117,7 @@ private:
     bool                                    hasFramebufferBeenResized            = false;
     BaseBuffer*                             vertexBuffer;
     BaseBuffer*                             indexBuffer;
+    VkPolygonMode                           polygonMode                          = VK_POLYGON_MODE_FILL;
     BaseBuffer*                             mvpBuffer;
     BaseImage*                              depthBuffer;
     BaseImage*                              msaaBufferImage;
@@ -193,10 +194,10 @@ private:
 
     */
     static VKAPI_ATTR VkBool32 VKAPI_CALL validationLayerDebugMessageCallback(
-        VkDebugUtilsMessageSeverityFlagBitsEXT            messageSeverity_,
-        VkDebugUtilsMessageTypeFlagsEXT                    messageType_,
-        const VkDebugUtilsMessengerCallbackDataEXT*        pCallbackData_,
-        void*                                            pUserData_
+        VkDebugUtilsMessageSeverityFlagBitsEXT              messageSeverity_,
+        VkDebugUtilsMessageTypeFlagsEXT                     messageType_,
+        const VkDebugUtilsMessengerCallbackDataEXT*         pCallbackData_,
+        void*                                               pUserData_
         );
 
     /**

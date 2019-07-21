@@ -626,6 +626,7 @@ VK_STATUS_CODE VKEngine::createLogicalDeviceFromPhysicalDevice() {
 
     VkPhysicalDeviceFeatures physicalDeviceFeatures            = {};
     physicalDeviceFeatures.samplerAnisotropy                   = VK_TRUE;
+    physicalDeviceFeatures.fillModeNonSolid                    = VK_TRUE;
 
     VkDeviceCreateInfo deviceCreateInfo                        = {};
     deviceCreateInfo.sType                                     = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -1013,7 +1014,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     rasterizationStateCreateInfo.sType                                              = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizationStateCreateInfo.depthClampEnable                                   = VK_FALSE;
     rasterizationStateCreateInfo.rasterizerDiscardEnable                            = VK_FALSE;
-    rasterizationStateCreateInfo.polygonMode                                        = VK_POLYGON_MODE_FILL;
+    rasterizationStateCreateInfo.polygonMode                                        = polygonMode;
     rasterizationStateCreateInfo.lineWidth                                          = 1.0f;
     rasterizationStateCreateInfo.cullMode                                           = VK_CULL_MODE_NONE;
     rasterizationStateCreateInfo.frontFace                                          = VK_FRONT_FACE_COUNTER_CLOCKWISE;
@@ -1704,6 +1705,33 @@ void VKEngine::processKeyboardInput() {
     
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
+
+        polygonMode = VK_POLYGON_MODE_FILL;
+        recreateSwapchain();
+
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
+
+        polygonMode = VK_POLYGON_MODE_LINE;
+        recreateSwapchain();
+
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
+
+        polygonMode = VK_POLYGON_MODE_POINT;
+        recreateSwapchain();
+
     }
 
     if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
