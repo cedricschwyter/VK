@@ -12,6 +12,8 @@
 
 typedef enum TEXTURE_TYPE {
 
+    TT_HEIGHT,
+    TT_NORMAL,
     TT_SPECULAR,
     TT_DIFFUSE,
     TT_STANDARD

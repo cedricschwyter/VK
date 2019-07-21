@@ -26,7 +26,7 @@ Model::Model(const char* path_, GraphicsPipeline& pipeline_, VKEngineModelLoadin
     }
     else if (lib_ == VKEngineModelLoadingLibTINYOBJ) {
     
-        result = loadOBJTINYOBJ(path_);
+        //result = loadOBJTINYOBJ(path_);
     
     }
 
@@ -114,7 +114,6 @@ Mesh* Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
 
     std::vector< BaseVertex >                                vertices;
     std::vector< uint32_t >                                  indices;
-    std::pair< TextureObject, Descriptor >                   texture;
     MeshVertexInfo                                           vertexInfo             = {};
     vertexInfo.vertexBase                                                           = vertexCount;
     vertexInfo.indexBase                                                            = indexCount;
@@ -161,20 +160,20 @@ Mesh* Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
     
     }
 
-    std::vector< std::pair< TextureObject, Descriptor > > textures;
+    std::vector< TextureObject > textures;
 
     static uint32_t meshIndex = 0;
     meshIndex++;
 
     aiMaterial* material = scene_->mMaterials[mesh_->mMaterialIndex];
-    std::vector< std::pair< TextureObject, Descriptor > > diffuseMaps = loadASSIMPMaterialTextures(material, aiTextureType_DIFFUSE, TT_DIFFUSE);
+    std::vector< TextureObject > diffuseMaps = loadASSIMPMaterialTextures(material, aiTextureType_DIFFUSE, TT_DIFFUSE);
     textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
     return new Mesh(
         pipeline, 
         vertices, 
         indices, 
-        textures[meshIndex - 1],
+        textures,
         vertexInfo
         );
 
@@ -189,7 +188,7 @@ Mesh* Model::processTINYOBJMesh(void* mesh_, void* attrib_) {
 
     std::vector< BaseVertex >                                vertices;
     std::vector< uint32_t >                                  indices;
-    std::pair< TextureObject, Descriptor >                   texture;
+    std::vector< TextureObject >                             texture;
     std::unordered_map< BaseVertex, uint32_t >               uniqueVertices         = {};
 
     for (const auto& index : mesh->indices) {
@@ -228,9 +227,9 @@ Mesh* Model::processTINYOBJMesh(void* mesh_, void* attrib_) {
 
 }
 
-std::vector< std::pair< TextureObject, Descriptor > > Model::loadASSIMPMaterialTextures(aiMaterial* material_, aiTextureType type_, TEXTURE_TYPE typeID_) {
+std::vector< TextureObject > Model::loadASSIMPMaterialTextures(aiMaterial* material_, aiTextureType type_, TEXTURE_TYPE typeID_) {
 
-    std::vector< std::pair< TextureObject, Descriptor > > textures;
+    std::vector< TextureObject > textures;
 
     for (uint32_t i = 0; i < material_->GetTextureCount(type_); i++) {
 
@@ -241,7 +240,7 @@ std::vector< std::pair< TextureObject, Descriptor > > Model::loadASSIMPMaterialT
 
         for (uint32_t j = 0; j < texturesLoaded.size(); j++) {
 
-            if (std::strcmp(texturesLoaded[j].first.path.data(), texturePath.C_Str()) == 0) {
+            if (std::strcmp(texturesLoaded[j].path.data(), texturePath.C_Str()) == 0) {
 
                 textures.push_back(texturesLoaded[j]);
                 skip = true;
@@ -260,23 +259,8 @@ std::vector< std::pair< TextureObject, Descriptor > > Model::loadASSIMPMaterialT
             texture.type                        = typeID_;
             texture.path                        = texturePath.C_Str();
 
-            VkDescriptorImageInfo imageInfo     = {};
-            imageInfo.sampler                   = reinterpret_cast< TextureImage* >(texture.img)->imgSampler;
-            imageInfo.imageLayout               = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            imageInfo.imageView                 = reinterpret_cast< TextureImage* >(texture.img)->imgView;
-
-            UniformInfo samplerInfo             = {};
-            samplerInfo.binding                 = 1;
-            samplerInfo.stageFlags              = VK_SHADER_STAGE_FRAGMENT_BIT;
-            samplerInfo.imageInfo               = imageInfo;
-            samplerInfo.type                    = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-
-            Descriptor samplerDescriptor        = Descriptor(&samplerInfo);
-
-            textures.push_back(std::make_pair(texture, samplerDescriptor));
-            texturesLoaded.push_back(std::make_pair(texture, samplerDescriptor));
-
-            descriptors.push_back(samplerDescriptor);
+            textures.push_back(texture);
+            texturesLoaded.push_back(texture);
 
         }
 
@@ -307,7 +291,7 @@ Model::~Model() {
 
     for (auto img : texturesLoaded) {
     
-        delete img.first.img;
+        delete img.img;
     
     }
 

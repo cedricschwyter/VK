@@ -38,7 +38,7 @@ public:
     std::vector< uint32_t >                                 indices;
     BaseBuffer*                                             vertexBuffer;
     BaseBuffer*                                             indexBuffer;
-    std::pair< TextureObject, Descriptor >                  texture;
+    std::vector< TextureObject >                            textures;
 
     MeshVertexInfo                                          vertexInfo;
 
@@ -48,22 +48,23 @@ public:
         @param      pipeline_               The graphics pipeline to render the mesh with
         @param      vertices_               Reference to vertex data of mesh
         @param      indices_                Reference to index data of mesh
+        @param      textures_               Reference to texturing data of mesh
         @param      vertexInfo_             A MeshVertexInfo structure
     */
     Mesh(
         GraphicsPipeline&                                               pipeline_,
         std::vector< BaseVertex >&                                      vertices_,
         std::vector< uint32_t >&                                        indices_,
-        std::pair< TextureObject, Descriptor >                          texture_,
+        std::vector< TextureObject >&                                   textures_,
         MeshVertexInfo                                                  vertexInfo_
         );
 
     /**
         Returns the correct descriptor to bind
 
-        @return     Returns a descriptor object
+        @return     Returns an array of descriptor objects
     */
-    Descriptor getDescriptor();
+    std::vector< Descriptor > getDescriptors(void);
 
     /**
         Binds the vertex and index data for command buffer recording and executes the draw call

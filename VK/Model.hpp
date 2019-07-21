@@ -27,7 +27,6 @@ class Model
 public:
 
     GraphicsPipeline                                            pipeline;
-    std::vector< Descriptor >                                   descriptors;
     std::vector< Mesh* >                                        meshes;
     uint32_t                                                    vertexCount                 = 0;
     uint32_t                                                    indexCount                  = 0;
@@ -54,7 +53,7 @@ public:
 private:
 
     std::string                                                 directory;
-    std::vector< std::pair< TextureObject, Descriptor > >       texturesLoaded;
+    std::vector< TextureObject >                                texturesLoaded;
 
     /**
         Handles and coordinates all loading actions for the specified file, using ASSIMP
@@ -109,9 +108,9 @@ private:
         @param      type_           ASSIMP texture type flags
         @param      typeID_         Own TEXTURE_TYPE type enumeration
 
-        @return     Returns an std::vector of TextureObjects and descriptors
+        @return     Returns an std::vector of TextureObjects
     */
-    std::vector< std::pair< TextureObject, Descriptor > > loadASSIMPMaterialTextures(aiMaterial* material_, aiTextureType type_, TEXTURE_TYPE typeID_);
+    std::vector< TextureObject > loadASSIMPMaterialTextures(aiMaterial* material_, aiTextureType type_, TEXTURE_TYPE typeID_);
 
     /**
         Loads a texture from a file

@@ -19,10 +19,10 @@ DescriptorSetLayout::DescriptorSetLayout(const std::vector< Descriptor >& descri
     for (size_t i = 0; i < descriptors_.size(); i++) {
 
         VkDescriptorSetLayoutBinding binding        = {};
-        binding.binding                             = descriptors_[i].info->binding;
-        binding.descriptorType                      = descriptors_[i].info->type;
+        binding.binding                             = descriptors_[i].info.binding;
+        binding.descriptorType                      = descriptors_[i].info.type;
         binding.descriptorCount                     = 1;
-        binding.stageFlags                          = descriptors_[i].info->stageFlags;
+        binding.stageFlags                          = descriptors_[i].info.stageFlags;
 
         bindings[i] = binding;
 

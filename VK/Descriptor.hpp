@@ -14,7 +14,7 @@ class Descriptor
 {
 public:
 
-    UniformInfo* info;
+    UniformInfo info;
 
     /**
         Default constructor
@@ -24,9 +24,9 @@ public:
     /**
         Constructor
 
-        @param      info_       A pointer to a UniformInfo structure
+        @param      info_       A UniformInfo structure
     */
-    Descriptor(UniformInfo* info_);
+    Descriptor(UniformInfo info_);
 
 };
 

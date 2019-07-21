@@ -224,6 +224,9 @@ VK_STATUS_CODE VKEngine::clean() {
     }
     logger::log(EVENT_LOG, "Successfully destroyed models");
 
+    delete standardDescriptorSet;
+    logger::log(EVENT_LOG, "Successfully destroyed descriptor set");
+
     delete camera;
     logger::log(EVENT_LOG, "Successfully destroyed camera");
 
@@ -1072,7 +1075,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     mvpInfo.bufferInfo                                                              = mvpBufferInfo;
     mvpInfo.type                                                                    = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     
-    mvpDescriptor                                                                   = Descriptor(&mvpInfo);
+    mvpDescriptor                                                                   = Descriptor(mvpInfo);
 
     VkDescriptorImageInfo imageInfo                                                 = {};
     imageInfo.sampler                                                               = VK_NULL_HANDLE;
@@ -1085,13 +1088,13 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     samplerInfo.imageInfo                                                           = imageInfo;
     samplerInfo.type                                                                = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
                
-    samplerDescriptor                                                               = Descriptor(&samplerInfo);
+    samplerDescriptor                                                               = Descriptor(samplerInfo);
 
     standardDescriptors.push_back(mvpDescriptor);
     standardDescriptors.push_back(samplerDescriptor);
 
     standardDescriptorLayout = new DescriptorSetLayout(standardDescriptors);
-    standardDescriptorSet = DescriptorSet(standardDescriptors);
+    standardDescriptorSet = new DescriptorSet(standardDescriptors);
 
     standardPipeline = GraphicsPipeline(
         "shaders/standard/vert.spv", 
@@ -1345,11 +1348,15 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
                         std::vector< Descriptor > descriptors;
 
                         descriptors.push_back(mvpDescriptor);
-                        descriptors.push_back(mesh->getDescriptor());
 
-                        standardDescriptorSet.update(descriptors);
+                        auto meshDescriptors = mesh->getDescriptors();
+                        descriptors.insert(descriptors.end(), meshDescriptors.begin(), meshDescriptors.end());
 
-                        standardDescriptorSet.bind(standardCommandBuffers, static_cast< uint32_t >(i), standardPipeline);
+                        //standardDescriptorSet->update(descriptors);
+                        DescriptorSet* descSet = new DescriptorSet(descriptors);
+                        descSet->update(descriptors);
+
+                        descSet->bind(standardCommandBuffers, static_cast< uint32_t >(i), standardPipeline);
 
                         mesh->draw(standardCommandBuffers, static_cast< uint32_t >(i));
 
@@ -1764,20 +1771,20 @@ VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
             
                 Model* model = new Model(info.path, info.pipeline, info.lib);
 
-                modelsPushBackMutex.lock();
+                //modelsPushBackMutex.lock();
                 models.push_back(model);
-                modelsPushBackMutex.unlock();
+                //modelsPushBackMutex.unlock();
             
         //    });
         //modelLoadingQueueThreads.push_back(t0);
     
     }
 
-    for (auto thread : modelLoadingQueueThreads) {
+    /*for (auto thread : modelLoadingQueueThreads) {
     
         thread->join();
     
-    }
+    }*/
 
     return vk::errorCodeBuffer;
 

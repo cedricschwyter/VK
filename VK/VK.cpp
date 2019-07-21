@@ -450,6 +450,7 @@ namespace vk {
         vkGetPhysicalDeviceMemoryProperties(engine->physicalDevice, &memProp);
 
         for (uint32_t i = 0; i < memProp.memoryTypeCount; i++) {
+
             // Does the memory type have all of the necessary properties?
             if (typeFilter_ & (1 << i) && (memProp.memoryTypes[i].propertyFlags & memoryPropertyFlags_) == memoryPropertyFlags_) {        // Some bitwise-operation magic to find appropriate bit-indices
 

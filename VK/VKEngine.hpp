@@ -64,7 +64,7 @@ public:
     VkFormat                                swapchainImageFormat;
     VkExtent2D                              swapchainImageExtent;
     VkCommandPool                           standardCommandPool;
-    VkQueue                                 graphicsQueue                        = VK_NULL_HANDLE;
+    VkQueue                                 graphicsQueue                           = VK_NULL_HANDLE;
     BaseCamera*                             camera;
     VkSampleCountFlagBits                   maxMSAASamples                          = VK_SAMPLE_COUNT_1_BIT;
 
@@ -149,7 +149,7 @@ private:
     GraphicsPipeline                        standardPipeline;
     std::vector< Descriptor >               standardDescriptors;
     DescriptorSetLayout*                    standardDescriptorLayout;
-    DescriptorSet                           standardDescriptorSet;
+    DescriptorSet*                          standardDescriptorSet;
     std::vector< VkCommandBuffer >          standardCommandBuffers;
     std::vector< VkSemaphore >              swapchainImageAvailableSemaphores;
     std::vector< VkSemaphore >              renderingCompletedSemaphores;

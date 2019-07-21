@@ -10,7 +10,7 @@
 #include "Descriptor.hpp"
 
 
-Descriptor::Descriptor(UniformInfo* info_) : info(info_) {
+Descriptor::Descriptor(UniformInfo info_) : info(info_) {
 
 
 

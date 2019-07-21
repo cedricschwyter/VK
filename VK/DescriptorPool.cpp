@@ -19,7 +19,7 @@ DescriptorPool::DescriptorPool(const DescriptorSetLayout* layout_) {
 
     for (uint32_t i = 0; i < layout_->descriptors.size(); i++) {
 
-        descriptorPoolSizes[i].type                         = layout_->descriptors[i].info->type;
+        descriptorPoolSizes[i].type                         = layout_->descriptors[i].info.type;
         descriptorPoolSizes[i].descriptorCount              = static_cast< uint32_t > (vk::engine->swapchainImages.size());
 
     }

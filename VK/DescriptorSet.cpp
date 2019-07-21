@@ -39,21 +39,21 @@ void DescriptorSet::update(std::vector< Descriptor > descriptors_) {
 
             std::cout << descriptorSets[i] << std::endl;
             std::cout << descriptors_.size() << std::endl;
-            std::cout << descriptors_[i].info->binding << std::endl;
-            std::cout << descriptors_[i].info->bufferInfo.buffer << std::endl;
-            std::cout << descriptors_[i].info->imageInfo.sampler << std::endl;
-            std::cout << descriptors_[i].info->stageFlags << std::endl;
-            std::cout << descriptors_[i].info->type << std::endl;
+            std::cout << descriptors_[j + 1].info.binding << std::endl;
+            std::cout << descriptors_[j + 1].info.bufferInfo.buffer << std::endl;
+            std::cout << descriptors_[j + 1].info.imageInfo.sampler << std::endl;
+            std::cout << descriptors_[j + 1].info.stageFlags << std::endl;
+            std::cout << descriptors_[j + 1].info.type << std::endl;
 
             VkWriteDescriptorSet writeDescriptorSet         = {};
             writeDescriptorSet.sType                        = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             writeDescriptorSet.dstSet                       = descriptorSets[i];
-            writeDescriptorSet.dstBinding                   = descriptors_[j].info->binding;
+            writeDescriptorSet.dstBinding                   = descriptors_[j].info.binding;
             writeDescriptorSet.dstArrayElement              = 0;
-            writeDescriptorSet.descriptorType               = descriptors_[j].info->type;
+            writeDescriptorSet.descriptorType               = descriptors_[j].info.type;
             writeDescriptorSet.descriptorCount              = 1;
-            writeDescriptorSet.pBufferInfo                  = &(descriptors_[j].info->bufferInfo);
-            writeDescriptorSet.pImageInfo                   = &(descriptors_[j].info->imageInfo);
+            writeDescriptorSet.pBufferInfo                  = &(descriptors_[j].info.bufferInfo);
+            writeDescriptorSet.pImageInfo                   = &(descriptors_[j].info.imageInfo);
 
             vkUpdateDescriptorSets(
                 vk::engine->logicalDevice,
