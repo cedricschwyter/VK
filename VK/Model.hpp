@@ -28,8 +28,6 @@ public:
 
     GraphicsPipeline                                            pipeline;
     std::vector< Mesh* >                                        meshes;
-    uint32_t                                                    vertexCount                 = 0;
-    uint32_t                                                    indexCount                  = 0;
 
     /**
         Constructor

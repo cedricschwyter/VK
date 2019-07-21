@@ -37,14 +37,6 @@ void DescriptorSet::update(std::vector< Descriptor > descriptors_) {
         
         for (size_t j = 0; j < descriptors_.size(); j++) {
 
-            std::cout << descriptorSets[i] << std::endl;
-            std::cout << descriptors_.size() << std::endl;
-            std::cout << descriptors_[j + 1].info.binding << std::endl;
-            std::cout << descriptors_[j + 1].info.bufferInfo.buffer << std::endl;
-            std::cout << descriptors_[j + 1].info.imageInfo.sampler << std::endl;
-            std::cout << descriptors_[j + 1].info.stageFlags << std::endl;
-            std::cout << descriptors_[j + 1].info.type << std::endl;
-
             VkWriteDescriptorSet writeDescriptorSet         = {};
             writeDescriptorSet.sType                        = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             writeDescriptorSet.dstSet                       = descriptorSets[i];

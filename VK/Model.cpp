@@ -114,46 +114,60 @@ Mesh* Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
 
     std::vector< BaseVertex >                                vertices;
     std::vector< uint32_t >                                  indices;
-    MeshVertexInfo                                           vertexInfo             = {};
-    vertexInfo.vertexBase                                                           = vertexCount;
-    vertexInfo.indexBase                                                            = indexCount;
-
-    vertexCount                 += mesh_->mNumVertices;
-    vertexInfo.vertexCount       = mesh_->mNumVertices;
 
     std::unordered_map< BaseVertex, uint32_t >               uniqueVertices         = {};
 
     for (uint32_t i = 0; i < mesh_->mNumVertices; i++) {
 
-        BaseVertex vertex;
+        BaseVertex vertex = {};
 
         glm::vec3 vector;
-        vector.x            = mesh_->mVertices[i].x;
-        vector.y            = mesh_->mVertices[i].y;
-        vector.z            = mesh_->mVertices[i].z;
-        vertex.pos          = vector;
+        vector.x = mesh_->mVertices[i].x;
+        vector.y = mesh_->mVertices[i].y;
+        vector.z = mesh_->mVertices[i].z;
+        vertex.pos = vector;
+
+        if (mesh_->HasNormals()) {
+
+            vector.x = mesh_->mNormals[i].x;
+            vector.y = mesh_->mNormals[i].y;
+            vector.z = mesh_->mNormals[i].z;
+            vertex.nor = vector;
+
+        }
 
         if (mesh_->mTextureCoords[0]) {     // Does the mesh contain texture coordinates?
-        
+
             glm::vec2 vec;
-            vec.x           = mesh_->mTextureCoords[0][i].x;
-            vec.y           = mesh_->mTextureCoords[0][i].y;
-            vertex.tex      = vec;
+            vec.x = mesh_->mTextureCoords[0][i].x;
+            vec.y = mesh_->mTextureCoords[0][i].y;
+            vertex.tex = vec;
 
         }
         else {
 
-            vertex.tex      = glm::vec2(0.0f, 0.0f);
-        
+            vertex.tex = glm::vec2(0.0f, 0.0f);
+
+        }
+
+        if (mesh_->HasTangentsAndBitangents()) {
+
+            vector.x = mesh_->mTangents[i].x;
+            vector.y = mesh_->mTangents[i].y;
+            vector.z = mesh_->mTangents[i].z;
+            vertex.tan = vector;
+
+            vector.x = mesh_->mBitangents[i].x;
+            vector.y = mesh_->mBitangents[i].y;
+            vector.z = mesh_->mBitangents[i].z;
+            vertex.bit = vector;
+
         }
 
         if (uniqueVertices.count(vertex) == 0) {
 
             uniqueVertices[vertex] = static_cast< uint32_t >(vertices.size());
             vertices.push_back(vertex);
-
-            vertexInfo.indexCount++;
-            indexCount++;
 
         }
 
@@ -163,9 +177,6 @@ Mesh* Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
 
     std::vector< TextureObject > textures;
 
-    static uint32_t meshIndex = 0;
-    meshIndex++;
-
     aiMaterial* material = scene_->mMaterials[mesh_->mMaterialIndex];
     std::vector< TextureObject > diffuseMaps = loadASSIMPMaterialTextures(material, aiTextureType_DIFFUSE, TT_DIFFUSE);
     textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
@@ -174,22 +185,19 @@ Mesh* Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
         pipeline, 
         vertices, 
         indices, 
-        textures,
-        vertexInfo
+        textures
         );
 
 }
 
 Mesh* Model::processTINYOBJMesh(void* mesh_, void* attrib_) {
 
-    MeshVertexInfo vertexInfo = {};
-
     tinyobj::mesh_t*        mesh        = reinterpret_cast< tinyobj::mesh_t* >(mesh_);
     tinyobj::attrib_t*      attrib      = reinterpret_cast< tinyobj::attrib_t* >(attrib_);
 
     std::vector< BaseVertex >                                vertices;
     std::vector< uint32_t >                                  indices;
-    std::vector< TextureObject >                             texture;
+    std::vector< TextureObject >                             textures;
     std::unordered_map< BaseVertex, uint32_t >               uniqueVertices         = {};
 
     for (const auto& index : mesh->indices) {
@@ -222,8 +230,7 @@ Mesh* Model::processTINYOBJMesh(void* mesh_, void* attrib_) {
         pipeline, 
         vertices, 
         indices, 
-        texture,
-        vertexInfo
+        textures
         );
 
 }

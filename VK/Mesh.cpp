@@ -16,10 +16,9 @@ Mesh::Mesh(
     GraphicsPipeline&                                               pipeline_, 
     std::vector< BaseVertex >&                                      vertices_, 
     std::vector< uint32_t >&                                        indices_,
-    std::vector< TextureObject >&                                   textures_,
-    MeshVertexInfo                                                  vertexInfo_
+    std::vector< TextureObject >&                                   textures_
     )
-    : pipeline(pipeline_), vertices(vertices_), indices(indices_), textures(textures_), vertexInfo(vertexInfo_) {
+    : pipeline(pipeline_), vertices(vertices_), indices(indices_), textures(textures_) {
 
     QueueFamily family                                          = vk::engine->findSuitableQueueFamily(vk::engine->physicalDevice);
 
@@ -63,7 +62,7 @@ std::vector< Descriptor > Mesh::getDescriptors() {
         imageInfo.imageView                 = reinterpret_cast< TextureImage* >(textures[i].img)->imgView;
 
         UniformInfo samplerInfo             = {};
-        samplerInfo.binding                 = 1;
+        samplerInfo.binding                 = textures[i].type;
         samplerInfo.stageFlags              = VK_SHADER_STAGE_FRAGMENT_BIT;
         samplerInfo.imageInfo               = imageInfo;
         samplerInfo.type                    = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;

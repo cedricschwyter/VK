@@ -1018,7 +1018,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     rasterizationStateCreateInfo.rasterizerDiscardEnable                            = VK_FALSE;
     rasterizationStateCreateInfo.polygonMode                                        = polygonMode;
     rasterizationStateCreateInfo.lineWidth                                          = 1.0f;
-    rasterizationStateCreateInfo.cullMode                                           = VK_CULL_MODE_NONE;
+    rasterizationStateCreateInfo.cullMode                                           = VK_CULL_MODE_BACK_BIT;
     rasterizationStateCreateInfo.frontFace                                          = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterizationStateCreateInfo.depthBiasEnable                                    = VK_FALSE;
 
@@ -1638,6 +1638,8 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers() {
     MVPBufferObject mvp                             = {};
 
     mvp.model                                       = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    mvp.model                                       = glm::scale(mvp.model, glm::vec3(0.02f));
+    mvp.model[1][1]                                 *= -1.0f;
     mvp.view                                        = camera->getViewMatrix();
     mvp.proj                                        = glm::perspective(static_cast< float >(glm::radians(camera->fov)), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 100.0f);
 
@@ -1670,11 +1672,19 @@ void VKEngine::processKeyboardInput() {
         vkFreeCommandBuffers(
             logicalDevice,
             standardCommandPool,
-            static_cast<uint32_t>(standardCommandBuffers.size()),
+            static_cast< uint32_t >(standardCommandBuffers.size()),
             standardCommandBuffers.data()
         );
         logger::log(EVENT_LOG, "Successfully freed command buffers");
+        delete standardDescriptorLayout;
         standardDescriptors.clear();
+        for (auto descSet : descriptorSets) {
+
+            delete descSet;
+            logger::log(EVENT_LOG, "Successfully destroyed descriptor set");
+
+        }
+        logger::log(EVENT_LOG, "Successfully destroyed descriptor sets");
         standardPipeline.destroy();
         ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
         ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
@@ -1688,11 +1698,19 @@ void VKEngine::processKeyboardInput() {
         vkFreeCommandBuffers(
             logicalDevice,
             standardCommandPool,
-            static_cast<uint32_t>(standardCommandBuffers.size()),
+            static_cast< uint32_t >(standardCommandBuffers.size()),
             standardCommandBuffers.data()
         );
         logger::log(EVENT_LOG, "Successfully freed command buffers");
+        delete standardDescriptorLayout;
         standardDescriptors.clear();
+        for (auto descSet : descriptorSets) {
+
+            delete descSet;
+            logger::log(EVENT_LOG, "Successfully destroyed descriptor set");
+
+        }
+        logger::log(EVENT_LOG, "Successfully destroyed descriptor sets");
         standardPipeline.destroy();
         ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
         ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
@@ -1706,11 +1724,19 @@ void VKEngine::processKeyboardInput() {
         vkFreeCommandBuffers(
             logicalDevice,
             standardCommandPool,
-            static_cast<uint32_t>(standardCommandBuffers.size()),
+            static_cast< uint32_t >(standardCommandBuffers.size()),
             standardCommandBuffers.data()
         );
         logger::log(EVENT_LOG, "Successfully freed command buffers");
+        delete standardDescriptorLayout;
         standardDescriptors.clear();
+        for (auto descSet : descriptorSets) {
+
+            delete descSet;
+            logger::log(EVENT_LOG, "Successfully destroyed descriptor set");
+
+        }
+        logger::log(EVENT_LOG, "Successfully destroyed descriptor sets");
         standardPipeline.destroy();
         ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
         ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
