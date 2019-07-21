@@ -252,13 +252,17 @@ namespace vk {
         Adds a model to the model loading queue
 
         @param      path_       The path to the model
+
+        @return     Returns VK_SC_SUCCESS on success
     */
     VK_STATUS_CODE push(const char* path_);
 
     /**
         Adds a model to the model loading queue
 
-        @param      info_       A model info struct
+        @param      path_       The path to the model
+
+        @return     Returns VK_SC_SUCCESS on success
     */
     VK_STATUS_CODE push(ModelInfo info_);
 

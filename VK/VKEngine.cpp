@@ -1008,13 +1008,12 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     rasterizationStateCreateInfo.sType                                              = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizationStateCreateInfo.depthClampEnable                                   = VK_FALSE;
     rasterizationStateCreateInfo.rasterizerDiscardEnable                            = VK_FALSE;
-    rasterizationStateCreateInfo.polygonMode                                        = VK_POLYGON_MODE_FILL;
+    rasterizationStateCreateInfo.polygonMode                                        = polygonMode;
     rasterizationStateCreateInfo.lineWidth                                          = 1.0f;
     rasterizationStateCreateInfo.cullMode                                           = VK_CULL_MODE_NONE;
     rasterizationStateCreateInfo.frontFace                                          = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterizationStateCreateInfo.depthBiasEnable                                    = VK_FALSE;
 
-    // No multisampling (yet)
     VkPipelineMultisampleStateCreateInfo multisampleStateCreateInfo                 = {};
     multisampleStateCreateInfo.sType                                                = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     multisampleStateCreateInfo.sampleShadingEnable                                  = VK_FALSE;
@@ -1648,9 +1647,30 @@ VK_STATUS_CODE VKEngine::createCamera() {
 void VKEngine::processKeyboardInput() {
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-    
+
         glfwSetWindowShouldClose(window, GLFW_TRUE);
-    
+
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
+
+        polygonMode = VK_POLYGON_MODE_FILL;
+        recreateSwapchain();
+
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
+
+        polygonMode = VK_POLYGON_MODE_LINE;
+        recreateSwapchain();
+
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
+
+        polygonMode = VK_POLYGON_MODE_POINT;
+        recreateSwapchain();
+
     }
 
     if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
@@ -1740,7 +1760,7 @@ VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
     for (auto info : modelLoadingQueue) {
     
-        std::thread* t0 = new std::thread([=]() {
+        //std::thread* t0 = new std::thread([=]() {
             
                 Model* model = new Model(info.path, info.pipeline, info.lib);
 
@@ -1748,8 +1768,8 @@ VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
                 models.push_back(model);
                 modelsPushBackMutex.unlock();
             
-            });
-        modelLoadingQueueThreads.push_back(t0);
+        //    });
+        //modelLoadingQueueThreads.push_back(t0);
     
     }
 

@@ -97,6 +97,8 @@ public:
         Adds a model to the model loading queue
 
         @param      path_       The path to the model
+
+        @return     Returns OGL_SC_SUCCESS on success
     */
     VK_STATUS_CODE push(const char* path_);
 
@@ -159,6 +161,7 @@ private:
     BaseImage*                              depthBuffer;
     BaseImage*                              msaaBufferImage;
     Descriptor                              samplerDescriptor;
+    VkPolygonMode                           polygonMode                          = VK_POLYGON_MODE_FILL;
     bool                                    initialized                          = false;
     std::vector< Model* >                   models;
     std::mutex                              modelsPushBackMutex;
