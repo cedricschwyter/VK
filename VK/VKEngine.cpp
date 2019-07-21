@@ -1080,22 +1080,16 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     mvpInfo.type                                                                    = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     
     mvpDescriptor                                                                   = Descriptor(mvpInfo);
-
-    VkDescriptorImageInfo imageInfo                                                 = {};
-    imageInfo.sampler                                                               = VK_NULL_HANDLE;
-    imageInfo.imageLayout                                                           = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView                                                             = VK_NULL_HANDLE;
                                                                                     
-    UniformInfo samplerInfo                                                         = {};
-    samplerInfo.binding                                                             = 1;
-    samplerInfo.stageFlags                                                          = VK_SHADER_STAGE_FRAGMENT_BIT;
-    samplerInfo.imageInfo                                                           = imageInfo;
-    samplerInfo.type                                                                = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    UniformInfo diffuseSamplerInfo                                                  = {};
+    diffuseSamplerInfo.binding                                                      = 1;
+    diffuseSamplerInfo.stageFlags                                                   = VK_SHADER_STAGE_FRAGMENT_BIT;
+    diffuseSamplerInfo.type                                                         = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
                
-    samplerDescriptor                                                               = Descriptor(samplerInfo);
+    diffuseSamplerDescriptor                                                        = Descriptor(diffuseSamplerInfo);
 
     standardDescriptors.push_back(mvpDescriptor);
-    standardDescriptors.push_back(samplerDescriptor);
+    standardDescriptors.push_back(diffuseSamplerDescriptor);
 
     standardDescriptorLayout = new DescriptorSetLayout(standardDescriptors);
 
@@ -1636,7 +1630,7 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers() {
     
     MVPBufferObject mvp                             = {};
 
-    mvp.model                                       = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    mvp.model                                       = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     mvp.model                                       = glm::scale(mvp.model, glm::vec3(0.02f));
     mvp.model[1][1]                                 *= -1.0f;
     mvp.view                                        = camera->getViewMatrix();

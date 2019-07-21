@@ -67,7 +67,8 @@ std::vector< Descriptor > Mesh::getDescriptors() {
         samplerInfo.imageInfo               = imageInfo;
         samplerInfo.type                    = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 
-        descriptors.push_back(Descriptor(samplerInfo));
+        if(textures[i].type == TT_DIFFUSE)
+            descriptors.push_back(Descriptor(samplerInfo));
 
     }
 

@@ -159,7 +159,7 @@ private:
     Descriptor                              mvpDescriptor;
     BaseImage*                              depthBuffer;
     BaseImage*                              msaaBufferImage;
-    Descriptor                              samplerDescriptor;
+    Descriptor                              diffuseSamplerDescriptor;
     VkPolygonMode                           polygonMode                          = VK_POLYGON_MODE_FILL;
     bool                                    initialized                          = false;
     std::vector< Model* >                   models;

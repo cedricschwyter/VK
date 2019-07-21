@@ -71,7 +71,7 @@ VK_STATUS_CODE Model::loadOBJTINYOBJ(const char* path_) {
 VK_STATUS_CODE Model::loadOBJASSIMP(const char* path_) {
 
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path_, aiProcess_Triangulate);
+    const aiScene* scene = importer.ReadFile(path_, aiProcess_Triangulate | aiProcess_FlipUVs);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 
@@ -180,6 +180,15 @@ Mesh* Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
     aiMaterial* material = scene_->mMaterials[mesh_->mMaterialIndex];
     std::vector< TextureObject > diffuseMaps = loadASSIMPMaterialTextures(material, aiTextureType_DIFFUSE, TT_DIFFUSE);
     textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+
+    std::vector< TextureObject > specularMaps = loadASSIMPMaterialTextures(material, aiTextureType_SPECULAR, TT_SPECULAR);
+    textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+
+    std::vector< TextureObject > normalMaps = loadASSIMPMaterialTextures(material, aiTextureType_NORMALS, TT_NORMAL);
+    textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+
+    std::vector< TextureObject > heightMaps = loadASSIMPMaterialTextures(material, aiTextureType_HEIGHT, TT_HEIGHT);
+    textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
     return new Mesh(
         pipeline, 
