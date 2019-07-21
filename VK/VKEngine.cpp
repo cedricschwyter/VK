@@ -980,7 +980,6 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     auto bindingDesc            = BaseVertex::getBindingDescription();
     auto attribDesc             = BaseVertex::getAttributeDescriptions();
 
-    // Vertex data is hardcoded in the vertex shader, no need to upload anything to the shaders (yet)
     VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo                 = {};
     vertexInputStateCreateInfo.sType                                                = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
     vertexInputStateCreateInfo.vertexBindingDescriptionCount                        = 1;
@@ -1684,6 +1683,7 @@ void VKEngine::processKeyboardInput() {
             logger::log(EVENT_LOG, "Successfully destroyed descriptor set");
 
         }
+        descriptorSets.clear();
         logger::log(EVENT_LOG, "Successfully destroyed descriptor sets");
         standardPipeline.destroy();
         ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
@@ -1710,6 +1710,7 @@ void VKEngine::processKeyboardInput() {
             logger::log(EVENT_LOG, "Successfully destroyed descriptor set");
 
         }
+        descriptorSets.clear();
         logger::log(EVENT_LOG, "Successfully destroyed descriptor sets");
         standardPipeline.destroy();
         ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
@@ -1736,6 +1737,7 @@ void VKEngine::processKeyboardInput() {
             logger::log(EVENT_LOG, "Successfully destroyed descriptor set");
 
         }
+        descriptorSets.clear();
         logger::log(EVENT_LOG, "Successfully destroyed descriptor sets");
         standardPipeline.destroy();
         ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
