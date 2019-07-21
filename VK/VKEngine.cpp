@@ -1716,21 +1716,51 @@ void VKEngine::processKeyboardInput() {
     if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
 
         polygonMode = VK_POLYGON_MODE_FILL;
-        recreateSwapchain();
+        vkDeviceWaitIdle(logicalDevice);
+        vkFreeCommandBuffers(
+            logicalDevice,
+            standardCommandPool,
+            static_cast<uint32_t>(standardCommandBuffers.size()),
+            standardCommandBuffers.data()
+        );
+        logger::log(EVENT_LOG, "Successfully freed command buffers");
+        pipeline.destroy();
+        ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
+        ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 
     }
 
     if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
 
         polygonMode = VK_POLYGON_MODE_LINE;
-        recreateSwapchain();
+        vkDeviceWaitIdle(logicalDevice);
+        vkFreeCommandBuffers(
+            logicalDevice,
+            standardCommandPool,
+            static_cast<uint32_t>(standardCommandBuffers.size()),
+            standardCommandBuffers.data()
+        );
+        logger::log(EVENT_LOG, "Successfully freed command buffers");
+        pipeline.destroy();
+        ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
+        ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 
     }
 
     if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
 
         polygonMode = VK_POLYGON_MODE_POINT;
-        recreateSwapchain();
+        vkDeviceWaitIdle(logicalDevice);
+        vkFreeCommandBuffers(
+            logicalDevice,
+            standardCommandPool,
+            static_cast<uint32_t>(standardCommandBuffers.size()),
+            standardCommandBuffers.data()
+        );
+        logger::log(EVENT_LOG, "Successfully freed command buffers");
+        pipeline.destroy();
+        ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
+        ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 
     }
 
