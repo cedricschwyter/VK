@@ -19,13 +19,21 @@
 //#define VK_WINDOW_MODE_FULLSCREEN
 //#define VK_WINDOW_MODE_BORDERLESS
 
-#define WIN_64                // Windows 64-bit
-//#define WIN_32              // Windows 32-bit
-//#define MACOSX              // macOS X 64-bit
-//#define LINUX               // Linux 64-bit
+#define WIN_64  
+//#define WIN_32
+//#define MACOSX
+//#define LINUX 
 
 //#define VK_STANDARD_MODEL_LOADING_LIB VKEngineModelLoadingLibTINYOBJ
 #define VK_STANDARD_MODEL_LOADING_LIB VKEngineModelLoadingLibASSIMP
+
+#define VK_MULTISAMPLING_NONE
+//#define VK_MULTISAMPLING_x2
+//#define VK_MULTISAMPLING_x4
+//#define VK_MULTISAMPLING_x8
+//#define VK_MULTISAMPLING_x16
+//#define VK_MULTISAMPLING_x32
+//#define VK_MULTISAMPLING_x64
 
 // Default values
 #if !defined VK_DEVELOPMENT && !defined VK_RELEASE && !defined VK_RELEASE_CONSOLE

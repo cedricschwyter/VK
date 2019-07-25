@@ -66,7 +66,7 @@ public:
     VkCommandPool                           standardCommandPool;
     VkQueue                                 graphicsQueue                           = VK_NULL_HANDLE;
     BaseCamera*                             camera;
-    VkSampleCountFlagBits                   maxMSAASamples                          = VK_SAMPLE_COUNT_1_BIT;
+    VkSampleCountFlagBits                   MSAASampleCount                         = VK_SAMPLE_COUNT_1_BIT;
 
     /**
         Default constructor
@@ -158,7 +158,9 @@ private:
     BaseBuffer*                             mvpBuffer;  
     Descriptor                              mvpDescriptor;
     BaseImage*                              depthBuffer;
+#ifndef VK_MULTISAMPLING_NONE
     BaseImage*                              msaaBufferImage;
+#endif
     Descriptor                              diffuseSamplerDescriptor;
     VkPolygonMode                           polygonMode                          = VK_POLYGON_MODE_FILL;
     bool                                    initialized                          = false;

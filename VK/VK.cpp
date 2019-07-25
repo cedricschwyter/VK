@@ -19,7 +19,7 @@ namespace vk {
     const unsigned int                  WIDTH                       = 1280;
     const unsigned int                  HEIGHT                      = 720;
     const char*                         TITLE                       = "VK by D3PSI";
-    const unsigned int                  MAX_IN_FLIGHT_FRAMES        = 4;
+    const unsigned int                  MAX_IN_FLIGHT_FRAMES        = 2;
     VkQueue                             transferQueue               = VK_NULL_HANDLE;
     VkCommandPool                       transferCommandPool         = VK_NULL_HANDLE;
     const double                        YAW                         = 0.0;

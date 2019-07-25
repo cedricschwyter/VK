@@ -90,6 +90,9 @@ VK_STATUS_CODE VKEngine::initWindow() {
         );
 #endif
 
+    glfwMakeContextCurrent(window);
+    glfwSwapInterval(0);
+
     GLFWimage windowIcon[1];
     windowIcon[0].pixels = stbi_load(
         "res/textures/loading_screen/infinity.jpg",
@@ -486,7 +489,32 @@ VK_STATUS_CODE VKEngine::selectBestPhysicalDevice() {
         logger::log(EVENT_LOG, "Suitable GPU found: ");
         printPhysicalDevicePropertiesAndFeatures(possibleGPUs.rbegin()->second);
         physicalDevice = possibleGPUs.rbegin()->second;
-        maxMSAASamples = enumerateMaximumMultisamplingSampleCount();
+        MSAASampleCount = enumerateMaximumMultisamplingSampleCount();
+        std::string msaaSamplesString;
+        if (MSAASampleCount == VK_SAMPLE_COUNT_64_BIT) { msaaSamplesString = "VK_SAMPLE_COUNT_64_BIT"; }
+        if (MSAASampleCount == VK_SAMPLE_COUNT_32_BIT) { msaaSamplesString = "VK_SAMPLE_COUNT_32_BIT"; }
+        if (MSAASampleCount == VK_SAMPLE_COUNT_16_BIT) { msaaSamplesString = "VK_SAMPLE_COUNT_16_BIT"; }
+        if (MSAASampleCount == VK_SAMPLE_COUNT_8_BIT) { msaaSamplesString = "VK_SAMPLE_COUNT_8_BIT"; }
+        if (MSAASampleCount == VK_SAMPLE_COUNT_4_BIT) { msaaSamplesString = "VK_SAMPLE_COUNT_4_BIT"; }
+        if (MSAASampleCount == VK_SAMPLE_COUNT_2_BIT) { msaaSamplesString = "VK_SAMPLE_COUNT_2_BIT"; }
+        if (MSAASampleCount == VK_SAMPLE_COUNT_1_BIT) { msaaSamplesString = "VK_SAMPLE_COUNT_1_BIT"; }
+        logger::log(EVENT_LOG, "Enumerated maximum multisampling count: " + msaaSamplesString);
+
+#ifdef VK_MULTISAMPLING_NONE
+        MSAASampleCount = VK_SAMPLE_COUNT_1_BIT;
+#elif VK_MULTISAMPLING_x2
+        MSAASampleCount = VK_SAMPLE_COUNT_2_BIT;
+#elif VK_MULTISAMPLING_x4
+        MSAASampleCount = VK_SAMPLE_COUNT_4_BIT;
+#elif VK_MULTISAMPLING_x8
+        MSAASampleCount = VK_SAMPLE_COUNT_8_BIT;
+#elif VK_MULTISAMPLING_x16
+        MSAASampleCount = VK_SAMPLE_COUNT_16_BIT;
+#elif VK_MULTISAMPLING_x32
+        MSAASampleCount = VK_SAMPLE_COUNT_32_BIT;
+#elif VK_MULTISAMPLING_x64
+        MSAASampleCount = VK_SAMPLE_COUNT_64_BIT;
+#endif
 
         return vk::errorCodeBuffer;
 
@@ -1024,7 +1052,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     VkPipelineMultisampleStateCreateInfo multisampleStateCreateInfo                 = {};
     multisampleStateCreateInfo.sType                                                = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     multisampleStateCreateInfo.sampleShadingEnable                                  = VK_FALSE;
-    multisampleStateCreateInfo.rasterizationSamples                                 = maxMSAASamples;
+    multisampleStateCreateInfo.rasterizationSamples                                 = MSAASampleCount;
                                                                                     
     VkPipelineDepthStencilStateCreateInfo depthStencilStateCreateInfo               = {};
     depthStencilStateCreateInfo.sType                                               = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
@@ -1121,21 +1149,23 @@ VK_STATUS_CODE VKEngine::createRenderPasses() {
 
     VkAttachmentDescription colorAttachmentDescription          = {};
     colorAttachmentDescription.format                           = swapchainImageFormat;
-    colorAttachmentDescription.samples                          = maxMSAASamples; 
+    colorAttachmentDescription.samples                          = MSAASampleCount; 
     colorAttachmentDescription.loadOp                           = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachmentDescription.storeOp                          = VK_ATTACHMENT_STORE_OP_STORE;
     colorAttachmentDescription.stencilLoadOp                    = VK_ATTACHMENT_LOAD_OP_DONT_CARE;                  // No stencil buffering, so nobody cares about stencil operations
     colorAttachmentDescription.stencilStoreOp                   = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     colorAttachmentDescription.initialLayout                    = VK_IMAGE_LAYOUT_UNDEFINED;
     colorAttachmentDescription.finalLayout                      = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;         // Render the image to the offscreen render-target
-
+#ifdef VK_MULTISAMPLING_NONE
+    colorAttachmentDescription.finalLayout                      = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+#endif
     VkAttachmentReference colorAttachmentReference              = {};
-    colorAttachmentReference.attachment                         = 0;
+    colorAttachmentReference.attachment                         = 0; 
     colorAttachmentReference.layout                             = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
     VkAttachmentDescription depthBufferAttachmentDescription    = {};
     depthBufferAttachmentDescription.format                     = depthBuffer->imgFormat;
-    depthBufferAttachmentDescription.samples                    = maxMSAASamples;
+    depthBufferAttachmentDescription.samples                    = MSAASampleCount;
     depthBufferAttachmentDescription.loadOp                     = VK_ATTACHMENT_LOAD_OP_CLEAR;
     depthBufferAttachmentDescription.storeOp                    = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     depthBufferAttachmentDescription.stencilLoadOp              = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -1146,7 +1176,7 @@ VK_STATUS_CODE VKEngine::createRenderPasses() {
     VkAttachmentReference depthBufferAttachmentReference        = {};
     depthBufferAttachmentReference.attachment                   = 1;
     depthBufferAttachmentReference.layout                       = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
+#ifndef VK_MULTISAMPLING_NONE
     VkAttachmentDescription colorAttachmentResolve              = {};
     colorAttachmentResolve.format                               = swapchainImageFormat;
     colorAttachmentResolve.samples                              = VK_SAMPLE_COUNT_1_BIT;     // Sample multisampled color attachment down to present to screen
@@ -1160,15 +1190,20 @@ VK_STATUS_CODE VKEngine::createRenderPasses() {
     VkAttachmentReference colorAttachmentResolveRef             = {};
     colorAttachmentResolveRef.attachment                        = 2;
     colorAttachmentResolveRef.layout                            = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
+#endif
     VkSubpassDescription subpassDescription                     = {};
     subpassDescription.pipelineBindPoint                        = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpassDescription.colorAttachmentCount                     = 1;
     subpassDescription.pColorAttachments                        = &colorAttachmentReference;
     subpassDescription.pDepthStencilAttachment                  = &depthBufferAttachmentReference;
+#ifndef VK_MULTISAMPLING_NONE
     subpassDescription.pResolveAttachments                      = &colorAttachmentResolveRef;
-
-    std::vector< VkAttachmentDescription > attachments          = {colorAttachmentDescription, depthBufferAttachmentDescription, colorAttachmentResolve};
+#endif
+    std::vector< VkAttachmentDescription > attachments          = { colorAttachmentDescription, depthBufferAttachmentDescription, 
+#ifndef VK_MULTISAMPLING_NONE 
+        colorAttachmentResolve 
+#endif
+    };
     VkRenderPassCreateInfo renderPassCreateInfo                 = {};
     renderPassCreateInfo.sType                                  = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     renderPassCreateInfo.attachmentCount                        = static_cast< uint32_t >(attachments.size());
@@ -1212,14 +1247,21 @@ VK_STATUS_CODE VKEngine::allocateSwapchainFramebuffers() {
     
         logger::log(EVENT_LOG, "Creating framebuffer...");
 
+#ifdef VK_MULTISAMPLING_NONE
         std::vector< VkImageView > attachments = {
-        
+            swapchainImageViews[i],
+            depthBuffer->imgView  
+        };
+#endif
+    
+#ifndef VK_MULTISAMPLING_NONE
+        std::vector< VkImageView > attachments = {
             msaaBufferImage->imgView,
             depthBuffer->imgView,
             swapchainImageViews[i]
-        
         };
-    
+#endif
+
         VkFramebufferCreateInfo framebufferCreateInfo          = {};
         framebufferCreateInfo.sType                            = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebufferCreateInfo.renderPass                       = renderPass;
@@ -1554,9 +1596,10 @@ VK_STATUS_CODE VKEngine::cleanSwapchain() {
 
     delete depthBuffer;
     logger::log(EVENT_LOG, "Successfully destroyed depth buffer");
-
+#ifndef VK_MULTISAMPLING_NONE
     delete msaaBufferImage;
     logger::log(EVENT_LOG, "Successfully destroyed multisampled color-buffer");
+#endif
 
     logger::log(EVENT_LOG, "Destroying framebuffers...");
     for (auto framebuffer : swapchainFramebuffers) {
@@ -1815,9 +1858,9 @@ VkSampleCountFlagBits VKEngine::enumerateMaximumMultisamplingSampleCount() {
 }
 
 VK_STATUS_CODE VKEngine::allocateMSAABufferedImage() {
-
+#ifndef VK_MULTISAMPLING_NONE
     msaaBufferImage = new MSAARenderImage();
-
+#endif
     return vk::errorCodeBuffer;
 
 }
@@ -1826,24 +1869,23 @@ VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
     for (auto info : modelLoadingQueue) {
     
-        //std::thread* t0 = new std::thread([=]() {
+        std::thread* t0 = new std::thread([=]() {
             
                 Model* model = new Model(info.path, info.pipeline, info.lib);
 
-                //modelsPushBackMutex.lock();
+                std::scoped_lock< std::mutex > lock(modelsPushBackMutex);
                 models.push_back(model);
-                //modelsPushBackMutex.unlock();
             
-        //    });
-        //modelLoadingQueueThreads.push_back(t0);
+            });
+        modelLoadingQueueThreads.push_back(t0);
     
     }
 
-    /*for (auto thread : modelLoadingQueueThreads) {
+    for (auto thread : modelLoadingQueueThreads) {
     
         thread->join();
     
-    }*/
+    }
 
     return vk::errorCodeBuffer;
 
