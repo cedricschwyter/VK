@@ -33,6 +33,8 @@ TextureImage::TextureImage(
 
     imageSize = w * h * 4;
 
+    mipLevels = static_cast< uint32_t >(std::floor(std::log2(std::max(w, h)))) + 1;     // Calculate number of mipmaps by using logarithms
+
     if (!pix) {
 
         logger::log(ERROR_LOG, "Failed to load textures");

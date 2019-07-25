@@ -20,6 +20,7 @@ public:
 
     VkImageView         imgView;
     VkSampler           imgSampler;
+    uint32_t            mipLevels;
 
     /**
         Default constructor

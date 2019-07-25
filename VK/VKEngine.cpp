@@ -1553,6 +1553,8 @@ VK_STATUS_CODE VKEngine::recreateSwapchain() {
 
     if (!firstTimeRecreation) {
 
+        vkDeviceWaitIdle(logicalDevice);
+
         int width = 0;
         int height = 0;
         while (width == 0 || height == 0) {
@@ -1561,8 +1563,6 @@ VK_STATUS_CODE VKEngine::recreateSwapchain() {
             glfwWaitEvents();
 
         }
-
-        vkDeviceWaitIdle(logicalDevice);
 
         cleanSwapchain();
 
