@@ -502,17 +502,17 @@ VK_STATUS_CODE VKEngine::selectBestPhysicalDevice() {
 
 #ifdef VK_MULTISAMPLING_NONE
         MSAASampleCount = VK_SAMPLE_COUNT_1_BIT;
-#elif VK_MULTISAMPLING_x2
+#elif defined VK_MULTISAMPLING_x2
         MSAASampleCount = VK_SAMPLE_COUNT_2_BIT;
-#elif VK_MULTISAMPLING_x4
+#elif defined VK_MULTISAMPLING_x4
         MSAASampleCount = VK_SAMPLE_COUNT_4_BIT;
-#elif VK_MULTISAMPLING_x8
+#elif defined VK_MULTISAMPLING_x8
         MSAASampleCount = VK_SAMPLE_COUNT_8_BIT;
-#elif VK_MULTISAMPLING_x16
+#elif defined VK_MULTISAMPLING_x16
         MSAASampleCount = VK_SAMPLE_COUNT_16_BIT;
-#elif VK_MULTISAMPLING_x32
+#elif defined VK_MULTISAMPLING_x32
         MSAASampleCount = VK_SAMPLE_COUNT_32_BIT;
-#elif VK_MULTISAMPLING_x64
+#elif defined VK_MULTISAMPLING_x64
         MSAASampleCount = VK_SAMPLE_COUNT_64_BIT;
 #endif
 
