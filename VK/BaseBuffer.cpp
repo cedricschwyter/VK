@@ -164,17 +164,7 @@ VK_STATUS_CODE BaseBuffer::fillS(const void* bufData_, size_t bufSize_) {
 
     BaseBuffer* stagingBuffer               = new BaseBuffer(&bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-    void* data;
-    vkMapMemory(
-        vk::engine->logicalDevice,
-        stagingBuffer->mem,
-        0,
-        bufSize_,
-        0,
-        &data
-        );
-    memcpy(data, bufData_, static_cast< size_t >(bufSize_));
-    vkUnmapMemory(vk::engine->logicalDevice, stagingBuffer->mem);
+    stagingBuffer->fill(bufData_);
 
     vk::copyBuffer(stagingBuffer->buf, buf, bufSize_);
 

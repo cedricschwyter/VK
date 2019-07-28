@@ -19,7 +19,7 @@ namespace vk {
     const unsigned int                  WIDTH                       = 1280;
     const unsigned int                  HEIGHT                      = 720;
     const char*                         TITLE                       = "VK by D3PSI";
-    const unsigned int                  MAX_IN_FLIGHT_FRAMES        = 2;
+    const unsigned int                  MAX_IN_FLIGHT_FRAMES        = 3;
     VkQueue                             transferQueue               = VK_NULL_HANDLE;
     VkCommandPool                       transferCommandPool         = VK_NULL_HANDLE;
     const double                        YAW                         = 0.0;
@@ -28,6 +28,8 @@ namespace vk {
     const double                        SPEED                       = 2.0;
     const double                        SENS                        = 0.1;
     const double                        FOV                         = 45.0;
+
+    VkFence                             copyFence;
 
     VK_STATUS_CODE init() {
     
@@ -159,6 +161,15 @@ namespace vk {
 
     void copyBuffer(VkBuffer srcBuf_, VkBuffer dstBuf_, VkDeviceSize size_) {
 
+        vkWaitForFences(
+            vk::engine->logicalDevice,
+            1,
+            &copyFence,
+            VK_TRUE,
+            std::numeric_limits< uint64_t >::max()
+            );
+        vkResetFences(vk::engine->logicalDevice, 1, &copyFence);
+
         VkCommandBufferAllocateInfo allocateInfo            = {};
         allocateInfo.sType                                  = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocateInfo.level                                  = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -187,19 +198,19 @@ namespace vk {
         submitInfo.commandBufferCount       = 1;
         submitInfo.pCommandBuffers          = &commandBuffer;
 
-        vkQueueSubmit(transferQueue, 1, &submitInfo, VK_NULL_HANDLE);
+        vkQueueSubmit(transferQueue, 1, &submitInfo, copyFence);
         vkQueueWaitIdle(transferQueue);
 
         vkFreeCommandBuffers(engine->logicalDevice, transferCommandPool, 1, &commandBuffer);
 
     }
 
-    VkCommandBuffer startCommandBuffer() {
+    VkCommandBuffer startCommandBuffer(VkCommandPool commandPool_) {
 
         VkCommandBufferAllocateInfo allocInfo   = {};
         allocInfo.sType                         = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.level                         = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandPool                   = vk::engine->standardCommandPool;
+        allocInfo.commandPool                   = commandPool_;
         allocInfo.commandBufferCount            = 1;
 
         VkCommandBuffer commandBuffer;
@@ -215,27 +226,27 @@ namespace vk {
 
     }
 
-    void endCommandBuffer(VkCommandBuffer commandBuffer_) {
+    void endCommandBuffer(VkCommandBuffer commandBuffer_, VkCommandPool commandPool_, VkQueue queue_) {
 
         vkEndCommandBuffer(commandBuffer_);
 
-        VkSubmitInfo submitInfo = {};
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandBuffer_;
+        VkSubmitInfo submitInfo         = {};
+        submitInfo.sType                = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.commandBufferCount   = 1;
+        submitInfo.pCommandBuffers      = &commandBuffer_;
 
         vkQueueSubmit(
-            vk::engine->graphicsQueue,
+            queue_,
             1,
             &submitInfo,
             VK_NULL_HANDLE
             );
 
-        vkQueueWaitIdle(vk::engine->graphicsQueue);
+        vkQueueWaitIdle(queue_);
 
         vkFreeCommandBuffers(
             engine->logicalDevice,
-            vk::engine->standardCommandPool,
+            commandPool_,
             1,
             &commandBuffer_
             );
@@ -250,7 +261,7 @@ namespace vk {
         uint32_t        mipLevels_
         ) {
 
-        VkCommandBuffer commandBuffer               = startCommandBuffer();
+        VkCommandBuffer commandBuffer               = startCommandBuffer(vk::engine->standardCommandPool);
 
         VkImageMemoryBarrier barrier                = {};
         barrier.sType                               = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -340,7 +351,7 @@ namespace vk {
             &barrier
             );
 
-        endCommandBuffer(commandBuffer);
+        endCommandBuffer(commandBuffer, vk::engine->standardCommandPool, vk::engine->graphicsQueue);
 
     }
 
@@ -351,7 +362,7 @@ namespace vk {
         uint32_t        height_
         ) {
 
-        VkCommandBuffer commandBuffer               = startCommandBuffer();
+        VkCommandBuffer commandBuffer               = startCommandBuffer(transferCommandPool);
 
         VkBufferImageCopy copyRegion                = {};
         copyRegion.bufferOffset                     = 0;
@@ -375,7 +386,7 @@ namespace vk {
             &copyRegion
             );
 
-        endCommandBuffer(commandBuffer);
+        endCommandBuffer(commandBuffer, transferCommandPool, transferQueue);
 
     }
 

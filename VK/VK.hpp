@@ -41,6 +41,8 @@ namespace vk {
     extern const double                         SENS;
     extern const double                         FOV;
 
+    extern VkFence                              copyFence;
+
     /**
         Initializes the VKEngine object
 
@@ -129,16 +131,20 @@ namespace vk {
     /**
         Starts a command buffer
 
+        @param      commandPool_        The command pool to allocate the command buffer from
+
         @return     Returns a command buffer handle
     */
-    VkCommandBuffer startCommandBuffer(void);
+    VkCommandBuffer startCommandBuffer(VkCommandPool commandPool_);
 
     /**
         Ends a command buffer
 
+        @param      commandPool_        The command pool the command buffer is allocated from
+        @param      queue_              The queue to submit the command buffer on
         @param      commandBuffer_      The command buffer to end
     */
-    void endCommandBuffer(VkCommandBuffer commandBuffer_);
+    void endCommandBuffer(VkCommandBuffer commandBuffer_, VkCommandPool commandPool_, VkQueue queue_);
 
     /**
         Executes an image layout transition operation

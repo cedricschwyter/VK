@@ -128,6 +128,7 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 
     allocator = nullptr;
 
+
     ASSERT(createInstance(), "Failed to create instance", VK_SC_INSTANCE_CREATON_ERROR);
     ASSERT(debugUtilsMessenger(), "Failed to create debug utils messenger", VK_SC_DEBUG_UTILS_MESSENGER_CREATION_ERROR);
     ASSERT(createSurfaceGLFW(), "Failed to create GLFW surface", VK_SC_SURFACE_CREATION_ERROR);
@@ -135,6 +136,7 @@ VK_STATUS_CODE VKEngine::initVulkan() {
     ASSERT(createLogicalDeviceFromPhysicalDevice(), "Failed to create a logical device from the selected physical device", VK_SC_LOGICAL_DEVICE_CREATION_ERROR);
     ASSERT(createSwapchain(), "Failed to create a swapchain with the given parameters", VK_SC_SWAPCHAIN_CREATION_ERROR);
     ASSERT(createSwapchainImageViews(), "Failed to create swapchain image views", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
+    ASSERT(initializeSynchronizationObjects(), "Failed to initialize sync-objects", VK_SC_SYNCHRONIZATION_OBJECT_INITIALIZATION_ERROR);
     ASSERT(allocateCommandPools(), "Failed to allocate command pools", VK_SC_COMMAND_POOL_ALLOCATION_ERROR);
     ASSERT(allocateMSAABufferedImage(), "Failed to allocate multisampling-buffer", VK_SC_MSAA_BUFFER_CREATION_ERROR);
     ASSERT(allocateDepthBuffer(), "Failed to allocate depth buffer", VK_SC_DEPTH_BUFFER_CREATION_ERROR);
@@ -142,14 +144,13 @@ VK_STATUS_CODE VKEngine::initVulkan() {
     ASSERT(allocateUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
     ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
     ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
-    ASSERT(loadModelsAndVertexData(), "Failed to load assets", VK_SC_RESOURCE_LOADING_ERROR);
+    ASSERT(loadModelsAndVertexData(), "Failed to load models", VK_SC_RESOURCE_LOADING_ERROR);
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
-    ASSERT(initializeSynchronizationObjects(), "Failed to initialize sync-objects", VK_SC_SYNCHRONIZATION_OBJECT_INITIALIZATION_ERROR);
     ASSERT(createCamera(), "Failed to create camera", VK_SC_CAMERA_CREATION_ERROR);
 
     if (!initialized) {
 
-        loadingScreen->closeMutex.lock();
+        std::unique_lock< std::mutex > lock(loadingScreen->closeMutex);
         loadingScreen->close = true;
         loadingScreen->closeMutex.unlock();
         glfwShowWindow(window);
@@ -244,6 +245,7 @@ VK_STATUS_CODE VKEngine::clean() {
         vkDestroySemaphore(logicalDevice, swapchainImageAvailableSemaphores[i], allocator);
         vkDestroyFence(logicalDevice, inFlightFences[i], allocator);
     }
+    vkDestroyFence(logicalDevice, vk::copyFence, allocator);
     logger::log(EVENT_LOG, "Successfully destroyed sync-objects");
 
     vkDestroyCommandPool(logicalDevice, vk::transferCommandPool, allocator);
@@ -1356,10 +1358,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
         commandBufferBeginInfo.sType                               = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         commandBufferBeginInfo.flags                               = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 
-        result = vkBeginCommandBuffer(
-            standardCommandBuffers[i],
-            &commandBufferBeginInfo
-            );
+        result = vkBeginCommandBuffer(standardCommandBuffers[i],&commandBufferBeginInfo);
         ASSERT(result, "Failed to allocate command buffer", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 
         VkRenderPassBeginInfo renderPassBeginInfo                  = {};
@@ -1542,6 +1541,14 @@ VK_STATUS_CODE VKEngine::initializeSynchronizationObjects() {
         logger::log(EVENT_LOG, "Successfully initialized fence");
 
     }
+
+    VkResult result = vkCreateFence(
+        logicalDevice,
+        &fenceCreateInfo,
+        allocator,
+        &vk::copyFence
+        );
+    logger::log(EVENT_LOG, "Successfully initialized copy buffer fence");
 
     logger::log(EVENT_LOG, "Successfully initialized sync-objects");
 
