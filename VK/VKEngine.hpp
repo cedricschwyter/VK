@@ -163,7 +163,6 @@ private:
     BaseImage*                              msaaBufferImage;
 #endif
     Descriptor                              diffuseSamplerDescriptor;
-    VkPolygonMode                           polygonMode                          = VK_POLYGON_MODE_FILL;
     bool                                    initialized                          = false;
     std::vector< Model* >                   models;
     std::mutex                              modelsPushBackMutex;

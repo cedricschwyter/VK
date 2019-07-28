@@ -1806,7 +1806,7 @@ void VKEngine::processKeyboardInput() {
             standardCommandBuffers.data()
         );
         logger::log(EVENT_LOG, "Successfully freed command buffers");
-        pipeline.destroy();
+        standardPipeline.destroy();
         ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
         ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 
@@ -1823,7 +1823,7 @@ void VKEngine::processKeyboardInput() {
             standardCommandBuffers.data()
         );
         logger::log(EVENT_LOG, "Successfully freed command buffers");
-        pipeline.destroy();
+        standardPipeline.destroy();
         ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
         ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 
@@ -1840,7 +1840,7 @@ void VKEngine::processKeyboardInput() {
             standardCommandBuffers.data()
         );
         logger::log(EVENT_LOG, "Successfully freed command buffers");
-        pipeline.destroy();
+        standardPipeline.destroy();
         ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
         ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 
