@@ -16,6 +16,6 @@
 typedef enum SDL_STATUS_CODE {
 
     SDL_SC_UNKNOWN_ERROR        = -1,
-    SDL_SC_SUCCESS                = 0
+    SDL_SC_SUCCESS              = 0
 
 } SDL_STATUS_CODE;

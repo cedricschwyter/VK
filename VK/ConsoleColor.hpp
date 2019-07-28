@@ -1,10 +1,10 @@
 /**
     Change color of console output in streams
 
-    @author        Vincent Godin
-    @version    17.09.2006
+    @author       Vincent Godin
+    @version      17.09.2006
 
-    @file        ConsoleColor.hpp
+    @file         ConsoleColor.hpp
     @brief        Change color of console output in streams
 */
 #pragma once

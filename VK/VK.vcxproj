@@ -124,7 +124,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\VK\ext\assimp-x64\include;$(SolutionDir)\VK\ext\stbimage;$(SolutionDir)\VK\ext\SDL\include;$(SolutionDir)\VK\ext\glm;C:\VulkanSDK\1.1.85.0\Include;$(SolutionDir)\VK\ext\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\VK\ext\tinyobjloader;$(SolutionDir)\VK\ext\assimp-x64\include;$(SolutionDir)\VK\ext\stbimage;$(SolutionDir)\VK\ext\SDL\include;$(SolutionDir)\VK\ext\glm;C:\VulkanSDK\1.1.85.0\Include;$(SolutionDir)\VK\ext\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -141,11 +141,15 @@
     <ClCompile Include="BaseImage.cpp" />
     <ClCompile Include="CenterCamera.cpp" />
     <ClCompile Include="DepthBuffer.cpp" />
+    <ClCompile Include="Descriptor.cpp" />
+    <ClCompile Include="DescriptorPool.cpp" />
     <ClCompile Include="DescriptorSet.cpp" />
+    <ClCompile Include="DescriptorSetLayout.cpp" />
     <ClCompile Include="FPSCamera.cpp" />
     <ClCompile Include="GraphicsPipeline.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="ModelInfo.cpp" />
     <ClCompile Include="MSAARenderImage.cpp" />
     <ClCompile Include="TextureImage.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
@@ -177,7 +181,10 @@
     <ClInclude Include="CenterCamera.hpp" />
     <ClInclude Include="ConsoleColor.hpp" />
     <ClInclude Include="DepthBuffer.hpp" />
+    <ClInclude Include="Descriptor.hpp" />
+    <ClInclude Include="DescriptorPool.hpp" />
     <ClInclude Include="DescriptorSet.hpp" />
+    <ClInclude Include="DescriptorSetLayout.hpp" />
     <ClInclude Include="FPSCamera.hpp" />
     <ClInclude Include="GraphicsPipeline.hpp" />
     <ClInclude Include="Mesh.hpp" />

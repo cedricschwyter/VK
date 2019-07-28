@@ -18,6 +18,6 @@ struct TextureObject {
 
     TextureImage*       img;
     TEXTURE_TYPE        type;
-    const char*         path;
+    std::string         path;
 
 };

@@ -13,18 +13,30 @@
 // Edit configuration here
 //#define VK_DEVELOPMENT      // enable this for verbose output
 //#define VK_RELEASE          // enable this for performance
+//#define VK_RELEASE_CONSOLE    // enbable this for performance with console
 
 #define VK_WINDOW_MODE_WINDOWED
 //#define VK_WINDOW_MODE_FULLSCREEN
 //#define VK_WINDOW_MODE_BORDERLESS
 
-#define WIN_64                // Windows 64-bit
-//#define WIN_32              // Windows 32-bit
-//#define MACOSX              // macOS X 64-bit
-//#define LINUX               // Linux 64-bit
+#define WIN_64  
+//#define WIN_32
+//#define MACOSX
+//#define LINUX 
+
+//#define VK_STANDARD_MODEL_LOADING_LIB VKEngineModelLoadingLibTINYOBJ
+#define VK_STANDARD_MODEL_LOADING_LIB VKEngineModelLoadingLibASSIMP
+
+//#define VK_MULTISAMPLING_NONE
+//#define VK_MULTISAMPLING_x2
+//#define VK_MULTISAMPLING_x4
+//#define VK_MULTISAMPLING_x8
+//#define VK_MULTISAMPLING_x16
+//#define VK_MULTISAMPLING_x32
+//#define VK_MULTISAMPLING_x64
 
 // Default values
-#if !defined VK_DEVELOPMENT && !defined VK_RELEASE
+#if !defined VK_DEVELOPMENT && !defined VK_RELEASE && !defined VK_RELEASE_CONSOLE
     #define VK_DEVELOPMENT
 #endif
 
@@ -36,7 +48,11 @@
     #define WIN_64
 #endif
 
-#if !defined VK_DEVELOPMENT && defined VK_RELEASE && (defined WIN_64 || defined WIN_32)
+#ifdef VK_RELEASE_CONSOLE
+    #define VK_RELEASE
+#endif
+
+#if !defined VK_DEVELOPMENT && !defined VK_RELEASE_CONSOLE && defined VK_RELEASE && (defined WIN_64 || defined WIN_32)
     #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 #endif
 

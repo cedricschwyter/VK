@@ -33,6 +33,8 @@ TextureImage::TextureImage(
 
     imageSize = w * h * 4;
 
+    mipLevels = static_cast< uint32_t >(std::floor(std::log2(std::max(w, h)))) + 1;     // Calculate number of mipmaps by using logarithms
+
     if (!pix) {
 
         logger::log(ERROR_LOG, "Failed to load textures");
@@ -104,19 +106,21 @@ TextureImage::TextureImage(
     samplerCreateInfo.maxLod                        = 0.0f;
 
     VkResult result = vkCreateSampler(
-        vk::engine.logicalDevice,
+        vk::engine->logicalDevice,
         &samplerCreateInfo,
-        vk::engine.allocator,
+        vk::engine->allocator,
         &imgSampler
         );
     ASSERT(result, "Failed to create sampler", VK_SC_SAMPLER_CREATION_ERROR);
+
+    logger::log(EVENT_LOG, "Successfully created sampler");
 
 }
 
 VK_STATUS_CODE TextureImage::bind() {
 
     VkResult result = vkBindImageMemory(
-        vk::engine.logicalDevice,
+        vk::engine->logicalDevice,
         img,
         mem,
         0
@@ -129,8 +133,8 @@ VK_STATUS_CODE TextureImage::bind() {
 
 TextureImage::~TextureImage() {
 
-    vkDestroySampler(vk::engine.logicalDevice, imgSampler, vk::engine.allocator);
-    vkDestroyImageView(vk::engine.logicalDevice, imgView, vk::engine.allocator);
-    vkDestroyImage(vk::engine.logicalDevice, img, vk::engine.allocator);
+    vkDestroySampler(vk::engine->logicalDevice, imgSampler, vk::engine->allocator);
+    vkDestroyImageView(vk::engine->logicalDevice, imgView, vk::engine->allocator);
+    vkDestroyImage(vk::engine->logicalDevice, img, vk::engine->allocator);
 
 }

@@ -25,13 +25,11 @@ namespace vk {
 
     extern VK_STATUS_CODE                       errorCodeBuffer;
     
-    extern VKEngine                             engine;
+    extern VKEngine*                            engine;
     extern const unsigned int                   HEIGHT;
     extern const unsigned int                   WIDTH;
     extern const char*                          TITLE;
     extern const unsigned int                   MAX_IN_FLIGHT_FRAMES;
-    extern const std::vector< BaseVertex >      vertices;
-    extern const std::vector< uint32_t >        indices;
     extern VkQueue                              transferQueue;
     extern VkCommandPool                        transferCommandPool;
 
@@ -43,13 +41,22 @@ namespace vk {
     extern const double                         SENS;
     extern const double                         FOV;
 
+    extern VkFence                              copyFence;
+
+    /**
+        Initializes the VKEngine object
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE init(void);
+
     /**
         Handles main initialization of everything
 
         @return        Returns VK_SC_SUCCESS on success
         @return        Returns VK_SC_UNKNOWN_ERROR on error
     */
-    VK_STATUS_CODE init(void);
+    VK_STATUS_CODE run(void);
 
     /**
         Helper function to create a VkDebugUtilsMessengerEXT
@@ -124,16 +131,20 @@ namespace vk {
     /**
         Starts a command buffer
 
+        @param      commandPool_        The command pool to allocate the command buffer from
+
         @return     Returns a command buffer handle
     */
-    VkCommandBuffer startCommandBuffer(void);
+    VkCommandBuffer startCommandBuffer(VkCommandPool commandPool_);
 
     /**
         Ends a command buffer
 
+        @param      commandPool_        The command pool the command buffer is allocated from
+        @param      queue_              The queue to submit the command buffer on
         @param      commandBuffer_      The command buffer to end
     */
-    void endCommandBuffer(VkCommandBuffer commandBuffer_);
+    void endCommandBuffer(VkCommandBuffer commandBuffer_, VkCommandPool commandPool_, VkQueue queue_);
 
     /**
         Executes an image layout transition operation
@@ -230,8 +241,8 @@ namespace vk {
         VkImageUsageFlags           usage_,
         VkMemoryPropertyFlags       properties_,
         VkSampleCountFlagBits       samples_,
-        VkImage& img_,
-        VkDeviceMemory& imgMem_
+        VkImage&                    img_,
+        VkDeviceMemory&             imgMem_
         );
 
     /**
@@ -242,5 +253,23 @@ namespace vk {
         @return     Returns true if the format utilizes a stencil component
     */
     bool hasStencilBufferComponent(VkFormat format_);
+
+    /**
+        Adds a model to the model loading queue
+
+        @param      path_       The path to the model
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE push(const char* path_);
+
+    /**
+        Adds a model to the model loading queue
+
+        @param      path_       The path to the model
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE push(ModelInfo info_);
 
 }

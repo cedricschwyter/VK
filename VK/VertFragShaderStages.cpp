@@ -43,8 +43,8 @@ VertFragShaderStages::VertFragShaderStages(const char* vertPath_, const char* fr
 
 VK_STATUS_CODE VertFragShaderStages::destroyModules() {
 
-    vkDestroyShaderModule(vk::engine.logicalDevice, vertModule, vk::engine.allocator);
-    vkDestroyShaderModule(vk::engine.logicalDevice, fragModule, vk::engine.allocator);
+    vkDestroyShaderModule(vk::engine->logicalDevice, vertModule, vk::engine->allocator);
+    vkDestroyShaderModule(vk::engine->logicalDevice, fragModule, vk::engine->allocator);
 
     return vk::errorCodeBuffer;
 
@@ -61,9 +61,9 @@ VkShaderModule VertFragShaderStages::createShaderModuleFromBinary(const std::vec
 
     VkShaderModule module;
     VkResult result = vkCreateShaderModule(
-        vk::engine.logicalDevice,
+        vk::engine->logicalDevice,
         &shaderModuleCreateInfo, 
-        vk::engine.allocator,
+        vk::engine->allocator,
         &module
         );
     ASSERT(result, "Failed to create shader module", VK_SC_SHADER_MODULE_CREATION_ERROR);

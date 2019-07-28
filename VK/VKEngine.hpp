@@ -23,6 +23,7 @@
 #include <map>
 #include <thread>
 #include <algorithm>
+#include <mutex>
 #include <fstream>
 #include <string>
 #if defined WIN_64 || defined WIN_32
@@ -49,6 +50,9 @@
 #include "DepthBuffer.hpp"
 #include "MSAARenderImage.hpp"
 #include "Model.hpp"
+#include "Descriptor.hpp"
+#include "DescriptorSet.hpp"
+#include "ModelInfo.cpp"
 
 class VKEngine {
 public:
@@ -60,16 +64,50 @@ public:
     VkFormat                                swapchainImageFormat;
     VkExtent2D                              swapchainImageExtent;
     VkCommandPool                           standardCommandPool;
-    VkQueue                                 graphicsQueue                        = VK_NULL_HANDLE;
+    VkQueue                                 graphicsQueue                           = VK_NULL_HANDLE;
     BaseCamera*                             camera;
-    VkSampleCountFlagBits                   maxMSAASamples                          = VK_SAMPLE_COUNT_1_BIT;
+    VkSampleCountFlagBits                   MSAASampleCount                         = VK_SAMPLE_COUNT_1_BIT;
+
+    /**
+        Default constructor
+    */
+    VKEngine(void) = default;
+
+    /**
+        Default destructor
+    */
+    ~VKEngine(void) = default;
 
     /**
         Initializes VKEngine and loads dependencies
 
-        @return        Returns VK_SC_SUCCESS on success
+        @param      returnCodeAddr_     A VK_STATUS_CODE pointer to which the return code of this multithreaded function will be written
     */
-    VK_STATUS_CODE init(void);
+    void init(VK_STATUS_CODE* returnCodeAddr_);
+
+    /**
+        Initializes the logger
+
+        @return        Returns LOGGER_SC_SUCCESS on success
+        @return        Returns LOGGER_SC_UNKNOWN_ERROR on error
+    */
+    LOGGER_STATUS_CODE initLogger(void);
+    
+    /**
+        Adds a model to the model loading queue
+
+        @param      path_       The path to the model
+
+        @return     Returns OGL_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE push(const char* path_);
+
+    /**
+        Adds a model to the model loading queue
+
+        @param      info_       A model info struct
+    */
+    VK_STATUS_CODE push(ModelInfo info_);
 
     /**
         Finds queue families that are suitable for the operations that are about to be performed on them
@@ -90,7 +128,7 @@ private:
         "VK_LAYER_LUNARG_standard_validation"
     
     };
-#ifdef VK_DEVELOPMENT
+#ifndef VK_RELEASE
     const bool                              validationLayersEnabled              = true;
 #else
     const bool                              validationLayersEnabled              = false;
@@ -108,29 +146,32 @@ private:
     std::vector< VkImageView >              swapchainImageViews;
     std::vector< VkFramebuffer >            swapchainFramebuffers;
     VkRenderPass                            renderPass;
-    GraphicsPipeline                        pipeline;
+    GraphicsPipeline                        standardPipeline;
+    std::vector< Descriptor >               standardDescriptors;
+    DescriptorSetLayout*                    standardDescriptorLayout;
     std::vector< VkCommandBuffer >          standardCommandBuffers;
     std::vector< VkSemaphore >              swapchainImageAvailableSemaphores;
     std::vector< VkSemaphore >              renderingCompletedSemaphores;
     std::vector< VkFence >                  inFlightFences;
     size_t                                  currentSwapchainImage                = 0;
     bool                                    hasFramebufferBeenResized            = false;
-    BaseBuffer*                             vertexBuffer;
-    BaseBuffer*                             indexBuffer;
+    BaseBuffer*                             mvpBuffer;  
+    Descriptor                              mvpDescriptor;
     VkPolygonMode                           polygonMode                          = VK_POLYGON_MODE_FILL;
-    BaseBuffer*                             mvpBuffer;
     BaseImage*                              depthBuffer;
+#ifndef VK_MULTISAMPLING_NONE
     BaseImage*                              msaaBufferImage;
-    TextureImage*                           image;
+#endif
+    Descriptor                              diffuseSamplerDescriptor;
+    VkPolygonMode                           polygonMode                          = VK_POLYGON_MODE_FILL;
     bool                                    initialized                          = false;
+    std::vector< Model* >                   models;
+    std::mutex                              modelsPushBackMutex;
+    bool                                    firstTimeRecreation                  = true;
+    std::vector< DescriptorSet* >           descriptorSets;
 
-    /**
-        Initializes the logger
-
-        @return        Returns LOGGER_SC_SUCCESS on success
-        @return        Returns LOGGER_SC_UNKNOWN_ERROR on error
-    */
-    LOGGER_STATUS_CODE initLogger(void);
+    std::vector< ModelInfo >                modelLoadingQueue;
+    std::vector< std::thread* >             modelLoadingQueueThreads;
 
     /**
         Initializes the windowing library
@@ -387,13 +428,6 @@ private:
     static void framebufferResizeCallback(GLFWwindow* window_, int width_, int height_);
 
     /**
-        Allocates the necessary buffers (vertex data, index data, etc.)
-
-        @return        Returns VK_SC_SUCCESS on success
-    */
-    VK_STATUS_CODE allocateNecessaryBuffers(void);
-
-    /**
         Creates uniform buffers
 
         @return        Returns VK_SC_SUCCESS on success
@@ -406,13 +440,6 @@ private:
         @return        Returns VK_SC_SUCCESS on success
     */
     VK_STATUS_CODE updateUniformBuffers();
-
-    /**
-        Loads and generates necessary textures
-
-        @return        Returns VK_SC_SUCCESS on success
-    */
-    VK_STATUS_CODE createTextureImages(void);
 
     /**
         Creates a camera object

@@ -67,6 +67,8 @@ namespace logger {
         int Min         = local_time.tm_min;
         int Sec         = local_time.tm_sec;
 
+        std::thread::id thisThread = std::this_thread::get_id();
+
         switch (log_) {
         case ERROR_LOG:
             if (countError == 0) {
@@ -79,18 +81,20 @@ namespace logger {
                 << Year << "   "
                 << Hour << ":"
                 << Min << ":"
-                << Sec << "        ===        "
+                << Sec << " in thread "
+                << thisThread << "        ===        "
                 << "CRITICAL: "
                 << msg_ << std::endl;
 
                 stream.close();
-#if defined VK_DEVELOPMENT && (defined WIN_64 || WIN_32)
+#if (defined VK_DEVELOPMENT || defined VK_RELEASE_CONSOLE) && (defined WIN_64 || WIN_32)
                 std::cerr << green << Day << white << ":"
                     << green << Month << white << ":"
                     << green << Year << white << "   "
                     << green << Hour << white << ":"
                     << green << Min << white << ":"
-                    << green << Sec << white << "        ===        "
+                    << green << Sec << yellow << " in thread "
+                    << thisThread << "        ===        "
                     << red << "CRITICAL: "
                     << blue << msg_ << white << std::endl;
 #else
@@ -99,7 +103,8 @@ namespace logger {
                     << Year << "   "
                     << Hour << ":"
                     << Min << ":"
-                    << Sec << "        ===        "
+                    << Sec << " in thread "
+                    << thisThread << "        ===        "
                     << "CRITICAL: "
                     << msg_ << std::endl;
 #endif
@@ -113,18 +118,20 @@ namespace logger {
                     << Year << "   "
                     << Hour << ":"
                     << Min << ":"
-                    << Sec << "        ===        "
+                    << Sec << " in thread "
+                    << thisThread << "        ===        "
                     << "CRITICAL: "
                     << msg_ << std::endl;
 
                 stream.close();
-#if defined VK_DEVELOPMENT && (defined WIN_64 || WIN_32)
+#if (defined VK_DEVELOPMENT || defined VK_RELEASE_CONSOLE) && (defined WIN_64 || WIN_32)
                 std::cerr << green << Day << white << ":"
                     << green << Month << white << ":"
                     << green << Year << white << "   "
                     << green << Hour << white << ":"
                     << green << Min << white << ":"
-                    << green << Sec << white << "        ===        "
+                    << green << Sec << yellow << " in thread "
+                    << thisThread << "        ===        "
                     << red << "CRITICAL: "
                     << blue << msg_ << white << std::endl;
 #else
@@ -133,7 +140,8 @@ namespace logger {
                     << Year << "   "
                     << Hour << ":"
                     << Min << ":"
-                    << Sec << "        ===        "
+                    << Sec << " in thread "
+                    << thisThread << "        ===        "
                     << "CRITICAL: "
                     << msg_ << std::endl;
 #endif
@@ -147,7 +155,8 @@ namespace logger {
                 << Year << "   "
                 << Hour << ":"
                 << Min << ":"
-                << Sec << "        ===        "
+                << Sec << " in thread "
+                << thisThread << "        ===        "
                 << msg_ << std::endl;
 
             stream.close();
@@ -163,17 +172,19 @@ namespace logger {
                     << Year << "   "
                     << Hour << ":"
                     << Min << ":"
-                    << Sec << "        ===        "
+                    << Sec << " in thread "
+                    << thisThread << "        ===        "
                     << msg_ << std::endl;
 
                 stream.close();
-#if defined VK_DEVELOPMENT && (defined WIN_64 || WIN_32)
+#if (defined VK_DEVELOPMENT || defined VK_RELEASE_CONSOLE) && (defined WIN_64 || WIN_32)
                 std::cout << green << Day << white << ":"
                     << green << Month << white << ":"
                     << green << Year << white << "   "
                     << green << Hour << white << ":"
                     << green << Min << white << ":"
-                    << green << Sec << white << "        ===        "
+                    << green << Sec << yellow << " in thread "
+                    << thisThread << white << "        ===        "
                     << blue << msg_ << white << std::endl;
 #else
                 std::cout << Day << ":"
@@ -181,7 +192,8 @@ namespace logger {
                     << Year << "   "
                     << Hour << ":"
                     << Min << ":"
-                    << Sec << "        ===        "
+                    << Sec << " in thread "
+                    << thisThread << "        ===        "
                     << msg_ << std::endl;
 #endif
             }
@@ -194,17 +206,19 @@ namespace logger {
                     << Year << "   "
                     << Hour << ":"
                     << Min << ":"
-                    << Sec << "        ===        "
+                    << Sec << " in thread "
+                    << thisThread << "        ===        "
                     << msg_ << std::endl;
 
                 stream.close();
-#if defined VK_DEVELOPMENT && (defined WIN_64 || WIN_32)
+#if (defined VK_DEVELOPMENT || defined VK_RELEASE_CONSOLE) && (defined WIN_64 || WIN_32)
                 std::cout << green << Day << white << ":"
                     << green << Month << white << ":"
                     << green << Year << white << "   "
                     << green << Hour << white << ":"
                     << green << Min << white << ":"
-                    << green << Sec << white << "        ===        "
+                    << green << Sec << yellow << " in thread "
+                    << thisThread << white << "        ===        "
                     << blue << msg_ << white << std::endl;
 #else
                 std::cout << Day << ":"
@@ -212,7 +226,8 @@ namespace logger {
                     << Year << "   "
                     << Hour << ":"
                     << Min << ":"
-                    << Sec << "        ===        "
+                    << Sec << " in thread "
+                    << thisThread << "        ===        "
                     << msg_ << std::endl;
 #endif
             }
