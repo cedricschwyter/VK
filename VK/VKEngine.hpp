@@ -53,6 +53,7 @@
 #include "Descriptor.hpp"
 #include "DescriptorSet.hpp"
 #include "ModelInfo.cpp"
+#include "Queue.cpp"
 
 class VKEngine {
 public:
@@ -63,8 +64,6 @@ public:
     std::vector< VkImage >                  swapchainImages;
     VkFormat                                swapchainImageFormat;
     VkExtent2D                              swapchainImageExtent;
-    VkCommandPool                           standardCommandPool;
-    VkQueue                                 graphicsQueue                           = VK_NULL_HANDLE;
     BaseCamera*                             camera;
     VkSampleCountFlagBits                   MSAASampleCount                         = VK_SAMPLE_COUNT_1_BIT;
 
@@ -171,6 +170,8 @@ private:
 
     std::vector< ModelInfo >                modelLoadingQueue;
     std::vector< std::thread* >             modelLoadingQueueThreads;
+
+    std::vector< std::thread* >             renderThreads;
 
     /**
         Initializes the windowing library
@@ -496,5 +497,10 @@ private:
         @return     Returns VK_SC_SUCCESS on success
     */
     VK_STATUS_CODE loadModelsAndVertexData(void);
+
+    /**
+        Executes commands for multithreaded image presentation
+    */
+    void multithreadedNextSwapchainImage(void);
 
 };

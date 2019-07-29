@@ -245,13 +245,18 @@ VK_STATUS_CODE VKEngine::clean() {
         vkDestroySemaphore(logicalDevice, swapchainImageAvailableSemaphores[i], allocator);
         vkDestroyFence(logicalDevice, inFlightFences[i], allocator);
     }
-    vkDestroyFence(logicalDevice, vk::copyFence, allocator);
+    vkDestroyFence(logicalDevice, vk::graphicsFence, allocator);
+    vkDestroyFence(logicalDevice, vk::transferFence, allocator);
     logger::log(EVENT_LOG, "Successfully destroyed sync-objects");
 
+    std::unique_lock< std::mutex > transferLock(vk::transferMutex);
     vkDestroyCommandPool(logicalDevice, vk::transferCommandPool, allocator);
+    transferLock.unlock();
     logger::log(EVENT_LOG, "Successfully destroyed command pool");
 
-    vkDestroyCommandPool(logicalDevice, standardCommandPool, allocator);
+    std::unique_lock< std::mutex > graphicsLock(vk::graphicsMutex);
+    vkDestroyCommandPool(logicalDevice, vk::graphicsCommandPool, allocator);
+    graphicsLock.unlock();
     logger::log(EVENT_LOG, "Successfully destroyed command pool");
 
     vkDestroyDevice(logicalDevice, allocator);
@@ -694,7 +699,7 @@ VK_STATUS_CODE VKEngine::createLogicalDeviceFromPhysicalDevice() {
         logicalDevice, 
         family.graphicsFamilyIndex.value(), 
         0, 
-        &graphicsQueue
+        &vk::graphicsQueue
         );
     logger::log(EVENT_LOG, "Successfully retrieved queue handle for graphics queue");
 
@@ -1301,13 +1306,15 @@ VK_STATUS_CODE VKEngine::allocateCommandPools() {
     commandPoolCreateInfo.sType                            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     commandPoolCreateInfo.queueFamilyIndex                 = family.graphicsFamilyIndex.value();
 
+    std::unique_lock< std::mutex > graphicsLock(vk::graphicsMutex);
     VkResult result = vkCreateCommandPool(
         logicalDevice,
         &commandPoolCreateInfo,
         allocator,
-        &standardCommandPool
+        &vk::graphicsCommandPool
         );
     ASSERT(result, "Failed to create command pool", VK_SC_COMMAND_POOL_ALLOCATION_ERROR);
+    graphicsLock.unlock();
 
     logger::log(EVENT_LOG, "Successfully allocated command pool");
 
@@ -1317,12 +1324,14 @@ VK_STATUS_CODE VKEngine::allocateCommandPools() {
     commandPoolCreateInfo.sType                            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     commandPoolCreateInfo.queueFamilyIndex                 = family.transferFamilyIndex.value();
 
+    std::unique_lock< std::mutex > transferLock(vk::transferMutex);
     result = vkCreateCommandPool(
         logicalDevice,
         &commandPoolCreateInfo,
         allocator,
         &vk::transferCommandPool
         );
+    transferLock.unlock();
 
     logger::log(EVENT_LOG, "Successfully allocated command pool");
 
@@ -1336,9 +1345,10 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
     standardCommandBuffers.resize(swapchainFramebuffers.size());        // For every frame in the swapchain, create a command buffer
 
+    std::scoped_lock< std::mutex > graphicsLock(vk::graphicsMutex);
     VkCommandBufferAllocateInfo commandBufferAllocateInfo          = {};
     commandBufferAllocateInfo.sType                                = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    commandBufferAllocateInfo.commandPool                          = standardCommandPool;
+    commandBufferAllocateInfo.commandPool                          = vk::graphicsCommandPool;
     commandBufferAllocateInfo.level                                = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     commandBufferAllocateInfo.commandBufferCount                   = static_cast< uint32_t >(standardCommandBuffers.size());
 
@@ -1449,6 +1459,7 @@ VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
     VkSubmitInfo submitInfo                            = {};
     submitInfo.sType                                   = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
+    std::unique_lock< std::mutex > lock(vk::graphicsMutex);
     VkSemaphore waitSemaphores[]                       = {swapchainImageAvailableSemaphores[currentSwapchainImage]};
     VkPipelineStageFlags waitStages[]                  = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
     submitInfo.waitSemaphoreCount                      = 1;
@@ -1456,13 +1467,14 @@ VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
     submitInfo.pWaitDstStageMask                       = waitStages;
     submitInfo.commandBufferCount                      = 1;
     submitInfo.pCommandBuffers                         = &standardCommandBuffers[swapchainImageIndex];
+    lock.unlock();
 
     VkSemaphore signalSemaphores[]                     = {renderingCompletedSemaphores[currentSwapchainImage]};
     submitInfo.signalSemaphoreCount                    = 1;
     submitInfo.pSignalSemaphores                       = signalSemaphores;
 
     result = vkQueueSubmit(
-        graphicsQueue,
+        vk::graphicsQueue,
         1,
         &submitInfo,
         inFlightFences[currentSwapchainImage]
@@ -1546,9 +1558,17 @@ VK_STATUS_CODE VKEngine::initializeSynchronizationObjects() {
         logicalDevice,
         &fenceCreateInfo,
         allocator,
-        &vk::copyFence
+        &vk::graphicsFence
         );
-    logger::log(EVENT_LOG, "Successfully initialized copy buffer fence");
+    logger::log(EVENT_LOG, "Successfully initialized graphics fence");
+
+    result = vkCreateFence(
+        logicalDevice,
+        &fenceCreateInfo,
+        allocator,
+        &vk::transferFence
+        );
+    logger::log(EVENT_LOG, "Successfully initialized transfer fence");
 
     logger::log(EVENT_LOG, "Successfully initialized sync-objects");
 
@@ -1617,12 +1637,14 @@ VK_STATUS_CODE VKEngine::cleanSwapchain() {
     }
     logger::log(EVENT_LOG, "Successfully destroyed framebuffers");
 
+    std::unique_lock< std::mutex > lock(vk::graphicsMutex);
     vkFreeCommandBuffers(
         logicalDevice,
-        standardCommandPool,
+        vk::graphicsCommandPool,
         static_cast< uint32_t >(standardCommandBuffers.size()),
         standardCommandBuffers.data()
         );
+    lock.unlock();
     logger::log(EVENT_LOG, "Successfully freed command buffers");
 
     standardPipeline.destroy();
@@ -1712,12 +1734,14 @@ void VKEngine::processKeyboardInput() {
 
         polygonMode = VK_POLYGON_MODE_FILL;
         vkDeviceWaitIdle(logicalDevice);
+        std::unique_lock< std::mutex > lock(vk::graphicsMutex);
         vkFreeCommandBuffers(
             logicalDevice,
-            standardCommandPool,
+            vk::graphicsCommandPool,
             static_cast< uint32_t >(standardCommandBuffers.size()),
             standardCommandBuffers.data()
-        );
+            );
+        lock.unlock();
         logger::log(EVENT_LOG, "Successfully freed command buffers");
         delete standardDescriptorLayout;
         standardDescriptors.clear();
@@ -1739,12 +1763,14 @@ void VKEngine::processKeyboardInput() {
 
         polygonMode = VK_POLYGON_MODE_LINE;
         vkDeviceWaitIdle(logicalDevice);
+        std::unique_lock< std::mutex > lock(vk::graphicsMutex);
         vkFreeCommandBuffers(
             logicalDevice,
-            standardCommandPool,
+            vk::graphicsCommandPool,
             static_cast< uint32_t >(standardCommandBuffers.size()),
             standardCommandBuffers.data()
-        );
+            );
+        lock.unlock();
         logger::log(EVENT_LOG, "Successfully freed command buffers");
         delete standardDescriptorLayout;
         standardDescriptors.clear();
@@ -1766,12 +1792,14 @@ void VKEngine::processKeyboardInput() {
 
         polygonMode = VK_POLYGON_MODE_POINT;
         vkDeviceWaitIdle(logicalDevice);
+        std::unique_lock< std::mutex > lock(vk::graphicsMutex);
         vkFreeCommandBuffers(
             logicalDevice,
-            standardCommandPool,
+            vk::graphicsCommandPool,
             static_cast< uint32_t >(standardCommandBuffers.size()),
             standardCommandBuffers.data()
-        );
+            );
+        lock.unlock();
         logger::log(EVENT_LOG, "Successfully freed command buffers");
         delete standardDescriptorLayout;
         standardDescriptors.clear();
@@ -1783,63 +1811,6 @@ void VKEngine::processKeyboardInput() {
         }
         descriptorSets.clear();
         logger::log(EVENT_LOG, "Successfully destroyed descriptor sets");
-        standardPipeline.destroy();
-        ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
-        ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
-
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
-
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
-
-        polygonMode = VK_POLYGON_MODE_FILL;
-        vkDeviceWaitIdle(logicalDevice);
-        vkFreeCommandBuffers(
-            logicalDevice,
-            standardCommandPool,
-            static_cast<uint32_t>(standardCommandBuffers.size()),
-            standardCommandBuffers.data()
-        );
-        logger::log(EVENT_LOG, "Successfully freed command buffers");
-        standardPipeline.destroy();
-        ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
-        ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
-
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
-
-        polygonMode = VK_POLYGON_MODE_LINE;
-        vkDeviceWaitIdle(logicalDevice);
-        vkFreeCommandBuffers(
-            logicalDevice,
-            standardCommandPool,
-            static_cast<uint32_t>(standardCommandBuffers.size()),
-            standardCommandBuffers.data()
-        );
-        logger::log(EVENT_LOG, "Successfully freed command buffers");
-        standardPipeline.destroy();
-        ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
-        ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
-
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
-
-        polygonMode = VK_POLYGON_MODE_POINT;
-        vkDeviceWaitIdle(logicalDevice);
-        vkFreeCommandBuffers(
-            logicalDevice,
-            standardCommandPool,
-            static_cast<uint32_t>(standardCommandBuffers.size()),
-            standardCommandBuffers.data()
-        );
-        logger::log(EVENT_LOG, "Successfully freed command buffers");
         standardPipeline.destroy();
         ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
         ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
@@ -1948,6 +1919,7 @@ VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
     for (auto thread : modelLoadingQueueThreads) {
     
         thread->join();
+        delete thread;
     
     }
 
@@ -1969,5 +1941,22 @@ VK_STATUS_CODE VKEngine::push(ModelInfo info_) {
     modelLoadingQueue.push_back(info_);
 
     return vk::errorCodeBuffer;
+
+}
+
+void VKEngine::multithreadedNextSwapchainImage() {
+
+    renderThreads.resize(swapchainImages.size());
+
+    for (uint32_t i = 0; i < renderThreads.size(); i++) {
+    
+        renderThreads[i] = new std::thread([=]() {
+            
+
+            
+        });
+
+    
+    }
 
 }

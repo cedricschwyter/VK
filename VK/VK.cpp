@@ -20,8 +20,6 @@ namespace vk {
     const unsigned int                  HEIGHT                      = 720;
     const char*                         TITLE                       = "VK by D3PSI";
     const unsigned int                  MAX_IN_FLIGHT_FRAMES        = 3;
-    VkQueue                             transferQueue               = VK_NULL_HANDLE;
-    VkCommandPool                       transferCommandPool         = VK_NULL_HANDLE;
     const double                        YAW                         = 0.0;
     const double                        PITCH                       = 0.0;
     const double                        ROLL                        = 0.0;
@@ -29,7 +27,14 @@ namespace vk {
     const double                        SENS                        = 0.1;
     const double                        FOV                         = 45.0;
 
-    VkFence                             copyFence;
+    VkCommandPool                       vk::graphicsCommandPool     = VK_NULL_HANDLE;
+    VkQueue                             vk::graphicsQueue           = VK_NULL_HANDLE;
+    VkFence                             graphicsFence;
+    std::mutex                          graphicsMutex;
+    VkQueue                             transferQueue               = VK_NULL_HANDLE;
+    VkCommandPool                       transferCommandPool         = VK_NULL_HANDLE;
+    VkFence                             transferFence;
+    std::mutex                          transferMutex;
 
     VK_STATUS_CODE init() {
     
@@ -161,56 +166,51 @@ namespace vk {
 
     void copyBuffer(VkBuffer srcBuf_, VkBuffer dstBuf_, VkDeviceSize size_) {
 
-        vkWaitForFences(
-            vk::engine->logicalDevice,
-            1,
-            &copyFence,
-            VK_TRUE,
-            std::numeric_limits< uint64_t >::max()
-            );
-        vkResetFences(vk::engine->logicalDevice, 1, &copyFence);
-
-        VkCommandBufferAllocateInfo allocateInfo            = {};
-        allocateInfo.sType                                  = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocateInfo.level                                  = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocateInfo.commandPool                            = transferCommandPool;
-        allocateInfo.commandBufferCount                     = 1;
-
-        VkCommandBuffer commandBuffer;
-        vkAllocateCommandBuffers(engine->logicalDevice, &allocateInfo, &commandBuffer);
-
-        VkCommandBufferBeginInfo commandBufferBeginInfo     = {};
-        commandBufferBeginInfo.sType                        = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        commandBufferBeginInfo.flags                        = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT; 
-
-        vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
+        VkCommandBuffer commandBuffer = startCommandBuffer(TRANSFER_QUEUE);
 
         VkBufferCopy copy       = {};
         copy.srcOffset          = 0;
         copy.dstOffset          = 0;
         copy.size               = size_;
+        
+        std::unique_lock< std::mutex > lock(transferMutex);
         vkCmdCopyBuffer(commandBuffer, srcBuf_, dstBuf_, 1, &copy);
+        lock.unlock();
 
-        vkEndCommandBuffer(commandBuffer);
-
-        VkSubmitInfo submitInfo             = {};
-        submitInfo.sType                    = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.commandBufferCount       = 1;
-        submitInfo.pCommandBuffers          = &commandBuffer;
-
-        vkQueueSubmit(transferQueue, 1, &submitInfo, copyFence);
-        vkQueueWaitIdle(transferQueue);
-
-        vkFreeCommandBuffers(engine->logicalDevice, transferCommandPool, 1, &commandBuffer);
+        endCommandBuffer(commandBuffer, TRANSFER_QUEUE);
 
     }
 
-    VkCommandBuffer startCommandBuffer(VkCommandPool commandPool_) {
+    VkCommandBuffer startCommandBuffer(Queue queue_) {
 
+        VkCommandPool   commandPool     = VK_NULL_HANDLE;
+        std::mutex*     mutex           = nullptr;
+
+        if (queue_ == TRANSFER_QUEUE) {
+
+            std::scoped_lock< std::mutex > lock(transferMutex);
+            commandPool = transferCommandPool;
+            mutex       = &transferMutex;
+        
+        }
+        else if (queue_ == GRAPHICS_QUEUE) {
+
+            std::scoped_lock< std::mutex > lock(graphicsMutex);
+            commandPool = graphicsCommandPool;
+            mutex       = &graphicsMutex;
+        
+        }
+        else {
+        
+            logger::log(ERROR_LOG, "Command buffer was allocated from unsupported command pool");
+        
+        }
+
+        std::scoped_lock< std::mutex > lock(*mutex);
         VkCommandBufferAllocateInfo allocInfo   = {};
         allocInfo.sType                         = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.level                         = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandPool                   = commandPool_;
+        allocInfo.commandPool                   = commandPool;
         allocInfo.commandBufferCount            = 1;
 
         VkCommandBuffer commandBuffer;
@@ -226,8 +226,40 @@ namespace vk {
 
     }
 
-    void endCommandBuffer(VkCommandBuffer commandBuffer_, VkCommandPool commandPool_, VkQueue queue_) {
+    void endCommandBuffer(VkCommandBuffer commandBuffer_, Queue queue_) {
 
+        waitForQueue(queue_);
+
+        VkQueue         queue       = VK_NULL_HANDLE;
+        VkFence         fence       = VK_NULL_HANDLE;
+        VkCommandPool   commandPool = VK_NULL_HANDLE;
+        std::mutex*     mutex       = nullptr;
+
+        if (queue_ == TRANSFER_QUEUE) {
+        
+            std::scoped_lock< std::mutex > lock(transferMutex);
+            queue           = transferQueue;
+            fence           = transferFence;
+            mutex           = &transferMutex;
+            commandPool     = transferCommandPool;
+        
+        }
+        else if (queue_ == GRAPHICS_QUEUE) {
+
+            std::scoped_lock< std::mutex > lock(graphicsMutex);
+            queue           = graphicsQueue;
+            fence           = graphicsFence;
+            mutex           = &graphicsMutex;
+            commandPool     = graphicsCommandPool;
+        
+        } 
+        else {
+        
+            logger::log(ERROR_LOG, "Command buffer was submitted to an unsupported queue");
+
+        }
+
+        std::scoped_lock< std::mutex > lock(*mutex);
         vkEndCommandBuffer(commandBuffer_);
 
         VkSubmitInfo submitInfo         = {};
@@ -236,17 +268,17 @@ namespace vk {
         submitInfo.pCommandBuffers      = &commandBuffer_;
 
         vkQueueSubmit(
-            queue_,
+            queue,
             1,
             &submitInfo,
-            VK_NULL_HANDLE
+            fence
             );
 
-        vkQueueWaitIdle(queue_);
+        vkQueueWaitIdle(queue);
 
         vkFreeCommandBuffers(
             engine->logicalDevice,
-            commandPool_,
+            commandPool,
             1,
             &commandBuffer_
             );
@@ -261,7 +293,7 @@ namespace vk {
         uint32_t        mipLevels_
         ) {
 
-        VkCommandBuffer commandBuffer               = startCommandBuffer(vk::engine->standardCommandPool);
+        VkCommandBuffer commandBuffer               = startCommandBuffer(GRAPHICS_QUEUE);
 
         VkImageMemoryBarrier barrier                = {};
         barrier.sType                               = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -338,6 +370,8 @@ namespace vk {
 
         }
 
+
+        std::unique_lock< std::mutex > lock(graphicsMutex);
         vkCmdPipelineBarrier(
             commandBuffer,
             sourceStage,
@@ -350,8 +384,12 @@ namespace vk {
             1,
             &barrier
             );
+        lock.unlock();
 
-        endCommandBuffer(commandBuffer, vk::engine->standardCommandPool, vk::engine->graphicsQueue);
+        endCommandBuffer(
+            commandBuffer, 
+            GRAPHICS_QUEUE
+            );
 
     }
 
@@ -362,7 +400,7 @@ namespace vk {
         uint32_t        height_
         ) {
 
-        VkCommandBuffer commandBuffer               = startCommandBuffer(transferCommandPool);
+        VkCommandBuffer commandBuffer               = startCommandBuffer(TRANSFER_QUEUE);
 
         VkBufferImageCopy copyRegion                = {};
         copyRegion.bufferOffset                     = 0;
@@ -377,6 +415,7 @@ namespace vk {
         copyRegion.imageOffset                      = { 0, 0, 0 };
         copyRegion.imageExtent                      = { width_, height_, 1 };
 
+        std::unique_lock< std::mutex > lock(transferMutex);
         vkCmdCopyBufferToImage(
             commandBuffer,
             buffer_,
@@ -385,8 +424,9 @@ namespace vk {
             1,
             &copyRegion
             );
+        lock.unlock();
 
-        endCommandBuffer(commandBuffer, transferCommandPool, transferQueue);
+        endCommandBuffer(commandBuffer, TRANSFER_QUEUE);
 
     }
 
@@ -559,9 +599,47 @@ namespace vk {
     VK_STATUS_CODE push(ModelInfo info_) {
 
         engine->push(info_);
+        logger::log(EVENT_LOG, "Pushing model at path " + std::string(info_.path) + " to loading queue");
 
         return vk::errorCodeBuffer;
 
+    }
+
+    void waitForQueue(Queue queue_) {
+    
+        VkFence         fence       = VK_NULL_HANDLE;
+        std::mutex*     mutex       = nullptr;
+
+        if (queue_ == TRANSFER_QUEUE) {
+
+            std::scoped_lock< std::mutex > lock(transferMutex);
+            fence = transferFence;
+            mutex = &transferMutex;
+        
+        }
+        else if (queue_ == GRAPHICS_QUEUE) {
+
+            std::scoped_lock< std::mutex > lock(graphicsMutex);
+            fence = graphicsFence;
+            mutex = &graphicsMutex;
+        
+        }
+        else {
+        
+            logger::log(ERROR_LOG, "Waiting for unsupported queue");
+        
+        }
+
+        std::scoped_lock< std::mutex > lock(*mutex);
+        vkWaitForFences(
+            engine->logicalDevice,
+            1,
+            &fence,
+            VK_TRUE,
+            std::numeric_limits< uint64_t >::max()
+            );
+        vkResetFences(engine->logicalDevice, 1, &fence);
+    
     }
 
 }

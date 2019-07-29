@@ -41,7 +41,14 @@ namespace vk {
     extern const double                         SENS;
     extern const double                         FOV;
 
-    extern VkFence                              copyFence;
+    extern VkCommandPool                        graphicsCommandPool;
+    extern VkQueue                              graphicsQueue;
+    extern VkFence                              graphicsFence;
+    extern std::mutex                           graphicsMutex;
+    extern VkQueue                              transferQueue;
+    extern VkCommandPool                        transferCommandPool;
+    extern VkFence                              transferFence;
+    extern std::mutex                           transferMutex;
 
     /**
         Initializes the VKEngine object
@@ -131,20 +138,19 @@ namespace vk {
     /**
         Starts a command buffer
 
-        @param      commandPool_        The command pool to allocate the command buffer from
+        @param      queue_          The queue to submit the command buffer on
 
         @return     Returns a command buffer handle
     */
-    VkCommandBuffer startCommandBuffer(VkCommandPool commandPool_);
+    VkCommandBuffer startCommandBuffer(Queue queue_);
 
     /**
         Ends a command buffer
 
-        @param      commandPool_        The command pool the command buffer is allocated from
-        @param      queue_              The queue to submit the command buffer on
         @param      commandBuffer_      The command buffer to end
+        @param      queue_              The queue to submit the command buffer on
     */
-    void endCommandBuffer(VkCommandBuffer commandBuffer_, VkCommandPool commandPool_, VkQueue queue_);
+    void endCommandBuffer(VkCommandBuffer commandBuffer_, Queue queue_);
 
     /**
         Executes an image layout transition operation
@@ -271,5 +277,12 @@ namespace vk {
         @return     Returns VK_SC_SUCCESS on success
     */
     VK_STATUS_CODE push(ModelInfo info_);
+
+    /**
+        Waits on a queue to signal their fence
+
+        @param      queue_      The queue to wait on
+    */
+    void waitForQueue(Queue queue_);
 
 }

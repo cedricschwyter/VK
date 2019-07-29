@@ -74,7 +74,7 @@ TextureImage::TextureImage(
         static_cast< uint32_t >(w),
         static_cast< uint32_t >(h)
         );
-
+    
     vk::imageLayoutTransition(
         img,
         VK_FORMAT_R8G8B8A8_UNORM, 
