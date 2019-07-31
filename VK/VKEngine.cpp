@@ -222,8 +222,14 @@ VK_STATUS_CODE VKEngine::clean() {
 
     for (auto model : models) {
     
-        delete model;
-        logger::log(EVENT_LOG, "Successfully destroyed model");
+        std::thread* t0 = new std::thread([model]() {
+            
+                delete model;
+                logger::log(EVENT_LOG, "Successfully destroyed model");
+            
+            });
+        modelLoadingQueueThreads.clear();
+        modelLoadingQueueThreads.push_back(t0);
     
     }
     logger::log(EVENT_LOG, "Successfully destroyed models");
@@ -259,6 +265,13 @@ VK_STATUS_CODE VKEngine::clean() {
     vkDestroyCommandPool(logicalDevice, vk::graphicsCommandPool, allocator);
     graphicsLock.unlock();
     logger::log(EVENT_LOG, "Successfully destroyed command pool");
+
+    for (auto thread : modelLoadingQueueThreads) {
+    
+        thread->join();
+        delete thread;
+    
+    }
 
     vkDestroyDevice(logicalDevice, allocator);
     logger::log(EVENT_LOG, "Successfully destroyed device");
