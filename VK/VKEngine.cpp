@@ -244,6 +244,7 @@ VK_STATUS_CODE VKEngine::clean() {
         vkDestroySemaphore(logicalDevice, renderingCompletedSemaphores[i], allocator);
         vkDestroySemaphore(logicalDevice, swapchainImageAvailableSemaphores[i], allocator);
         vkDestroyFence(logicalDevice, inFlightFences[i], allocator);
+
     }
     vkDestroyFence(logicalDevice, vk::graphicsFence, allocator);
     vkDestroyFence(logicalDevice, vk::transferFence, allocator);
@@ -1368,7 +1369,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
         commandBufferBeginInfo.sType                               = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         commandBufferBeginInfo.flags                               = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 
-        result = vkBeginCommandBuffer(standardCommandBuffers[i],&commandBufferBeginInfo);
+        result = vkBeginCommandBuffer(standardCommandBuffers[i], &commandBufferBeginInfo);
         ASSERT(result, "Failed to allocate command buffer", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 
         VkRenderPassBeginInfo renderPassBeginInfo                  = {};
@@ -1428,7 +1429,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 }
 
 VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
-
+    
     vkWaitForFences(
         logicalDevice,
         1,
@@ -1449,7 +1450,10 @@ VK_STATUS_CODE VKEngine::showNextSwapchainImage() {
         );
     if (result == VK_ERROR_OUT_OF_DATE_KHR) {
     
-        return recreateSwapchain();
+        recreateSwapchain();
+
+        return VK_SC_SWAPCHAIN_RECREATED;
+
     
     }
     ASSERT(result, "Failed to acquire swapchain image", VK_SC_SWAPCHAIN_IMAGE_ACQUIRE_ERROR);
@@ -1560,6 +1564,7 @@ VK_STATUS_CODE VKEngine::initializeSynchronizationObjects() {
         allocator,
         &vk::graphicsFence
         );
+    ASSERT(result, "Failed to create fence", VK_SC_FENCE_CREATION_ERROR);
     logger::log(EVENT_LOG, "Successfully initialized graphics fence");
 
     result = vkCreateFence(
@@ -1568,6 +1573,7 @@ VK_STATUS_CODE VKEngine::initializeSynchronizationObjects() {
         allocator,
         &vk::transferFence
         );
+    ASSERT(result, "Failed to create fence", VK_SC_FENCE_CREATION_ERROR);
     logger::log(EVENT_LOG, "Successfully initialized transfer fence");
 
     logger::log(EVENT_LOG, "Successfully initialized sync-objects");
