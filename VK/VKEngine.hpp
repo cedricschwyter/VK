@@ -22,7 +22,9 @@
 #include <set>
 #include <map>
 #include <thread>
+#include <condition_variable>
 #include <algorithm>
+#include <queue>
 #include <mutex>
 #include <fstream>
 #include <string>
@@ -54,6 +56,7 @@
 #include "DescriptorSet.hpp"
 #include "ModelInfo.cpp"
 #include "Queue.cpp"
+#include "AssetLoader.hpp"
 
 class VKEngine {
 public:
@@ -66,11 +69,16 @@ public:
     VkExtent2D                              swapchainImageExtent;
     BaseCamera*                             camera;
     VkSampleCountFlagBits                   MSAASampleCount                         = VK_SAMPLE_COUNT_1_BIT;
+    std::queue< ModelInfo >                 modelLoadingQueue;
+    std::condition_variable                 modelLoadingQueueCondVar;
+    std::mutex                              modelLoadingQueueMutex;
+    bool                                    done                                    = false;
+    bool                                    notified                                = false;
 
     /**
         Default constructor
     */
-    VKEngine(void) = default;
+    VKEngine(void);
 
     /**
         Default destructor
@@ -91,6 +99,25 @@ public:
         @return        Returns LOGGER_SC_UNKNOWN_ERROR on error
     */
     LOGGER_STATUS_CODE initLogger(void);
+
+    /**
+        Initializes the loading screen
+    */
+    void initLoadingScreen(void);
+
+    /**
+        Initializes the windowing library
+
+        @return        Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE initWindow(void);
+
+    /**
+        Initializes the Vulkan API
+
+        @return        Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE initVulkan(void);
     
     /**
         Adds a model to the model loading queue
@@ -164,28 +191,14 @@ private:
     Descriptor                              diffuseSamplerDescriptor;
     bool                                    initialized                          = false;
     std::vector< Model* >                   models;
-    std::mutex                              modelsPushBackMutex;
     bool                                    firstTimeRecreation                  = true;
     std::vector< DescriptorSet* >           descriptorSets;
 
-    std::vector< ModelInfo >                modelLoadingQueue;
     std::vector< std::thread* >             modelLoadingQueueThreads;
+    std::vector< AssetLoader* >             assetLoaders;
+    uint32_t                                maxThreads                           = std::thread::hardware_concurrency();
 
     std::vector< std::thread* >             renderThreads;
-
-    /**
-        Initializes the windowing library
-
-        @return        Returns VK_SC_SUCCESS on success
-    */
-    VK_STATUS_CODE initWindow(void);
-
-    /**
-        Initializes the Vulkan API
-
-        @return        Returns VK_SC_SUCCESS on success
-    */
-    VK_STATUS_CODE initVulkan(void);
 
     /**
         Contains the main loop
@@ -299,11 +312,6 @@ private:
         @return        Returns false if the device does not support the VK_KHR_swapchain extensions
     */
     bool checkDeviceSwapchainExtensionSupport(VkPhysicalDevice device_);
-
-    /**
-        Initializes the loading screen
-    */
-    void initLoadingScreen(void);
 
     /**
         Queries the specified device's swap chain capabilities and details
@@ -502,5 +510,12 @@ private:
         Executes commands for multithreaded image presentation
     */
     void multithreadedNextSwapchainImage(void);
+
+    /**
+        Recreates the graphics pipelines
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE recreateGraphicsPipelines(void);
 
 };

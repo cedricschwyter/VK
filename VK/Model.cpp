@@ -1,5 +1,5 @@
 /**
-    Implementation the Model class
+    Implementation of the Model class
 
     @author       D3PSI
     @version      0.0.1 02.12.2019

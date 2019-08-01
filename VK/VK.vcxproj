@@ -264,6 +264,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ASSERT.cpp" />
+    <ClCompile Include="AssetLoader.cpp" />
     <ClCompile Include="BaseBuffer.cpp" />
     <ClCompile Include="BaseCamera.cpp" />
     <ClCompile Include="BaseImage.cpp" />
@@ -303,6 +304,7 @@
     <ClCompile Include="VKEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AssetLoader.hpp" />
     <ClInclude Include="BaseBuffer.hpp" />
     <ClInclude Include="BaseCamera.hpp" />
     <ClInclude Include="BaseImage.hpp" />

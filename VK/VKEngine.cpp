@@ -15,13 +15,20 @@
 #include <stb_image.h>
 
 
-void VKEngine::init(VK_STATUS_CODE* returnCodeAddr_) {
+VKEngine::VKEngine() {
+
+    ASSERT(initLogger(), "Logger initialization error", LOGGER_SC_UNKNOWN_ERROR);
 
     logger::log(START_LOG, "Initializing...");
     logger::log(EVENT_LOG, "Initializing loading screen...");
-    initLoadingScreen();
-    ASSERT(initWindow(), "Window initialization error", VK_SC_WINDOW_ERROR);
-    ASSERT(initVulkan(), "Vulkan initialization error", VK_SC_VULKAN_ERROR);
+
+}
+
+void VKEngine::init(VK_STATUS_CODE* returnCodeAddr_) {
+
+    done = true;
+    notified = true;
+    modelLoadingQueueCondVar.notify_all();
     ASSERT(loop(), "Vulkan runtime error", VK_SC_VULKAN_RUNTIME_ERROR);
     ASSERT(clean(), "Application cleanup error", VK_SC_CLEANUP_ERROR);
     logger::log(START_LOG, "Shutting down...");
@@ -127,7 +134,7 @@ VK_STATUS_CODE VKEngine::initWindow() {
 VK_STATUS_CODE VKEngine::initVulkan() {
 
     allocator = nullptr;
-
+    vk::loadingMutex.lock();
 
     ASSERT(createInstance(), "Failed to create instance", VK_SC_INSTANCE_CREATON_ERROR);
     ASSERT(debugUtilsMessenger(), "Failed to create debug utils messenger", VK_SC_DEBUG_UTILS_MESSENGER_CREATION_ERROR);
@@ -144,9 +151,11 @@ VK_STATUS_CODE VKEngine::initVulkan() {
     ASSERT(allocateUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
     ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
     ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
-    ASSERT(loadModelsAndVertexData(), "Failed to load models", VK_SC_RESOURCE_LOADING_ERROR);
+    std::thread t0(&VKEngine::loadModelsAndVertexData, this);
+    t0.join();
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
     ASSERT(createCamera(), "Failed to create camera", VK_SC_CAMERA_CREATION_ERROR);
+    vk::loadingMutex.unlock();
 
     if (!initialized) {
 
@@ -164,6 +173,8 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 }
 
 VK_STATUS_CODE VKEngine::loop() {
+
+    vk::loadingMutex.lock();
 
     logger::log(EVENT_LOG, "Entering application loop...");
 
@@ -211,6 +222,7 @@ VK_STATUS_CODE VKEngine::loop() {
     vkDeviceWaitIdle(logicalDevice);
 
     logger::log(EVENT_LOG, "Terminating...");
+    vk::loadingMutex.unlock();
 
     return vk::errorCodeBuffer;
 
@@ -265,13 +277,6 @@ VK_STATUS_CODE VKEngine::clean() {
     vkDestroyCommandPool(logicalDevice, vk::graphicsCommandPool, allocator);
     graphicsLock.unlock();
     logger::log(EVENT_LOG, "Successfully destroyed command pool");
-
-    for (auto thread : modelLoadingQueueThreads) {
-    
-        thread->join();
-        delete thread;
-    
-    }
 
     vkDestroyDevice(logicalDevice, allocator);
     logger::log(EVENT_LOG, "Successfully destroyed device");
@@ -1355,6 +1360,14 @@ VK_STATUS_CODE VKEngine::allocateCommandPools() {
 
 VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
+    if (!modelLoadingQueue.empty()) {
+    
+        std::this_thread::sleep_for(std::chrono::duration(std::chrono::milliseconds(1)));
+        /*std::unique_lock< std::mutex> lock(vk::engine->modelLoadingQueueMutex);
+        vk::engine->modelLoadingQueueCondVar.wait(lock);*/
+    
+    }
+
     logger::log(EVENT_LOG, "Allocating command buffers...");
 
     standardCommandBuffers.resize(swapchainFramebuffers.size());        // For every frame in the swapchain, create a command buffer
@@ -1752,87 +1765,24 @@ void VKEngine::processKeyboardInput() {
     if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
 
         polygonMode = VK_POLYGON_MODE_FILL;
-        vkDeviceWaitIdle(logicalDevice);
-        std::unique_lock< std::mutex > lock(vk::graphicsMutex);
-        vkFreeCommandBuffers(
-            logicalDevice,
-            vk::graphicsCommandPool,
-            static_cast< uint32_t >(standardCommandBuffers.size()),
-            standardCommandBuffers.data()
-            );
-        lock.unlock();
-        logger::log(EVENT_LOG, "Successfully freed command buffers");
-        delete standardDescriptorLayout;
-        standardDescriptors.clear();
-        for (auto descSet : descriptorSets) {
-
-            delete descSet;
-            logger::log(EVENT_LOG, "Successfully destroyed descriptor set");
-
-        }
-        descriptorSets.clear();
-        logger::log(EVENT_LOG, "Successfully destroyed descriptor sets");
-        standardPipeline.destroy();
-        ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
-        ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
+        std::thread t0(&VKEngine::recreateGraphicsPipelines, this);
+        t0.join();
 
     }
 
     if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
 
         polygonMode = VK_POLYGON_MODE_LINE;
-        vkDeviceWaitIdle(logicalDevice);
-        std::unique_lock< std::mutex > lock(vk::graphicsMutex);
-        vkFreeCommandBuffers(
-            logicalDevice,
-            vk::graphicsCommandPool,
-            static_cast< uint32_t >(standardCommandBuffers.size()),
-            standardCommandBuffers.data()
-            );
-        lock.unlock();
-        logger::log(EVENT_LOG, "Successfully freed command buffers");
-        delete standardDescriptorLayout;
-        standardDescriptors.clear();
-        for (auto descSet : descriptorSets) {
-
-            delete descSet;
-            logger::log(EVENT_LOG, "Successfully destroyed descriptor set");
-
-        }
-        descriptorSets.clear();
-        logger::log(EVENT_LOG, "Successfully destroyed descriptor sets");
-        standardPipeline.destroy();
-        ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
-        ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
+        std::thread t0(&VKEngine::recreateGraphicsPipelines, this);
+        t0.join();
 
     }
 
     if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
 
         polygonMode = VK_POLYGON_MODE_POINT;
-        vkDeviceWaitIdle(logicalDevice);
-        std::unique_lock< std::mutex > lock(vk::graphicsMutex);
-        vkFreeCommandBuffers(
-            logicalDevice,
-            vk::graphicsCommandPool,
-            static_cast< uint32_t >(standardCommandBuffers.size()),
-            standardCommandBuffers.data()
-            );
-        lock.unlock();
-        logger::log(EVENT_LOG, "Successfully freed command buffers");
-        delete standardDescriptorLayout;
-        standardDescriptors.clear();
-        for (auto descSet : descriptorSets) {
-
-            delete descSet;
-            logger::log(EVENT_LOG, "Successfully destroyed descriptor set");
-
-        }
-        descriptorSets.clear();
-        logger::log(EVENT_LOG, "Successfully destroyed descriptor sets");
-        standardPipeline.destroy();
-        ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
-        ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
+        std::thread t0(&VKEngine::recreateGraphicsPipelines, this);
+        t0.join();
 
     }
 
@@ -1921,24 +1871,21 @@ VK_STATUS_CODE VKEngine::allocateMSAABufferedImage() {
 
 VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
-    for (auto info : modelLoadingQueue) {
+    for (uint32_t i = 0; i < maxThreads; i++) {
     
-        std::thread* t0 = new std::thread([=]() {
-            
-                Model* model = new Model(info.path, info.pipeline, info.lib);
+        AssetLoader loader;
 
-                std::scoped_lock< std::mutex > lock(modelsPushBackMutex);
-                models.push_back(model);
-            
-            });
+        std::thread* t0 = new std::thread(std::ref(loader));
+        assetLoaders.push_back(&loader);
         modelLoadingQueueThreads.push_back(t0);
-    
+
     }
 
-    for (auto thread : modelLoadingQueueThreads) {
+    for (uint32_t i = 0; i < modelLoadingQueueThreads.size(); i++) {
     
-        thread->join();
-        delete thread;
+        modelLoadingQueueThreads[i]->join();
+        models.insert(models.end(), assetLoaders[i]->get().begin(), assetLoaders[i]->get().end());
+        delete modelLoadingQueueThreads[i];
     
     }
 
@@ -1946,10 +1893,12 @@ VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
 }
 
-
 VK_STATUS_CODE VKEngine::push(const char* path_) {
 
-    modelLoadingQueue.push_back({ path_, standardPipeline, VK_STANDARD_MODEL_LOADING_LIB });
+    std::unique_lock< std::mutex > lock(modelLoadingQueueMutex);
+    modelLoadingQueue.push({ path_, standardPipeline, VK_STANDARD_MODEL_LOADING_LIB });
+    notified = true;
+    modelLoadingQueueCondVar.notify_one();
 
     return vk::errorCodeBuffer;
 
@@ -1957,7 +1906,10 @@ VK_STATUS_CODE VKEngine::push(const char* path_) {
 
 VK_STATUS_CODE VKEngine::push(ModelInfo info_) {
 
-    modelLoadingQueue.push_back(info_);
+    std::unique_lock< std::mutex > lock(modelLoadingQueueMutex);
+    modelLoadingQueue.push(info_);
+    notified = true;
+    modelLoadingQueueCondVar.notify_one();
 
     return vk::errorCodeBuffer;
 
@@ -1977,5 +1929,35 @@ void VKEngine::multithreadedNextSwapchainImage() {
 
     
     }
+
+}
+
+VK_STATUS_CODE VKEngine::recreateGraphicsPipelines() {
+
+    vkDeviceWaitIdle(logicalDevice);
+    std::unique_lock< std::mutex > lock(vk::graphicsMutex);
+    vkFreeCommandBuffers(
+        logicalDevice,
+        vk::graphicsCommandPool,
+        static_cast<uint32_t>(standardCommandBuffers.size()),
+        standardCommandBuffers.data()
+        );
+    lock.unlock();
+    logger::log(EVENT_LOG, "Successfully freed command buffers");
+    delete standardDescriptorLayout;
+    standardDescriptors.clear();
+    for (auto descSet : descriptorSets) {
+
+        delete descSet;
+        logger::log(EVENT_LOG, "Successfully destroyed descriptor set");
+
+    }
+    descriptorSets.clear();
+    logger::log(EVENT_LOG, "Successfully destroyed descriptor sets");
+    standardPipeline.destroy();
+    ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
+    ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
+
+    return vk::errorCodeBuffer;
 
 }

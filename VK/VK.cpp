@@ -36,11 +36,20 @@ namespace vk {
     VkFence                             transferFence;
     std::mutex                          transferMutex;
 
+    std::mutex                          loadingMutex;
+
     VK_STATUS_CODE init() {
-    
+
         engine = new VKEngine();
-        ASSERT(engine->initLogger(), "Logger initialization error", LOGGER_SC_UNKNOWN_ERROR);
-    
+        engine->initLoadingScreen();
+        ASSERT(engine->initWindow(), "Window initialization error", VK_SC_WINDOW_ERROR);
+        std::thread t0([]() {
+
+                ASSERT(engine->initVulkan(), "Vulkan initialization error", VK_SC_VULKAN_ERROR);
+
+            });
+        t0.detach();
+
         return VK_SC_SUCCESS;
 
     }
