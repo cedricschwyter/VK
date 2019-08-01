@@ -12,8 +12,9 @@
 
 // Edit configuration here
 //#define VK_DEVELOPMENT      // enable this for verbose output
-#define VK_RELEASE          // enable this for performance
+//#define VK_RELEASE          // enable this for performance
 //#define VK_RELEASE_CONSOLE    // enbable this for performance with console
+#define VK_NO_LOG
 
 #define VK_WINDOW_MODE_WINDOWED
 //#define VK_WINDOW_MODE_FULLSCREEN
@@ -39,6 +40,11 @@
 #if !defined VK_DEVELOPMENT && !defined VK_RELEASE && !defined VK_RELEASE_CONSOLE
     #define VK_DEVELOPMENT
 #endif
+
+#ifdef VK_NO_LOG
+    #define VK_RELEASE
+#endif
+
 
 #if !defined VK_WINDOW_MODE_WINDOWED && !defined VK_WINDOW_MODE_FULLSCREEN && !defined VK_WINDOW_MODE_BORDERLESS
     #define VK_WINDOW_MODE_UNDEFINED

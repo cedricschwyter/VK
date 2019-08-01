@@ -30,7 +30,7 @@ namespace logger {
     std::mutex                streamBusy;
 
     LOGGER_STATUS_CODE init() {
-    
+#ifndef VK_NO_LOG
         if(_mkdir(LOG_DIR) >= 0) return LOGGER_SC_DIRECTORY_CREATION_ERROR;
         std::ofstream error;
         std::ofstream start;
@@ -41,14 +41,15 @@ namespace logger {
         start.close();
         event.open(EVENT_LOG_PATH, std::ios::trunc);
         logger::log(EVENT_LOG, "Successfully initialized Logger");
-
+#endif
         return LOGGER_SC_SUCCESS;
 
     }
 
     LOGGER_STATUS_CODE log(LOG_TYPE log_, const char* msg_) {
-    
-        streamBusy.lock();
+#ifndef VK_NO_LOG
+        std::scoped_lock< std::mutex > lock(streamBusy);
+        
         static int countEvent = 0;
         static int countError = 0;
         std::ofstream stream;
@@ -245,9 +246,7 @@ namespace logger {
             throw std::runtime_error(msg_);
 #endif
         }
-
-        streamBusy.unlock();
-
+#endif
         return LOGGER_SC_SUCCESS;
 
     }
