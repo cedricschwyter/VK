@@ -72,8 +72,8 @@ public:
     std::queue< ModelInfo >                 modelLoadingQueue;
     std::condition_variable                 modelLoadingQueueCondVar;
     std::mutex                              modelLoadingQueueMutex;
-    bool                                    done                                    = false;
-    bool                                    notified                                = false;
+    bool                                    finished                                = false;
+    std::mutex                              finishedMutex;
 
     /**
         Default constructor

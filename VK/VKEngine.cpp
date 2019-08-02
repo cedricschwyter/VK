@@ -26,8 +26,9 @@ VKEngine::VKEngine() {
 
 void VKEngine::init(VK_STATUS_CODE* returnCodeAddr_) {
 
-    done        = true;
-    notified    = true;
+    std::unique_lock< std::mutex > lock(finishedMutex);
+    finished = true;
+    lock.unlock();
     modelLoadingQueueCondVar.notify_all();
     ASSERT(loop(), "Vulkan runtime error", VK_SC_VULKAN_RUNTIME_ERROR);
     ASSERT(clean(), "Application cleanup error", VK_SC_CLEANUP_ERROR);
@@ -165,6 +166,7 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 VK_STATUS_CODE VKEngine::loop() {
 
     vk::loadingMutex.lock(); 
+    modelLoadingQueueMutex.lock();
     
     if (!initialized) {
 
@@ -1897,7 +1899,6 @@ VK_STATUS_CODE VKEngine::push(const char* path_) {
 
     std::unique_lock< std::mutex > lock(modelLoadingQueueMutex);
     modelLoadingQueue.push({ path_, standardPipeline, VK_STANDARD_MODEL_LOADING_LIB });
-    notified = true;
     modelLoadingQueueCondVar.notify_one();
 
     return vk::errorCodeBuffer;
@@ -1908,7 +1909,6 @@ VK_STATUS_CODE VKEngine::push(ModelInfo info_) {
 
     std::unique_lock< std::mutex > lock(modelLoadingQueueMutex);
     modelLoadingQueue.push(info_);
-    notified = true;
     modelLoadingQueueCondVar.notify_one();
 
     return vk::errorCodeBuffer;
