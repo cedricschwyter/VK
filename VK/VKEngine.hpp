@@ -70,8 +70,8 @@ public:
     BaseCamera*                             camera;
     VkSampleCountFlagBits                   MSAASampleCount                         = VK_SAMPLE_COUNT_1_BIT;
     std::queue< ModelInfo >                 modelLoadingQueue;
-    std::condition_variable                 modelLoadingQueueCondVar;
     std::mutex                              modelLoadingQueueMutex;
+    std::condition_variable                 modelLoadingQueueCondVar;
     bool                                    finished                                = false;
     std::mutex                              finishedMutex;
 

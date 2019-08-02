@@ -41,14 +41,6 @@ namespace vk {
     VK_STATUS_CODE init() {
 
         engine = new VKEngine();
-        engine->initLoadingScreen();
-        std::thread t0([]() {
-
-                ASSERT(engine->initWindow(), "Window initialization error", VK_SC_WINDOW_ERROR);
-                ASSERT(engine->initVulkan(), "Vulkan initialization error", VK_SC_VULKAN_ERROR);
-
-            });
-        t0.detach();
 
         return VK_SC_SUCCESS;
 

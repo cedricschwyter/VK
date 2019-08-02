@@ -18,6 +18,7 @@
 VKEngine::VKEngine() {
 
     ASSERT(initLogger(), "Logger initialization error", LOGGER_SC_UNKNOWN_ERROR);
+    initLoadingScreen();
 
     logger::log(START_LOG, "Initializing...");
     logger::log(EVENT_LOG, "Initializing loading screen...");
@@ -26,10 +27,8 @@ VKEngine::VKEngine() {
 
 void VKEngine::init(VK_STATUS_CODE* returnCodeAddr_) {
 
-    std::unique_lock< std::mutex > lock(finishedMutex);
-    finished = true;
-    lock.unlock();
-    modelLoadingQueueCondVar.notify_all();
+    ASSERT(initWindow(), "Window initialization error", VK_SC_WINDOW_ERROR);
+    ASSERT(initVulkan(), "Vulkan initialization error", VK_SC_VULKAN_ERROR);
     ASSERT(loop(), "Vulkan runtime error", VK_SC_VULKAN_RUNTIME_ERROR);
     ASSERT(clean(), "Application cleanup error", VK_SC_CLEANUP_ERROR);
     logger::log(START_LOG, "Shutting down...");
@@ -49,7 +48,6 @@ LOGGER_STATUS_CODE VKEngine::initLogger() {
 VK_STATUS_CODE VKEngine::initWindow() {
 
     vk::loadingMutex.lock();
-    modelLoadingQueueMutex.lock();
     logger::log(EVENT_LOG, "Initializing window...");
     glfwInit();
 
@@ -152,22 +150,10 @@ VK_STATUS_CODE VKEngine::initVulkan() {
     ASSERT(allocateUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
     ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
     ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
-    std::thread t0(&VKEngine::loadModelsAndVertexData, this);
-    modelLoadingQueueMutex.unlock();
-    t0.join();
+    ASSERT(loadModelsAndVertexData(), "Failed to load assets", VK_SC_RESOURCE_LOADING_ERROR);
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
     ASSERT(createCamera(), "Failed to create camera", VK_SC_CAMERA_CREATION_ERROR);
-    vk::loadingMutex.unlock();
 
-    return vk::errorCodeBuffer;
-
-}
-
-VK_STATUS_CODE VKEngine::loop() {
-
-    vk::loadingMutex.lock(); 
-    modelLoadingQueueMutex.lock();
-    
     if (!initialized) {
 
         std::unique_lock< std::mutex > lock(loadingScreen->closeMutex);
@@ -179,6 +165,12 @@ VK_STATUS_CODE VKEngine::loop() {
         initialized = true;
 
     }
+
+    return vk::errorCodeBuffer;
+
+}
+
+VK_STATUS_CODE VKEngine::loop() {
 
     logger::log(EVENT_LOG, "Entering application loop...");
 
@@ -226,7 +218,6 @@ VK_STATUS_CODE VKEngine::loop() {
     vkDeviceWaitIdle(logicalDevice);
 
     logger::log(EVENT_LOG, "Terminating...");
-    vk::loadingMutex.unlock();
 
     return vk::errorCodeBuffer;
 
@@ -237,15 +228,9 @@ VK_STATUS_CODE VKEngine::clean() {
     ASSERT(cleanSwapchain(), "Failed to clean swapchain", VK_SC_SWAPCHAIN_CLEAN_ERROR);
 
     for (auto model : models) {
-    
-        std::thread* t0 = new std::thread([model]() {
-            
-                delete model;
-                logger::log(EVENT_LOG, "Successfully destroyed model");
-            
-            });
-        modelLoadingQueueThreads.clear();
-        modelLoadingQueueThreads.push_back(t0);
+
+        delete model;
+        logger::log(EVENT_LOG, "Successfully destroyed model");    
     
     }
     logger::log(EVENT_LOG, "Successfully destroyed models");
@@ -1875,18 +1860,28 @@ VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
     for (uint32_t i = 0; i < maxThreads; i++) {
     
-        AssetLoader loader;
+        AssetLoader* loader = new AssetLoader();
 
-        std::thread* t0 = new std::thread(std::ref(loader));
-        assetLoaders.push_back(&loader);
+        std::thread* t0 = new std::thread(std::ref(*loader));
+        assetLoaders.push_back(loader);
         modelLoadingQueueThreads.push_back(t0);
 
     }
 
+    while (!modelLoadingQueue.empty()) {
+    
+        modelLoadingQueueCondVar.notify_one();
+    
+    }
+    std::unique_lock< std::mutex > finishedLock(finishedMutex);
+    finished = true;
+    finishedLock.unlock();
+
     for (uint32_t i = 0; i < modelLoadingQueueThreads.size(); i++) {
     
         modelLoadingQueueThreads[i]->join();
-        models.insert(models.end(), assetLoaders[i]->get().begin(), assetLoaders[i]->get().end());
+        auto threadModels = assetLoaders[i]->get();
+        models.insert(models.end(), threadModels.begin(), threadModels.end());
         delete modelLoadingQueueThreads[i];
     
     }
@@ -1899,7 +1894,6 @@ VK_STATUS_CODE VKEngine::push(const char* path_) {
 
     std::unique_lock< std::mutex > lock(modelLoadingQueueMutex);
     modelLoadingQueue.push({ path_, standardPipeline, VK_STANDARD_MODEL_LOADING_LIB });
-    modelLoadingQueueCondVar.notify_one();
 
     return vk::errorCodeBuffer;
 
@@ -1909,7 +1903,6 @@ VK_STATUS_CODE VKEngine::push(ModelInfo info_) {
 
     std::unique_lock< std::mutex > lock(modelLoadingQueueMutex);
     modelLoadingQueue.push(info_);
-    modelLoadingQueueCondVar.notify_one();
 
     return vk::errorCodeBuffer;
 
