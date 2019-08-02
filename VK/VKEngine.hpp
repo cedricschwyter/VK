@@ -73,7 +73,6 @@ public:
     std::mutex                              modelLoadingQueueMutex;
     std::condition_variable                 modelLoadingQueueCondVar;
     bool                                    finished                                = false;
-    std::mutex                              finishedMutex;
 
     /**
         Default constructor

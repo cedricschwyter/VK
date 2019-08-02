@@ -22,7 +22,11 @@ void AssetLoader::operator()() {
     while (!vk::engine->finished) {
 
         std::unique_lock< std::mutex > lock(vk::engine->modelLoadingQueueMutex);
-        vk::engine->modelLoadingQueueCondVar.wait(lock);
+        vk::engine->modelLoadingQueueCondVar.wait(lock, []() {
+            
+            return !vk::engine->modelLoadingQueue.empty();
+            
+            });
 
         auto front = vk::engine->modelLoadingQueue.front();
         vk::engine->modelLoadingQueue.pop();

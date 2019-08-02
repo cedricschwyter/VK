@@ -37,14 +37,14 @@
 //#define VK_MULTISAMPLING_x64
 
 // Default values
-#if !defined VK_DEVELOPMENT && !defined VK_RELEASE && !defined VK_RELEASE_CONSOLE && !defined VK_NO_LOG
+
+/*#ifdef VK_NO_LOG
+    #define VK_RELEASE
+#endif*/
+
+#if !defined VK_DEVELOPMENT && !defined VK_RELEASE && !defined VK_RELEASE_CONSOLE
     #define VK_DEVELOPMENT
 #endif
-
-#ifdef VK_NO_LOG
-    #define VK_RELEASE
-#endif
-
 
 #if !defined VK_WINDOW_MODE_WINDOWED && !defined VK_WINDOW_MODE_FULLSCREEN && !defined VK_WINDOW_MODE_BORDERLESS
     #define VK_WINDOW_MODE_UNDEFINED

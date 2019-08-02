@@ -1868,14 +1868,24 @@ VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
     }
 
-    while (!modelLoadingQueue.empty()) {
-    
-        modelLoadingQueueCondVar.notify_one();
+    while (true) {
+
+        std::scoped_lock< std::mutex > lock(modelLoadingQueueMutex);
+        if (modelLoadingQueue.empty()) {
+
+            break;
+        
+        }
+        else {
+
+            modelLoadingQueueCondVar.notify_one();
+
+        }
     
     }
-    std::unique_lock< std::mutex > finishedLock(finishedMutex);
+    
+    modelLoadingQueueMutex.lock();
     finished = true;
-    finishedLock.unlock();
 
     for (uint32_t i = 0; i < modelLoadingQueueThreads.size(); i++) {
     
@@ -1885,6 +1895,8 @@ VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
         delete modelLoadingQueueThreads[i];
     
     }
+    std::cout << models.size() << std::endl;
+    modelLoadingQueueMutex.unlock();
 
     return vk::errorCodeBuffer;
 

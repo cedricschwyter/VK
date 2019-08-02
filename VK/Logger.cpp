@@ -238,7 +238,7 @@ namespace logger {
             break;
 
         }
-
+#endif
         if (log_ == ERROR_LOG) {
 #ifdef VK_DEVELOPMENT
             __debugbreak();
@@ -246,7 +246,6 @@ namespace logger {
             throw std::runtime_error(msg_);
 #endif
         }
-#endif
         return LOGGER_SC_SUCCESS;
 
     }
