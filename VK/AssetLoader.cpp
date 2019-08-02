@@ -19,16 +19,20 @@ AssetLoader::AssetLoader() {
 
 void AssetLoader::operator()() {
 
-    while (true) {
+    std::unique_lock< std::mutex> lock(vk::engine->modelLoadingQueueMutex);
 
-        std::unique_lock< std::mutex> lock(vk::engine->modelLoadingQueueMutex);
+    while (!vk::engine->done) {
 
-        vk::engine->modelLoadingQueueCondVar.wait(lock, []() {
+        while (!vk::engine->notified) {  // loop to avoid spurious wakeups
+
+            vk::engine->modelLoadingQueueCondVar.wait(lock, []() {
 
                 return !vk::engine->modelLoadingQueue.empty();
-        
-            });
 
+                });
+
+        }
+            
         auto front = vk::engine->modelLoadingQueue.front();
         vk::engine->modelLoadingQueue.pop();
         lock.unlock();

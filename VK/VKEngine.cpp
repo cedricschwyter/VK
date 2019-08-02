@@ -26,6 +26,8 @@ VKEngine::VKEngine() {
 
 void VKEngine::init(VK_STATUS_CODE* returnCodeAddr_) {
 
+    done        = true;
+    notified    = true;
     modelLoadingQueueCondVar.notify_all();
     ASSERT(loop(), "Vulkan runtime error", VK_SC_VULKAN_RUNTIME_ERROR);
     ASSERT(clean(), "Application cleanup error", VK_SC_CLEANUP_ERROR);
@@ -45,6 +47,7 @@ LOGGER_STATUS_CODE VKEngine::initLogger() {
 
 VK_STATUS_CODE VKEngine::initWindow() {
 
+    vk::loadingMutex.lock();
     logger::log(EVENT_LOG, "Initializing window...");
     glfwInit();
 
@@ -95,7 +98,6 @@ VK_STATUS_CODE VKEngine::initWindow() {
         );
 #endif
 
-    glfwMakeContextCurrent(window);
     glfwSwapInterval(0);
 
     GLFWimage windowIcon[1];
@@ -132,7 +134,6 @@ VK_STATUS_CODE VKEngine::initWindow() {
 VK_STATUS_CODE VKEngine::initVulkan() {
 
     allocator = nullptr;
-    vk::loadingMutex.lock();
 
     ASSERT(createInstance(), "Failed to create instance", VK_SC_INSTANCE_CREATON_ERROR);
     ASSERT(debugUtilsMessenger(), "Failed to create debug utils messenger", VK_SC_DEBUG_UTILS_MESSENGER_CREATION_ERROR);
@@ -155,24 +156,25 @@ VK_STATUS_CODE VKEngine::initVulkan() {
     ASSERT(createCamera(), "Failed to create camera", VK_SC_CAMERA_CREATION_ERROR);
     vk::loadingMutex.unlock();
 
-    if (!initialized) {
-
-        std::unique_lock< std::mutex > lock(loadingScreen->closeMutex);
-        loadingScreen->close = true;
-        loadingScreen->closeMutex.unlock();
-        glfwShowWindow(window);
-        glfwFocusWindow(window);
-        initialized = true;
-
-    }
-
     return vk::errorCodeBuffer;
 
 }
 
 VK_STATUS_CODE VKEngine::loop() {
 
-    vk::loadingMutex.lock();
+    vk::loadingMutex.lock(); 
+    
+    if (!initialized) {
+
+        std::unique_lock< std::mutex > lock(loadingScreen->closeMutex);
+        loadingScreen->close = true;
+        loadingScreen->closeMutex.unlock();
+        glfwMakeContextCurrent(window);
+        glfwShowWindow(window);
+        glfwFocusWindow(window);
+        initialized = true;
+
+    }
 
     logger::log(EVENT_LOG, "Entering application loop...");
 
@@ -1358,11 +1360,9 @@ VK_STATUS_CODE VKEngine::allocateCommandPools() {
 
 VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
-    if (!modelLoadingQueue.empty()) {
-    
-        std::this_thread::sleep_for(std::chrono::duration(std::chrono::milliseconds(1)));
-        /*std::unique_lock< std::mutex> lock(vk::engine->modelLoadingQueueMutex);
-        vk::engine->modelLoadingQueueCondVar.wait(lock);*/
+    while (!modelLoadingQueue.empty()) {
+      
+
     
     }
 
@@ -1895,6 +1895,7 @@ VK_STATUS_CODE VKEngine::push(const char* path_) {
 
     std::unique_lock< std::mutex > lock(modelLoadingQueueMutex);
     modelLoadingQueue.push({ path_, standardPipeline, VK_STANDARD_MODEL_LOADING_LIB });
+    notified = true;
     modelLoadingQueueCondVar.notify_one();
 
     return vk::errorCodeBuffer;
@@ -1905,6 +1906,7 @@ VK_STATUS_CODE VKEngine::push(ModelInfo info_) {
 
     std::unique_lock< std::mutex > lock(modelLoadingQueueMutex);
     modelLoadingQueue.push(info_);
+    notified = true;
     modelLoadingQueueCondVar.notify_one();
 
     return vk::errorCodeBuffer;

@@ -11,10 +11,10 @@
 #include "Makros.hpp"
 
 // Edit configuration here
-//#define VK_DEVELOPMENT      // enable this for verbose output
+#define VK_DEVELOPMENT      // enable this for verbose output
 //#define VK_RELEASE          // enable this for performance
 //#define VK_RELEASE_CONSOLE    // enbable this for performance with console
-#define VK_NO_LOG
+//#define VK_NO_LOG             // enable this for full performance
 
 #define VK_WINDOW_MODE_WINDOWED
 //#define VK_WINDOW_MODE_FULLSCREEN
@@ -37,7 +37,7 @@
 //#define VK_MULTISAMPLING_x64
 
 // Default values
-#if !defined VK_DEVELOPMENT && !defined VK_RELEASE && !defined VK_RELEASE_CONSOLE
+#if !defined VK_DEVELOPMENT && !defined VK_RELEASE && !defined VK_RELEASE_CONSOLE && !defined VK_NO_LOG
     #define VK_DEVELOPMENT
 #endif
 

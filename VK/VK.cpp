@@ -42,9 +42,9 @@ namespace vk {
 
         engine = new VKEngine();
         engine->initLoadingScreen();
-        ASSERT(engine->initWindow(), "Window initialization error", VK_SC_WINDOW_ERROR);
         std::thread t0([]() {
 
+                ASSERT(engine->initWindow(), "Window initialization error", VK_SC_WINDOW_ERROR);
                 ASSERT(engine->initVulkan(), "Vulkan initialization error", VK_SC_VULKAN_ERROR);
 
             });
