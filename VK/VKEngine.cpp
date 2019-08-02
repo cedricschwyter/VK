@@ -48,6 +48,7 @@ LOGGER_STATUS_CODE VKEngine::initLogger() {
 VK_STATUS_CODE VKEngine::initWindow() {
 
     vk::loadingMutex.lock();
+    modelLoadingQueueMutex.lock();
     logger::log(EVENT_LOG, "Initializing window...");
     glfwInit();
 
@@ -151,6 +152,7 @@ VK_STATUS_CODE VKEngine::initVulkan() {
     ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
     ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
     std::thread t0(&VKEngine::loadModelsAndVertexData, this);
+    modelLoadingQueueMutex.unlock();
     t0.join();
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
     ASSERT(createCamera(), "Failed to create camera", VK_SC_CAMERA_CREATION_ERROR);
@@ -168,7 +170,7 @@ VK_STATUS_CODE VKEngine::loop() {
 
         std::unique_lock< std::mutex > lock(loadingScreen->closeMutex);
         loadingScreen->close = true;
-        loadingScreen->closeMutex.unlock();
+        lock.unlock();
         glfwMakeContextCurrent(window);
         glfwShowWindow(window);
         glfwFocusWindow(window);
