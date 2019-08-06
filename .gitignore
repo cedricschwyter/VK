@@ -18,6 +18,7 @@
 x64/
 x86/
 bld/
+[Bb]in/
 [Oo]bj/
 [Ll]og/
 
@@ -261,3 +262,10 @@ __pycache__/
 
 # Application specific log files
 *.log
+
+# Visual Studio files
+*.sln
+*.user
+*.filters
+*.vcproj
+*.vcxproj
