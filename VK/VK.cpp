@@ -40,12 +40,11 @@ namespace vk {
 
     VK_STATUS_CODE init() {
 
-        engine = new VKEngine();
         std::scoped_lock< std::mutex > lock(loadingMutex);
-        ASSERT(engine->initWindow(), "Window initialization error", VK_SC_WINDOW_ERROR);
-        ASSERT(engine->initVulkan(), "Vulkan initialization error", VK_SC_VULKAN_ERROR);
+        engine = new VKEngine();
+        engine->init();
 
-        return VK_SC_SUCCESS;
+        return errorCodeBuffer;
 
     }
 
@@ -53,7 +52,6 @@ namespace vk {
 
         try {
 
-            std::this_thread::sleep_for(std::chrono::duration(std::chrono::milliseconds(500)));
             return engine->run();
 
         }

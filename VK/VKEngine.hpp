@@ -74,6 +74,10 @@ public:
     std::condition_variable                 modelLoadingQueueCondVar;
     bool                                    finished                                = false;
     bool                                    notified                                = false;
+    std::condition_variable                 assetsLoadedCondVar;
+    std::mutex                              assetsLoadedMutex;
+    bool                                    assetsLoaded                            = false;
+    std::thread                             assetThread;
 
     /**
         Default constructor
@@ -87,6 +91,13 @@ public:
 
     /**
         Initializes VKEngine and loads dependencies
+
+        @return     Returns VK_SC_SUCCESS on success
+    */
+    VK_STATUS_CODE init(void);
+
+    /**
+        Runs VKEngine
 
         @return     Returns VK_SC_SUCCESS on success
     */

@@ -25,6 +25,15 @@ VKEngine::VKEngine() {
 
 }
 
+VK_STATUS_CODE VKEngine::init() {
+
+    ASSERT(initWindow(), "Window initialization error", VK_SC_WINDOW_ERROR);
+    ASSERT(initVulkan(), "Vulkan initialization error", VK_SC_VULKAN_ERROR);
+
+    return vk::errorCodeBuffer;
+
+}
+
 VK_STATUS_CODE VKEngine::run() {
 
     ASSERT(loop(), "Vulkan runtime error", VK_SC_VULKAN_RUNTIME_ERROR);
@@ -145,8 +154,7 @@ VK_STATUS_CODE VKEngine::initVulkan() {
     ASSERT(allocateUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
     ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
     ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
-    std::thread t0(&VKEngine::loadModelsAndVertexData, this);
-    t0.detach();
+    assetThread = std::thread(&VKEngine::loadModelsAndVertexData, this);
 
     return vk::errorCodeBuffer;
 
@@ -154,7 +162,12 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 
 VK_STATUS_CODE VKEngine::loop() {
 
-    std::scoped_lock< std::mutex > lock(vk::loadingMutex);
+    std::scoped_lock< std::mutex > loadingLock(vk::loadingMutex);
+
+    std::unique_lock< std::mutex > assetsLock(assetsLoadedMutex);
+    assetsLoadedCondVar.wait(assetsLock, [=]() { return assetsLoaded; });
+
+    assetThread.join();
 
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
     ASSERT(createCamera(), "Failed to create camera", VK_SC_CAMERA_CREATION_ERROR);
@@ -1851,7 +1864,7 @@ VK_STATUS_CODE VKEngine::allocateMSAABufferedImage() {
 
 VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
-    for (uint32_t i = 0; i < maxThreads; i++) {
+    for (uint32_t i = 0; i < static_cast< uint32_t >(maxThreads  / 2); i++) {
     
         AssetLoader* loader = new AssetLoader();
 
@@ -1861,7 +1874,6 @@ VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
     }
 
-    // WAIT HERE UNTIL OTHER THREADS HAVE FINISHED WORK
     std::unique_lock< std::mutex > stopLock(modelLoadingQueueMutex);
     finished = true;
     notified = true;
@@ -1877,6 +1889,10 @@ VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
     }
 
+    std::scoped_lock< std::mutex > lock(assetsLoadedMutex);
+    assetsLoaded = true;
+    assetsLoadedCondVar.notify_one();
+
     return vk::errorCodeBuffer;
 
 }
@@ -1887,6 +1903,7 @@ VK_STATUS_CODE VKEngine::push(const char* path_) {
     modelLoadingQueue.push({ path_, standardPipeline, VK_STANDARD_MODEL_LOADING_LIB });
     notified = true;
     modelLoadingQueueCondVar.notify_one();
+    lock.unlock();
 
     return vk::errorCodeBuffer;
 
@@ -1898,6 +1915,7 @@ VK_STATUS_CODE VKEngine::push(ModelInfo info_) {
     modelLoadingQueue.push(info_);
     notified = true;
     modelLoadingQueueCondVar.notify_one();
+    lock.unlock();
 
     return vk::errorCodeBuffer;
 

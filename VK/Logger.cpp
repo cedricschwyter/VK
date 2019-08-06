@@ -26,19 +26,17 @@ namespace logger {
     const std::string        ERROR_LOG_PATH        = "logs/error.log";
     const std::string        START_LOG_PATH        = "logs/start.log";
     const std::string        EVENT_LOG_PATH        = "logs/event.log";
+    std::ofstream           error;
+    std::ofstream           start;
+    std::ofstream           event;
 
     std::mutex                streamBusy;
 
     LOGGER_STATUS_CODE init() {
 #ifndef VK_NO_LOG
         if(_mkdir(LOG_DIR) >= 0) return LOGGER_SC_DIRECTORY_CREATION_ERROR;
-        std::ofstream error;
-        std::ofstream start;
-        std::ofstream event;
         error.open(ERROR_LOG_PATH, std::ios::trunc);
-        error.close();
         start.open(START_LOG_PATH, std::ios::app);
-        start.close();
         event.open(EVENT_LOG_PATH, std::ios::trunc);
         logger::log(EVENT_LOG, "Successfully initialized Logger");
 #endif
@@ -52,7 +50,6 @@ namespace logger {
         
         static int countEvent = 0;
         static int countError = 0;
-        std::ofstream stream;
 
         time_t current_time;
         struct tm local_time;
@@ -74,10 +71,9 @@ namespace logger {
         case ERROR_LOG:
             if (countError == 0) {
 
-                stream.open(ERROR_LOG_PATH, std::ios::trunc);
                 countError++;
 
-                stream << Day << ":"
+                error << Day << ":"
                 << Month << ":"
                 << Year << "   "
                 << Hour << ":"
@@ -87,7 +83,6 @@ namespace logger {
                 << "CRITICAL: "
                 << msg_ << std::endl;
 
-                stream.close();
 #if (defined VK_DEVELOPMENT || defined VK_RELEASE_CONSOLE) && (defined WIN_64 || WIN_32)
                 std::cerr << green << Day << white << ":"
                     << green << Month << white << ":"
@@ -112,9 +107,7 @@ namespace logger {
             }
             else {
 
-                stream.open(ERROR_LOG_PATH, std::ios::app);
-
-                stream << Day << ":"
+                error << Day << ":"
                     << Month << ":"
                     << Year << "   "
                     << Hour << ":"
@@ -124,7 +117,6 @@ namespace logger {
                     << "CRITICAL: "
                     << msg_ << std::endl;
 
-                stream.close();
 #if (defined VK_DEVELOPMENT || defined VK_RELEASE_CONSOLE) && (defined WIN_64 || WIN_32)
                 std::cerr << green << Day << white << ":"
                     << green << Month << white << ":"
@@ -149,9 +141,8 @@ namespace logger {
             }
 
         case START_LOG:
-            stream.open(START_LOG_PATH, std::ios::app);
 
-            stream << Day << ":"
+            start << Day << ":"
                 << Month << ":"
                 << Year << "   "
                 << Hour << ":"
@@ -160,15 +151,12 @@ namespace logger {
                 << thisThread << "        ===        "
                 << msg_ << std::endl;
 
-            stream.close();
-
         case EVENT_LOG:
             if (countEvent == 0) {
 
-                stream.open(EVENT_LOG_PATH, std::ios::trunc);
                 countEvent++;
 
-                stream << Day << ":"
+                event << Day << ":"
                     << Month << ":"
                     << Year << "   "
                     << Hour << ":"
@@ -177,7 +165,6 @@ namespace logger {
                     << thisThread << "        ===        "
                     << msg_ << std::endl;
 
-                stream.close();
 #if (defined VK_DEVELOPMENT || defined VK_RELEASE_CONSOLE) && (defined WIN_64 || WIN_32)
                 std::cout << green << Day << white << ":"
                     << green << Month << white << ":"
@@ -200,9 +187,7 @@ namespace logger {
             }
             else {
 
-                stream.open(EVENT_LOG_PATH, std::ios::app);
-
-                stream << Day << ":"
+                event << Day << ":"
                     << Month << ":"
                     << Year << "   "
                     << Hour << ":"
@@ -211,7 +196,6 @@ namespace logger {
                     << thisThread << "        ===        "
                     << msg_ << std::endl;
 
-                stream.close();
 #if (defined VK_DEVELOPMENT || defined VK_RELEASE_CONSOLE) && (defined WIN_64 || WIN_32)
                 std::cout << green << Day << white << ":"
                     << green << Month << white << ":"
