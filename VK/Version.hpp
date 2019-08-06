@@ -14,7 +14,7 @@
 //#define VK_DEVELOPMENT      // enable this for verbose output
 //#define VK_RELEASE          // enable this for performance
 //#define VK_RELEASE_CONSOLE    // enbable this for performance with console
-//#define VK_NO_LOG             // enable this for full performance
+#define VK_NO_LOG             // enable this for full performance
 
 #define VK_WINDOW_MODE_WINDOWED
 //#define VK_WINDOW_MODE_FULLSCREEN
@@ -28,7 +28,7 @@
 //#define VK_STANDARD_MODEL_LOADING_LIB VKEngineModelLoadingLibTINYOBJ
 #define VK_STANDARD_MODEL_LOADING_LIB VKEngineModelLoadingLibASSIMP
 
-//#define VK_MULTISAMPLING_NONE
+#define VK_MULTISAMPLING_NONE
 //#define VK_MULTISAMPLING_x2
 //#define VK_MULTISAMPLING_x4
 //#define VK_MULTISAMPLING_x8

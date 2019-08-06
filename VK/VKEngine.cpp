@@ -47,7 +47,6 @@ LOGGER_STATUS_CODE VKEngine::initLogger() {
 
 VK_STATUS_CODE VKEngine::initWindow() {
 
-    vk::loadingMutex.lock();
     logger::log(EVENT_LOG, "Initializing window...");
     glfwInit();
 

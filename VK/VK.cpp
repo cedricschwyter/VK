@@ -36,8 +36,6 @@ namespace vk {
     VkFence                             transferFence;
     std::mutex                          transferMutex;
 
-    std::mutex                          loadingMutex;
-
     VK_STATUS_CODE init() {
 
         engine = new VKEngine();
