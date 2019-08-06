@@ -41,14 +41,9 @@ namespace vk {
     VK_STATUS_CODE init() {
 
         engine = new VKEngine();
-        std::thread t0([]() {
-
-            std::scoped_lock< std::mutex > lock(loadingMutex);
-            ASSERT(engine->initWindow(), "Window initialization error", VK_SC_WINDOW_ERROR);
-            ASSERT(engine->initVulkan(), "Vulkan initialization error", VK_SC_VULKAN_ERROR);
-
-            });
-        t0.detach();
+        std::scoped_lock< std::mutex > lock(loadingMutex);
+        ASSERT(engine->initWindow(), "Window initialization error", VK_SC_WINDOW_ERROR);
+        ASSERT(engine->initVulkan(), "Vulkan initialization error", VK_SC_VULKAN_ERROR);
 
         return VK_SC_SUCCESS;
 

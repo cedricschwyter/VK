@@ -146,7 +146,16 @@ VK_STATUS_CODE VKEngine::initVulkan() {
     ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
     ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
     std::thread t0(&VKEngine::loadModelsAndVertexData, this);
-    t0.join();
+    t0.detach();
+
+    return vk::errorCodeBuffer;
+
+}
+
+VK_STATUS_CODE VKEngine::loop() {
+
+    std::scoped_lock< std::mutex > lock(vk::loadingMutex);
+
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
     ASSERT(createCamera(), "Failed to create camera", VK_SC_CAMERA_CREATION_ERROR);
 
@@ -161,14 +170,6 @@ VK_STATUS_CODE VKEngine::initVulkan() {
         initialized = true;
 
     }
-
-    return vk::errorCodeBuffer;
-
-}
-
-VK_STATUS_CODE VKEngine::loop() {
-
-    std::scoped_lock< std::mutex > lock(vk::loadingMutex);
 
     logger::log(EVENT_LOG, "Entering application loop...");
 
