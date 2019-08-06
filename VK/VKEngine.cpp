@@ -162,12 +162,15 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 
 VK_STATUS_CODE VKEngine::loop() {
 
-    std::scoped_lock< std::mutex > loadingLock(vk::loadingMutex);
+    std::scoped_lock< std::mutex > lock(vk::loadingMutex);
+    readyToRun = true;
 
     std::unique_lock< std::mutex > assetsLock(assetsLoadedMutex);
     assetsLoadedCondVar.wait(assetsLock, [=]() { return assetsLoaded; });
 
     assetThread.join();
+
+    std::scoped_lock< std::mutex > modelLock(modelLoadingQueueMutex);
 
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
     ASSERT(createCamera(), "Failed to create camera", VK_SC_CAMERA_CREATION_ERROR);

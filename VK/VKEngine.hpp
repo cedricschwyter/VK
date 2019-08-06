@@ -78,6 +78,7 @@ public:
     std::mutex                              assetsLoadedMutex;
     bool                                    assetsLoaded                            = false;
     std::thread                             assetThread;
+    bool                                    readyToRun                              = false;
 
     /**
         Default constructor
