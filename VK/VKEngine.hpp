@@ -73,6 +73,7 @@ public:
     std::mutex                              modelLoadingQueueMutex;
     std::condition_variable                 modelLoadingQueueCondVar;
     bool                                    finished                                = false;
+    bool                                    notified                                = false;
 
     /**
         Default constructor
@@ -87,9 +88,9 @@ public:
     /**
         Initializes VKEngine and loads dependencies
 
-        @param      returnCodeAddr_     A VK_STATUS_CODE pointer to which the return code of this multithreaded function will be written
+        @return     Returns VK_SC_SUCCESS on success
     */
-    void init(VK_STATUS_CODE* returnCodeAddr_);
+    VK_STATUS_CODE run(void);
 
     /**
         Initializes the logger

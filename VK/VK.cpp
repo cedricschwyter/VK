@@ -36,9 +36,19 @@ namespace vk {
     VkFence                             transferFence;
     std::mutex                          transferMutex;
 
+    std::mutex                          loadingMutex;
+
     VK_STATUS_CODE init() {
 
         engine = new VKEngine();
+        std::thread t0([]() {
+
+            std::scoped_lock< std::mutex > lock(loadingMutex);
+            ASSERT(engine->initWindow(), "Window initialization error", VK_SC_WINDOW_ERROR);
+            ASSERT(engine->initVulkan(), "Vulkan initialization error", VK_SC_VULKAN_ERROR);
+
+            });
+        t0.detach();
 
         return VK_SC_SUCCESS;
 
@@ -48,14 +58,8 @@ namespace vk {
 
         try {
 
-            VK_STATUS_CODE* returnAddr = new VK_STATUS_CODE();
-            std::thread t0(&VKEngine::init, engine, returnAddr);
-            t0.join();
-
-            VK_STATUS_CODE retCode = *returnAddr;
-            delete returnAddr;
-
-            return retCode;
+            std::this_thread::sleep_for(std::chrono::duration(std::chrono::milliseconds(500)));
+            return engine->run();
 
         }
         catch (std::exception& e) {

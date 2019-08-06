@@ -25,17 +25,13 @@ VKEngine::VKEngine() {
 
 }
 
-void VKEngine::init(VK_STATUS_CODE* returnCodeAddr_) {
+VK_STATUS_CODE VKEngine::run() {
 
-    ASSERT(initWindow(), "Window initialization error", VK_SC_WINDOW_ERROR);
-    ASSERT(initVulkan(), "Vulkan initialization error", VK_SC_VULKAN_ERROR);
     ASSERT(loop(), "Vulkan runtime error", VK_SC_VULKAN_RUNTIME_ERROR);
     ASSERT(clean(), "Application cleanup error", VK_SC_CLEANUP_ERROR);
     logger::log(START_LOG, "Shutting down...");
 
-    VK_STATUS_CODE* returnCode;
-    returnCode          = returnCodeAddr_;
-    *returnCode         = vk::errorCodeBuffer;
+    return vk::errorCodeBuffer;
 
 }
 
@@ -149,7 +145,8 @@ VK_STATUS_CODE VKEngine::initVulkan() {
     ASSERT(allocateUniformBuffers(), "Failed to allocate uniform buffers", VK_SC_UNIFORM_BUFFER_CREATION_ERROR);
     ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
     ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
-    ASSERT(loadModelsAndVertexData(), "Failed to load assets", VK_SC_RESOURCE_LOADING_ERROR);
+    std::thread t0(&VKEngine::loadModelsAndVertexData, this);
+    t0.join();
     ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
     ASSERT(createCamera(), "Failed to create camera", VK_SC_CAMERA_CREATION_ERROR);
 
@@ -170,6 +167,8 @@ VK_STATUS_CODE VKEngine::initVulkan() {
 }
 
 VK_STATUS_CODE VKEngine::loop() {
+
+    std::scoped_lock< std::mutex > lock(vk::loadingMutex);
 
     logger::log(EVENT_LOG, "Entering application loop...");
 
@@ -1348,12 +1347,6 @@ VK_STATUS_CODE VKEngine::allocateCommandPools() {
 
 VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
 
-    while (!modelLoadingQueue.empty()) {
-      
-
-    
-    }
-
     logger::log(EVENT_LOG, "Allocating command buffers...");
 
     standardCommandBuffers.resize(swapchainFramebuffers.size());        // For every frame in the swapchain, create a command buffer
@@ -1867,35 +1860,21 @@ VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
     }
 
-    while (true) {
-
-        std::scoped_lock< std::mutex > lock(modelLoadingQueueMutex);
-        if (modelLoadingQueue.empty()) {
-
-            break;
-        
-        }
-        else {
-
-            modelLoadingQueueCondVar.notify_one();
-
-        }
-    
-    }
-    
-    modelLoadingQueueMutex.lock();
+    // WAIT HERE UNTIL OTHER THREADS HAVE FINISHED WORK
+    std::unique_lock< std::mutex > stopLock(modelLoadingQueueMutex);
     finished = true;
+    notified = true;
+    modelLoadingQueueCondVar.notify_all();
+    stopLock.unlock();
 
     for (uint32_t i = 0; i < modelLoadingQueueThreads.size(); i++) {
-    
+
         modelLoadingQueueThreads[i]->join();
         auto threadModels = assetLoaders[i]->get();
         models.insert(models.end(), threadModels.begin(), threadModels.end());
         delete modelLoadingQueueThreads[i];
-    
+
     }
-    std::cout << models.size() << std::endl;
-    modelLoadingQueueMutex.unlock();
 
     return vk::errorCodeBuffer;
 
@@ -1905,6 +1884,8 @@ VK_STATUS_CODE VKEngine::push(const char* path_) {
 
     std::unique_lock< std::mutex > lock(modelLoadingQueueMutex);
     modelLoadingQueue.push({ path_, standardPipeline, VK_STANDARD_MODEL_LOADING_LIB });
+    notified = true;
+    modelLoadingQueueCondVar.notify_one();
 
     return vk::errorCodeBuffer;
 
@@ -1914,6 +1895,8 @@ VK_STATUS_CODE VKEngine::push(ModelInfo info_) {
 
     std::unique_lock< std::mutex > lock(modelLoadingQueueMutex);
     modelLoadingQueue.push(info_);
+    notified = true;
+    modelLoadingQueueCondVar.notify_one();
 
     return vk::errorCodeBuffer;
 

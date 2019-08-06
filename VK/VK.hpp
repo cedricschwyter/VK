@@ -50,6 +50,8 @@ namespace vk {
     extern VkFence                              transferFence;
     extern std::mutex                           transferMutex;
 
+    extern std::mutex                           loadingMutex;
+
     /**
         Initializes the VKEngine object
 
