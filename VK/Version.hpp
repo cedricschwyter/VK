@@ -50,10 +50,6 @@
     #define VK_WINDOW_MODE_UNDEFINED
 #endif
 
-#if !defined WIN_64 && !defined WIN_32 && !defined MACOSX && !defined LINUX
-    #define WIN_64
-#endif
-
 #ifdef VK_RELEASE_CONSOLE
     #define VK_RELEASE
 #endif
