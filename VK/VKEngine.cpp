@@ -1867,7 +1867,7 @@ VK_STATUS_CODE VKEngine::allocateMSAABufferedImage() {
 
 VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
-    for (uint32_t i = 0; i < static_cast< uint32_t >(maxThreads  / 2); i++) {
+    for (uint32_t i = 0; i < maxThreads; i++) {
     
         AssetLoader* loader = new AssetLoader();
 
@@ -1894,7 +1894,7 @@ VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
     std::scoped_lock< std::mutex > lock(assetsLoadedMutex);
     assetsLoaded = true;
-    assetsLoadedCondVar.notify_one();
+    assetsLoadedCondVar.notify_all();
 
     return vk::errorCodeBuffer;
 

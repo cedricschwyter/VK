@@ -14,8 +14,8 @@
 */
 typedef enum Queue {
 
-    GRAPHICS_QUEUE,
-    TRANSFER_QUEUE,
-    PRESENT_QUEUE
+    GRAPHICS_QUEUE = 2,
+    TRANSFER_QUEUE = 1,
+    PRESENT_QUEUE = 0
 
 } Queue;
