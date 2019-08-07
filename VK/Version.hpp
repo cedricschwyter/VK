@@ -20,10 +20,10 @@
 //#define VK_WINDOW_MODE_FULLSCREEN
 //#define VK_WINDOW_MODE_BORDERLESS
 
-#define WIN_64  
+//#define WIN_64  
 //#define WIN_32
 //#define MACOSX
-//#define LINUX 
+#define LINUX 
 
 //#define VK_STANDARD_MODEL_LOADING_LIB VKEngineModelLoadingLibTINYOBJ
 #define VK_STANDARD_MODEL_LOADING_LIB VKEngineModelLoadingLibASSIMP

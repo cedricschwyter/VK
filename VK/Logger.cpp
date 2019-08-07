@@ -8,7 +8,6 @@
     @brief        Implementation of the Logger namespace
 */
 #pragma once
-#include <direct.h>
 #include <fstream>
 #include <time.h>
 #include <iostream>
@@ -16,6 +15,7 @@
 
 #include "Logger.hpp"
 #if defined WIN_64 || defined WIN_32
+    #include <direct.h>
     #include "ConsoleColor.hpp"
 #endif
 
@@ -34,8 +34,10 @@ namespace logger {
 
     LOGGER_STATUS_CODE init() {
 #ifndef VK_NO_LOG
+#if defined WIN_64 || WIN_32
         if(_mkdir(LOG_DIR) >= 0) return LOGGER_SC_DIRECTORY_CREATION_ERROR;
-        error.open(ERROR_LOG_PATH, std::ios::trunc);
+#endif        
+	error.open(ERROR_LOG_PATH, std::ios::trunc);
         start.open(START_LOG_PATH, std::ios::app);
         event.open(EVENT_LOG_PATH, std::ios::trunc);
         logger::log(EVENT_LOG, "Successfully initialized Logger");
