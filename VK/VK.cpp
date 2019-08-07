@@ -27,8 +27,8 @@ namespace vk {
     const double                        SENS                        = 0.1;
     const double                        FOV                         = 45.0;
 
-    VkCommandPool                       vk::graphicsCommandPool     = VK_NULL_HANDLE;
-    VkQueue                             vk::graphicsQueue           = VK_NULL_HANDLE;
+    VkCommandPool                       graphicsCommandPool         = VK_NULL_HANDLE;
+    VkQueue                             graphicsQueue               = VK_NULL_HANDLE;
     VkFence                             graphicsFence;
     std::mutex                          graphicsMutex;
     VkQueue                             transferQueue               = VK_NULL_HANDLE;
