@@ -9,7 +9,7 @@ To install this application, simply execute the following commands:
 
     git clone https://github.com/D3PSI/VK.git
     cd VK/install/
-    ./INSTALL.sh
+    sudo ./INSTALL.sh
     cd ..
     make
 
@@ -22,7 +22,7 @@ or
 
     make run
 
-Either one should work.
+Either one should work. If it gives you errors about includes from Windows or whatever, make sure to open `VK/Version.hpp` in a text editor and check that the line containing `#define LINUX` is uncommented and that the lines containing `#define WIN_64 `, `#define WIN_32`, `#define MACOSX` are commented out. Then try to recompile the project by `cd`-ing into the projects root directory and running `make run`.
 
 #### Hint
 (If you are a little lazy like me, there are precompiled versions for Windows x64 and Debian x64 hidden somewhere in this repository. I am sure that you will manage to find them.)
