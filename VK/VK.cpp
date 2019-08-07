@@ -140,7 +140,6 @@ namespace vk {
 
     const std::vector< char > loadFile(const std::string& filePath_) {
 
-        std::cout << "loadFile\n";
         logger::log(EVENT_LOG, "Loading file at '" + filePath_ + "'");
 
         std::ifstream file(filePath_, std::ios::ate | std::ios::binary);        // Start reading at end of file --> determine the buffer size needed
@@ -158,15 +157,12 @@ namespace vk {
         file.read(buffer.data(), bufferSize);
         file.close();
 
-        std::cout << "/loadFile\n";
-
         return buffer;
 
     }
 
     void copyBuffer(VkBuffer srcBuf_, VkBuffer dstBuf_, VkDeviceSize size_) {
 
-        std::cout << "copyBuffer\n";
         VkCommandBuffer commandBuffer = startCommandBuffer(TRANSFER_QUEUE);
 
         VkBufferCopy copy       = {};
@@ -175,12 +171,10 @@ namespace vk {
         copy.size               = size_;
         
         std::unique_lock< std::mutex > lock(transferMutex);
-        std::cout << "transfer5\n";
         vkCmdCopyBuffer(commandBuffer, srcBuf_, dstBuf_, 1, &copy);
         lock.unlock();
 
         endCommandBuffer(commandBuffer, TRANSFER_QUEUE);
-        std::cout << "/copyBuffer\n";
 
     }
 
@@ -188,15 +182,12 @@ namespace vk {
 
         std::scoped_lock< std::mutex > commandLock(commandBufferMutex);
 
-        std::cout << "startCommandBuffer\n";
-        std::cout << queue_ << std::endl;
         VkCommandPool   commandPool     = VK_NULL_HANDLE;
         std::mutex*     mutex           = nullptr;
 
         if (queue_ == TRANSFER_QUEUE) {
 
             std::scoped_lock< std::mutex > lock(transferMutex);
-            std::cout << "transfer4\n";
             commandPool = transferCommandPool;
             mutex       = &transferMutex;
         
@@ -204,7 +195,6 @@ namespace vk {
         else if (queue_ == GRAPHICS_QUEUE) {
 
             std::scoped_lock< std::mutex > lock(graphicsMutex);
-            std::cout << "graphics4\n";
             commandPool = graphicsCommandPool;
             mutex       = &graphicsMutex;
 
@@ -231,8 +221,6 @@ namespace vk {
 
         vkBeginCommandBuffer(commandBuffer, &beginInfo);
 
-        std::cout << "/startCommandBuffer\n";
-
         return commandBuffer;
 
     }
@@ -241,7 +229,6 @@ namespace vk {
 
         std::scoped_lock< std::mutex > commandLock(commandBufferMutex);
 
-        std::cout << "endCommandBuffer\n";
         waitForQueue(queue_);
 
         VkQueue         queue       = VK_NULL_HANDLE;
@@ -252,7 +239,6 @@ namespace vk {
         if (queue_ == TRANSFER_QUEUE) {
         
             std::scoped_lock< std::mutex > lock(transferMutex);
-            std::cout << "transfer1\n";
             queue           = transferQueue;
             fence           = transferFence;
             mutex           = &transferMutex;
@@ -266,7 +252,6 @@ namespace vk {
             fence           = graphicsFence;
             mutex           = &graphicsMutex;
             commandPool     = graphicsCommandPool;
-            std::cout << "graphics1\n";
         
         } 
         else {
@@ -299,8 +284,6 @@ namespace vk {
             &commandBuffer_
             );
 
-        std::cout << "/endCommandBuffer\n";
-
     }
 
     void imageLayoutTransition(
@@ -311,7 +294,6 @@ namespace vk {
         uint32_t        mipLevels_
         ) {
 
-        std::cout << "imageLayoutTransition\n";
         VkCommandBuffer commandBuffer               = startCommandBuffer(GRAPHICS_QUEUE);
 
         VkImageMemoryBarrier barrier                = {};
@@ -391,7 +373,6 @@ namespace vk {
 
 
         std::unique_lock< std::mutex > lock(graphicsMutex);
-        std::cout << "graphics2\n";
         vkCmdPipelineBarrier(
             commandBuffer,
             sourceStage,
@@ -410,7 +391,6 @@ namespace vk {
             commandBuffer, 
             GRAPHICS_QUEUE
             );
-        std::cout << "/imageLayoutTransition\n";
 
     }
 
@@ -421,7 +401,6 @@ namespace vk {
         uint32_t        height_
         ) {
 
-        std::cout << "copyBufferToImage\n";
         VkCommandBuffer commandBuffer               = startCommandBuffer(TRANSFER_QUEUE);
 
         VkBufferImageCopy copyRegion                = {};
@@ -438,7 +417,6 @@ namespace vk {
         copyRegion.imageExtent                      = { width_, height_, 1 };
 
         std::unique_lock< std::mutex > lock(transferMutex);
-        std::cout << "transfer2\n";
         vkCmdCopyBufferToImage(
             commandBuffer,
             buffer_,
@@ -450,7 +428,6 @@ namespace vk {
         lock.unlock();
 
         endCommandBuffer(commandBuffer, TRANSFER_QUEUE);
-        std::cout << "/copyBufferToImage\n";
 
     }
 
@@ -461,7 +438,6 @@ namespace vk {
         uint32_t                mipLevels_
         ) {
 
-        std::cout << "createImageView\n";
         logger::log(EVENT_LOG, "Creating image view...");
 
         VkImageViewCreateInfo imageViewCreateInfo               = {};
@@ -489,8 +465,6 @@ namespace vk {
         ASSERT(result, "Failed to create image view", VK_SC_IMAGE_VIEW_CREATION_ERROR);
 
         logger::log(EVENT_LOG, "Successfully created image view");
-
-        std::cout << "/createImageView\n";
 
         return imgView;
 
@@ -557,7 +531,6 @@ namespace vk {
         VkDeviceMemory&             imgMem_
         ) {
 
-        std::cout << "createImage\n";
         VkImageCreateInfo imgCreateInfo         = {};
         imgCreateInfo.sType                     = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         imgCreateInfo.imageType                 = VK_IMAGE_TYPE_2D;
@@ -603,7 +576,6 @@ namespace vk {
             imgMem_,
             0
             );
-        std::cout << "/createImage\n";
 
         return vk::errorCodeBuffer;
 
@@ -636,14 +608,12 @@ namespace vk {
 
     void waitForQueue(Queue queue_) {
 
-        std::cout << "waitForQueue\n";
         VkFence         fence       = VK_NULL_HANDLE;
         std::mutex*     mutex       = nullptr;
 
         if (queue_ == TRANSFER_QUEUE) {
 
             std::scoped_lock< std::mutex > lock(transferMutex);
-            std::cout << "transfer3\n";
             fence = transferFence;
             mutex = &transferMutex;
         
@@ -651,7 +621,6 @@ namespace vk {
         else if (queue_ == GRAPHICS_QUEUE) {
 
             std::scoped_lock< std::mutex > lock(graphicsMutex);
-            std::cout << "graphics3\n";
             fence = graphicsFence;
             mutex = &graphicsMutex;
         
@@ -671,7 +640,6 @@ namespace vk {
             std::numeric_limits< uint64_t >::max()
             );
         vkResetFences(engine->logicalDevice, 1, &fence);
-        std::cout << "/waitForQueue\n";
     
     }
 

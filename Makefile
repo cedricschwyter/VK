@@ -5,9 +5,9 @@ LDFLAGS = -L$(VULKAN_SDK_PATH)/lib `pkg-config --static --libs glfw3` -lvulkan -
 VKTest: VK/*.cpp
 	g++ $(CFLAGS) -o "bin/Linux/x64/VK by D3PSI" VK/*.cpp $(LDFLAGS)
 
-.PHONY: test clean
+.PHONY: run clean
 
-test: VKTest
+run: VKTest
 	./RUN.sh
 
 clean:

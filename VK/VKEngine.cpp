@@ -102,8 +102,6 @@ VK_STATUS_CODE VKEngine::initWindow() {
         );
 #endif
 
-    glfwSwapInterval(0);
-
     GLFWimage windowIcon[1];
     windowIcon[0].pixels = stbi_load(
         "res/textures/loading_screen/infinity.jpg",
@@ -181,6 +179,7 @@ VK_STATUS_CODE VKEngine::loop() {
         loadingScreen->close = true;
         lock.unlock();
         glfwMakeContextCurrent(window);
+        glfwSwapInterval(0);
         glfwShowWindow(window);
         glfwFocusWindow(window);
         initialized = true;

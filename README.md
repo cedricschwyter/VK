@@ -1,21 +1,36 @@
 # VK
 ## Vulkan part of my Vulkan vs. OpenGL comparison
 
-This project features a big part of my matura thesis: Comparing the Vulkan API and OpenGL with one another. There are no install instructions just yet, I am working on those.
+This project features a big part of my matura thesis which is Comparing the Vulkan API and OpenGL with one another. This repository contains the source code for the Vulkan application.
 
 ## Installing
 
-There are no specific instructions to install the project yet, and I have not yet created Makefiles for the project and whatever, because I am developing on Visual Studio 2019. I will add those shortly.
-
-If you still want to compile the executable for yourself (at the moment it only works on Windows,  as stated I have not yet been able to compile it under any other OS), clone the repo:
+To install this application, simply execute the following commands:
 
     git clone https://github.com/D3PSI/VK.git
+    cd VK/install/
+    ./INSTALL.sh
+    cd ..
+    make
 
-And open it in your favorite C++ IDE. Link the libraries and includes correctly and your good to go.
+This will give you the executable in `bin/Linux/x64/VK by D3PSI`. 
+To run it execute the following (in the root directory of the project):
+
+    ./RUN.sh
+
+or
+
+    make run
+
+Either one should work.
 
 #### Hint
-(If you are a little lazy like me, there is a precompiled version for Windows x64 hidden somewhere in this repository. I am sure that you will manage to find it.)
+(If you are a little lazy like me, there are precompiled versions for Windows x64 and Debian x64 hidden somewhere in this repository. I am sure that you will manage to find them.)
 
 ## Uninstalling
 
-Well, if you figured out how to install the project, you will manage to uninstall it on your own. It does not create any temporary files outside of the project folder, so, just delete that.
+Well, if you figured out how to install the project, you will manage to uninstall it on your own. It does not create any temporary files outside of the project folder, so, just delete that:
+
+    rm -r VK/
+
+Thank you for your interest in this project!
