@@ -7,7 +7,8 @@
     @file         BaseImage.hpp
     @brief        Implementation of the BaseImage class
 */
-#pragma once
+#ifndef BASE_IMAGE_HPP
+#define BASE_IMAGE_HPP
 #include <vulkan/vulkan.h>
 
 #include "VK_STATUS_CODE.hpp"
@@ -38,4 +39,4 @@ protected:
 
 
 };
-
+#endif  // BASE_IMAGE_HPP

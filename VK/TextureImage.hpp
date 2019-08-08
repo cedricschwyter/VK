@@ -7,7 +7,8 @@
     @file         TextureImage.hpp
     @brief        Definition of the TextureImage class
 */
-#pragma once
+#ifndef TEXTURE_IMAGE_HPP
+#define TEXTURE_IMAGE_HPP
 #include <vulkan/vulkan.h>
 
 #include "Logger.hpp"
@@ -64,4 +65,4 @@ private:
     VkImage             img;
 
 };
-
+#endif  // TEXTURE_IMAGE_HPP

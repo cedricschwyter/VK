@@ -7,7 +7,8 @@
     @file         ASSERT.cpp
     @brief        Implementation of the ASSERT function
 */
-#pragma once
+#ifndef ASSERT_CPP
+#define ASSERT_CPP
 #include <iostream>
 
 #include "VK.hpp"
@@ -49,3 +50,4 @@ inline int ASSERT(int val_, const char* msg_, int ret_) {
     }
 
 }
+#endif  // ASSERT_CPP

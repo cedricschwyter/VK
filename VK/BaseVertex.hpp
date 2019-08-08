@@ -7,7 +7,8 @@
     @file         BaseVertex.hpp
     @brief        Definition of the BaseVertex struct
 */
-#pragma once
+#ifndef BASE_VERTEX_HPP
+#define BASE_VERTEX_HPP
 #include <glm/glm.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
@@ -126,3 +127,4 @@ namespace std {
     };
 
 }
+#endif  // BASE_VERTEX_HPP

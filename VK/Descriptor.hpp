@@ -7,7 +7,8 @@
     @file         Descriptor.hpp
     @brief        Definition of the Descriptor wrapper
 */
-#pragma once
+#ifndef DESCRIPTOR_HPP
+#define DESCRIPTOR_HPP
 #include "UniformInfo.cpp"
 
 class Descriptor
@@ -29,4 +30,4 @@ public:
     Descriptor(UniformInfo info_);
 
 };
-
+#endif  // DESCRIPTOR_HPP

@@ -7,7 +7,8 @@
     @file         Version.hpp
     @brief        Set build-options by defining macros
 */
-#pragma once
+#ifndef VERSION_HPP
+#define VERSION_HPP
 #include "Makros.hpp"
 
 // Edit configuration here
@@ -63,4 +64,5 @@
         #define NOMINMAX        // Fixes std::min/std::max/std::clamp error
         #include <Windows.h>
     #endif
-#endif // NOMINMAX
+#endif  // NOMINMAX
+#endif  // VERSION_HPP

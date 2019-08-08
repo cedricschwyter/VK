@@ -7,7 +7,8 @@
     @file        BaseBuffer.hpp
     @brief        Definition of the BaseBuffer class
 */
-#pragma once
+#ifndef BASE_BUFFER_HPP
+#define BASE_BUFFER_HPP
 #include <vulkan/vulkan.h>
 
 #include <vector>
@@ -91,4 +92,4 @@ protected:
     VkBufferCreateInfo        bufferCreateInfo           = {};
 
 };
-
+#endif  // BASE_BUFFER_HPP

@@ -7,7 +7,8 @@
     @file         MSAARenderImage.cpp
     @brief        Implementation of the MSAARenderImage class
 */
-#pragma once
+#ifndef MSAA_RENDER_IMAGE_HPP
+#define MSAA_RENDER_IMAGE_HPP
 #include "BaseImage.hpp"
 
 class MSAARenderImage :
@@ -26,4 +27,4 @@ public:
     ~MSAARenderImage(void);
 
 };
-
+#endif  // MSAA_RENDER_IMAGE_HPP

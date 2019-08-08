@@ -211,13 +211,15 @@ VK_STATUS_CODE VKEngine::loop() {
 
         if (currentTime - lastTime >= seconds) {
 
-            /*std::string fps                = "Average FPS (last " + std::to_string(seconds) + " seconds):    %f\t";
+#ifndef VK_NO_LOG
+            std::string fps                = "Average FPS (last " + std::to_string(seconds) + " seconds):    %f\t";
             std::string frametime          = "Average Frametime (last " + std::to_string(seconds) + " seconds):    %f ms\t";
             std::string maxFPS             = "Max FPS:    %f\n";
 
             printf(fps.c_str(), double(nbFrames / seconds));
             printf(frametime.c_str(), double((1000.0 * seconds) / nbFrames));
-            printf(maxFPS.c_str(), double(maxfps / seconds));*/
+            printf(maxFPS.c_str(), double(maxfps / seconds));
+#endif
             nbFrames = 0;
             lastTime += seconds;
 

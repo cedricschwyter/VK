@@ -7,7 +7,8 @@
     @file         FPSCamera.hpp
     @brief        Definition of the FPSCamera class
 */
-#pragma once
+#ifndef FPS_CAMERA_HPP
+#define FPS_CAMERA_HPP
 #include "BaseCamera.hpp"
 
 class FPSCamera :
@@ -45,4 +46,4 @@ public:
     ~FPSCamera(void);
 
 };
-
+#endif  // FPS_CAMERA_HPP

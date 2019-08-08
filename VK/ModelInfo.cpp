@@ -7,7 +7,8 @@
     @file         ModelInfo.cpp
     @brief        Definition of the ModelInfo struct
 */
-#pragma once
+#ifndef MODEL_INFO_CPP
+#define MODEL_INFO_CPP
 #include "Model.hpp"
 
 /**
@@ -20,3 +21,4 @@ struct ModelInfo {
     VKEngineModelLoadingLib     lib;
 
 };
+#endif  // MODEL_INFO_CPP

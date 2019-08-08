@@ -7,7 +7,8 @@
     @file         DescriptorPool.hpp
     @brief        Definition of the DescriptorPool wrapper
 */
-#pragma once
+#ifndef DESCRIPTOR_POOL_HPP
+#define DESCRIPTOR_POOL_HPP
 #include <vulkan/vulkan.h>
 
 #include "DescriptorSetLayout.hpp"
@@ -31,4 +32,4 @@ public:
     ~DescriptorPool(void);
 
 };
-
+#endif  // DESCRIPTOR_POOL_HPP

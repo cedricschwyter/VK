@@ -1,13 +1,14 @@
 /**
     Defines the UniformBuffer class, inheriting BaseBuffer
 
-    @author        D3PSI
-    @version    0.0.1 02.12.2019
+    @author       D3PSI
+    @version      0.0.1 02.12.2019
 
-    @file        UniformBuffer.hpp
+    @file         UniformBuffer.hpp
     @brief        Definition of the UniformBuffer class
 */
-#pragma once
+#ifndef UNIFORM_BUFFER_HPP
+#define UNIFORM_BUFFER_HPP
 #include "BaseBuffer.hpp"
 #include "VK_STATUS_CODE.hpp"
 
@@ -18,4 +19,4 @@ class UniformBuffer :
 public:
 
 };
-
+#endif  // UNIFORM_BUFFER_HPP

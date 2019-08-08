@@ -1,13 +1,15 @@
 /**
     Prototypes the Logger namespace
 
-    @author        D3PSI
-    @version    0.0.1 02.12.2019
+    @author       D3PSI
+    @version      0.0.1 02.12.2019
 
-    @file        Logger.hpp
+    @file         Logger.hpp
     @brief        Prototype of the Logger namespace
 */
-#pragma once
+#ifndef LOGGER_HPP
+#define LOGGER_HPP
+#include <thread>
 #include <mutex>
 
 #include "Version.hpp"
@@ -48,3 +50,4 @@ namespace logger {
     LOGGER_STATUS_CODE log(LOG_TYPE log_, std::string msg_);
 
 }
+#endif  // LOGGER_HPP

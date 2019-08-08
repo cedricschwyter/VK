@@ -7,9 +7,12 @@
     @file         TEXTURE_TYPE.cpp
     @brief        Definition of the TEXTURE_TYPE struct
 */
-#pragma once
+#ifndef TEXTURE_TYPE_CPP
+#define TEXTURE_TYPE_CPP
 
-
+/**
+ * Enumeration to differenciate between the different types of textures
+ */
 typedef enum TEXTURE_TYPE {
 
     TT_HEIGHT       = 4,
@@ -19,3 +22,4 @@ typedef enum TEXTURE_TYPE {
     TT_STANDARD     = 0
 
 } TEXTURE_TYPE;
+#endif  // TEXTURE_TYPE_CPP

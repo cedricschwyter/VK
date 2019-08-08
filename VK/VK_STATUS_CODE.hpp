@@ -1,14 +1,15 @@
 /**
     Implements the VK_STATUS_CODE enumeration
 
-    @author        D3PSI
-    @version    0.0.1 02.12.2019
+    @author       D3PSI
+    @version      0.0.1 02.12.2019
 
-    @file        VK_STATUS_CODE.hpp
+    @file         VK_STATUS_CODE.hpp
     @brief        Implementation of the VK_STATUS_CODE enumeration
 
 */
-#pragma once
+#ifndef VK_STATUS_CODE_HPP
+#define VK_STATUS_CODE_HPP
 
 /**
     Status code enumeration for easier exception-backtracing
@@ -73,3 +74,4 @@ typedef enum VK_STATUS_CODE {
     VK_SC_ERROR_CODE_BUFFER_NOT_INITIALIZED                 = 1
 
 } VK_STATUS_CODE;
+#endif  // VK_STATUS_CODE_HPP

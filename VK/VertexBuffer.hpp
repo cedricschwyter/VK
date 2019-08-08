@@ -1,13 +1,14 @@
 /**
     Defines the VertexBuffer class, inheriting BaseBuffer
 
-    @author        D3PSI
-    @version    0.0.1 02.12.2019
+    @author       D3PSI
+    @version      0.0.1 02.12.2019
 
-    @file        VertexBuffer.hpp
+    @file         VertexBuffer.hpp
     @brief        Definition of the VertexBuffer class
 */
-#pragma once
+#ifndef VERTEX_BUFFER_HPP
+#define VERTEX_BUFFER_HPP
 #include "BaseBuffer.hpp"
 
 class VertexBuffer :
@@ -15,4 +16,4 @@ class VertexBuffer :
 {
     using BaseBuffer::BaseBuffer;
 };
-
+#endif  // VERTEX_BUFFER_HPP

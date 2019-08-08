@@ -1,13 +1,14 @@
 /**
     Defines the VertFragShaderStages wrapper for a Vulkan shader stage
 
-    @author        D3PSI
-    @version    0.0.1 02.12.2019
+    @author       D3PSI
+    @version      0.0.1 02.12.2019
 
-    @file        VertFragShaderStages.hpp
+    @file         VertFragShaderStages.hpp
     @brief        Definition of the VertFragShaderStages for a Vulkan shader stage
 */
-#pragma once
+#ifndef VERT_FRAG_SHADER_STAGES_HPP
+#define VERT_FRAG_SHADER_STAGES_HPP
 #include <vulkan/vulkan.h>
 
 #include <vector>
@@ -59,4 +60,4 @@ private:
     VkShaderModule createShaderModuleFromBinary(const std::vector< char >* code_);
 
 };
-
+#endif  // VERT_FRAG_SHADER_STAGES_HPP

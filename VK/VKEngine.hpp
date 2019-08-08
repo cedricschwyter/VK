@@ -7,7 +7,8 @@
     @file         VKEngine.hpp
     @brief        Declaration of the VKEngine class
 */
-#pragma once
+#ifndef VK_ENGINE_HPP
+#define VK_ENGINE_HPP
 #include "Version.hpp"
 
 #define GLFW_INCLUDE_VULKAN
@@ -531,3 +532,4 @@ private:
     VK_STATUS_CODE recreateGraphicsPipelines(void);
 
 };
+#endif  // VK_ENGINE_HPPmake

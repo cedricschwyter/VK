@@ -1,10 +1,10 @@
 /**
     Implements the VertFragShaderStages wrapper for a Vulkan shader stage
 
-    @author        D3PSI
-    @version    0.0.1 02.12.2019
+    @author       D3PSI
+    @version      0.0.1 02.12.2019
 
-    @file        VertFragShaderStages.cpp
+    @file         VertFragShaderStages.cpp
     @brief        Implementation of the VertFragShaderStages wrapper for a Vulkan shader stage
 */
 #include "VertFragShaderStages.hpp"

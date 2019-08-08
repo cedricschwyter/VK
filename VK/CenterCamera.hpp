@@ -7,7 +7,8 @@
     @file         CenterCamera.hpp
     @brief        Definition of the CenterCamera class
 */
-#pragma once
+#ifndef CENTER_CAMERA_HPP
+#define CENTER_CAMERA_HPP
 #include "BaseCamera.hpp"
 #include "Makros.hpp"
 
@@ -55,4 +56,4 @@ private:
     glm::vec3 camTar;
 
 };
-
+#endif  // CENTER_CAMERA_HPP

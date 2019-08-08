@@ -7,7 +7,6 @@
     @file         Logger.cpp
     @brief        Implementation of the Logger namespace
 */
-#pragma once
 #include <fstream>
 #include <time.h>
 #include <iostream>
@@ -17,27 +16,31 @@
 #if defined WIN_64 || defined WIN_32
     #include <direct.h>
     #include "ConsoleColor.hpp"
+#elif defined LINUX
+    #include <sys/stat.h>
 #endif
 
 namespace logger {
 
     const char*              LOG_DIR               = "logs";
 
-    const std::string        ERROR_LOG_PATH        = "logs/error.log";
-    const std::string        START_LOG_PATH        = "logs/start.log";
-    const std::string        EVENT_LOG_PATH        = "logs/event.log";
-    std::ofstream           error;
-    std::ofstream           start;
-    std::ofstream           event;
+    const std::string        ERROR_LOG_PATH        = LOG_DIR + std::string("/error.log");
+    const std::string        START_LOG_PATH        = LOG_DIR + std::string("/start.log");
+    const std::string        EVENT_LOG_PATH        = LOG_DIR + std::string("/event.log");
+    std::ofstream            error;
+    std::ofstream            start;
+    std::ofstream            event;
 
     std::mutex                streamBusy;
 
     LOGGER_STATUS_CODE init() {
 #ifndef VK_NO_LOG
-#if defined WIN_64 || WIN_32
-        if(_mkdir(LOG_DIR) >= 0) return LOGGER_SC_DIRECTORY_CREATION_ERROR;
+#if defined WIN_64 || defined WIN_32
+        if (_mkdir(LOG_DIR) >= 0) return LOGGER_SC_DIRECTORY_CREATION_ERROR;
+#elif defined LINUX
+        if (mkdir(LOG_DIR, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH))
 #endif        
-	error.open(ERROR_LOG_PATH, std::ios::trunc);
+	    error.open(ERROR_LOG_PATH, std::ios::trunc);
         start.open(START_LOG_PATH, std::ios::app);
         event.open(EVENT_LOG_PATH, std::ios::trunc);
         logger::log(EVENT_LOG, "Successfully initialized Logger");
@@ -57,7 +60,11 @@ namespace logger {
         struct tm local_time;
 
         time(&current_time);
+#if defined WIN_64 || defined WIN_32
         localtime_s(&local_time, &current_time);
+#elif defined LINUX
+        localtime_r(&current_time, &local_time);
+#endif
 
         int Year        = local_time.tm_year + 1900;
         int Month       = local_time.tm_mon + 1;
@@ -85,7 +92,7 @@ namespace logger {
                 << "CRITICAL: "
                 << msg_ << std::endl;
 
-#if (defined VK_DEVELOPMENT || defined VK_RELEASE_CONSOLE) && (defined WIN_64 || WIN_32)
+#if (defined VK_DEVELOPMENT || defined VK_RELEASE_CONSOLE) && (defined WIN_64 || defined WIN_32)
                 std::cerr << green << Day << white << ":"
                     << green << Month << white << ":"
                     << green << Year << white << "   "
@@ -119,7 +126,7 @@ namespace logger {
                     << "CRITICAL: "
                     << msg_ << std::endl;
 
-#if (defined VK_DEVELOPMENT || defined VK_RELEASE_CONSOLE) && (defined WIN_64 || WIN_32)
+#if (defined VK_DEVELOPMENT || defined VK_RELEASE_CONSOLE) && (defined WIN_64 || defined WIN_32)
                 std::cerr << green << Day << white << ":"
                     << green << Month << white << ":"
                     << green << Year << white << "   "
@@ -167,7 +174,7 @@ namespace logger {
                     << thisThread << "        ===        "
                     << msg_ << std::endl;
 
-#if (defined VK_DEVELOPMENT || defined VK_RELEASE_CONSOLE) && (defined WIN_64 || WIN_32)
+#if (defined VK_DEVELOPMENT || defined VK_RELEASE_CONSOLE) && (defined WIN_64 || defined WIN_32)
                 std::cout << green << Day << white << ":"
                     << green << Month << white << ":"
                     << green << Year << white << "   "
@@ -198,7 +205,7 @@ namespace logger {
                     << thisThread << "        ===        "
                     << msg_ << std::endl;
 
-#if (defined VK_DEVELOPMENT || defined VK_RELEASE_CONSOLE) && (defined WIN_64 || WIN_32)
+#if (defined VK_DEVELOPMENT || defined VK_RELEASE_CONSOLE) && (defined WIN_64 || defined WIN_32)
                 std::cout << green << Day << white << ":"
                     << green << Month << white << ":"
                     << green << Year << white << "   "
@@ -226,12 +233,13 @@ namespace logger {
         }
 #endif
         if (log_ == ERROR_LOG) {
-#ifdef VK_DEVELOPMENT
+#if defined VK_DEVELOPMENT && (defined WIN_64 || defined WIN_32)
             __debugbreak();
 #else
             throw std::runtime_error(msg_);
 #endif
         }
+        
         return LOGGER_SC_SUCCESS;
 
     }

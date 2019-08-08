@@ -7,7 +7,8 @@
     @file         DescriptorSetLayout.hpp
     @brief        Definition of the DescriptorSetLayout wrapper
 */
-#pragma once
+#ifndef DESCRIPTOR_SET_LAYOUT_HPP
+#define DESCRIPTOR_SET_LAYOUT_HPP
 #include <vulkan/vulkan.h>
 
 #include <vector>
@@ -40,3 +41,4 @@ public:
     ~DescriptorSetLayout(void);
 
 };
+#endif  // DESCRIPTOR_SET_LAYOUT_HPP

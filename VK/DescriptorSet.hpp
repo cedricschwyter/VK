@@ -7,7 +7,8 @@
     @file         DescriptorSet.hpp
     @brief        Definition of the DescriptorSet wrapper
 */
-#pragma once
+#ifndef DESCRIPTOR_SET_HPP
+#define DESCRIPTOR_SET_HPP
 #include <vector>
 
 #include "UniformInfo.cpp"
@@ -57,4 +58,4 @@ public:
     ~DescriptorSet(void);
 
 };
-
+#endif  // DESCRIPTOR_SET_HPP

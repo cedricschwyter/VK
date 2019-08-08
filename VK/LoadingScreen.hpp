@@ -7,7 +7,8 @@
     @file         LoadingScreen.hpp
     @brief        Declaration of the LoadingScreen class
 */
-#pragma once
+#ifndef LOADING_SCREEN_HPP
+#define LOADING_SCREEN_HPP
 #include <SDL.h>
 #undef main        // fixes SDL2 error: Entry point not defined
 
@@ -53,4 +54,4 @@ private:
     SDL_STATUS_CODE clean(void);
 
 };
-
+#endif  // LOADING_SCREEN_HPP

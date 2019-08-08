@@ -7,7 +7,8 @@
     @file         DepthBuffer.cpp
     @brief        Definition of the DepthBuffer class
 */
-#pragma once
+#ifndef DEPTH_BUFFER_HPP
+#define DEPTH_BUFFER_HPP
 #include "BaseImage.hpp"
 
 class DepthBuffer :
@@ -35,4 +36,4 @@ private:
     VkFormat enumerateSupportedDepthBufferFormat(void);
 
 };
-
+#endif  // DEPTH_BUFFER_HPP

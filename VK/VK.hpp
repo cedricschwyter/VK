@@ -7,7 +7,8 @@
     @file         VK.hpp
     @brief        Prototype of the vk namespace
 */
-#pragma once
+#ifndef VK_HPP
+#define VK_HPP
 #include "Version.hpp"
 
 #include <vulkan/vulkan.h>
@@ -288,3 +289,4 @@ namespace vk {
     void waitForQueue(Queue queue_);
 
 }
+#endif  // VK_HPP

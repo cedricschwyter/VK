@@ -8,7 +8,8 @@
     @brief        Implementation of the LOGGER_STATUS_CODE enumeration
 
 */
-#pragma once
+#ifndef LOGGER_STATUS_CODE_CPP
+#define LOGGER_STATUS_CODE_CPP
 
 /**
     Status code enumeration for easier exception-backtracing
@@ -20,3 +21,4 @@ typedef enum LOGGER_STATUS_CODE {
     LOGGER_SC_SUCCESS                               = 0
 
 } LOGGER_STATUS_CODE;
+#endif  // LOGGER_STATUS_CODE_CPP

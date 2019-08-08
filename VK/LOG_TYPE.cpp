@@ -8,8 +8,12 @@
     @brief        Implementation of the LOG_TYPE enumeration
 
 */
-#pragma once
+#ifndef LOG_TYPE_CPP
+#define LOG_TYPE_CPP
 
+/**
+ * Enumeration to differenciate between the different types of .log-files and streams
+ */
 typedef enum LOG_TYPE {
 
     ERROR_LOG,
@@ -17,3 +21,4 @@ typedef enum LOG_TYPE {
     EVENT_LOG
 
 } LOG_TYPE;
+#endif  // LOG_TYPE_CPP

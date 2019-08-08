@@ -7,7 +7,8 @@
     @file         AssetLoader.hpp
     @brief        Definition of the AssetLoader functor class
 */
-#pragma once
+#ifndef ASSET_LOADER_HPP
+#define ASSET_LOADER_HPP
 
 #include "Model.hpp"
 #include "ModelInfo.cpp"
@@ -35,4 +36,4 @@ private:
     std::vector< Model* >           models;
 
 };
-
+#endif  // ASSET_LOADER_HPP

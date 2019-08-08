@@ -7,7 +7,8 @@
     @file         Mesh.hpp
     @brief        Declaration of the Mesh class
 */
-#pragma once
+#ifndef MESH_HPP
+#define MESH_HPP
 #include <vector>
 
 #include "TextureObject.cpp"
@@ -63,4 +64,4 @@ public:
     ~Mesh(void);
 
 };
-
+#endif  // MESH_HPP

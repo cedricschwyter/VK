@@ -7,7 +7,8 @@
     @file        GraphicsPipeline.hpp
     @brief        Definition of the GraphicsPipeline wrapper for a Vulkan graphics pipeline
 */
-#pragma once
+#ifndef GRAPHICS_PIPELINE_HPP
+#define GRAPHICS_PIPELINE_HPP
 #include <vulkan/vulkan.h>
 
 #include "VertFragShaderStages.hpp"
@@ -77,4 +78,4 @@ private:
     VertFragShaderStages        stages;
 
 };
-
+#endif  // GRAPHICS_PIPELINE_HPP

@@ -1,13 +1,14 @@
 /**
     Defines the UniformInfo struct
 
-    @author        D3PSI
-    @version    0.0.1 02.12.2019
+    @author       D3PSI
+    @version      0.0.1 02.12.2019
 
-    @file        UniformInfo.cpp
+    @file         UniformInfo.cpp
     @brief        Definition of the UniformInfo struct
 */ 
-#pragma once
+#ifndef UNIFORM_INFO_CPP
+#define UNIFORM_INFO_CPP
 #include <vulkan/vulkan.h>
 
 /**
@@ -22,3 +23,4 @@ struct UniformInfo {
     VkDescriptorType            type;
 
 };
+#endif

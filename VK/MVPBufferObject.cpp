@@ -1,13 +1,14 @@
 /**
     Defines the MVPBufferObject struct
 
-    @author        D3PSI
-    @version    0.0.1 02.12.2019
+    @author       D3PSI
+    @version      0.0.1 02.12.2019
 
-    @file        MVPBufferObject.cpp
+    @file         MVPBufferObject.cpp
     @brief        Definition of the MVPBufferObject struct
 */
-#pragma once
+#ifndef MVP_BUFFER_OBJECT_CPP
+#define MVP_BUFFER_OBJECT_CPP
 #include <glm/glm.hpp>
 
 /**
@@ -20,3 +21,4 @@ struct MVPBufferObject {
     alignas(16) glm::mat4 proj;
 
 };
+#endif  // MVP_BUFFER_OBJECT_CPP

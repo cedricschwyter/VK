@@ -7,7 +7,8 @@
     @file         Queue.cpp
     @brief        Definition of the Queue enumeration
 */
-#pragma once
+#ifndef QUEUE_CPP
+#define QUEUE_CPP
 
 /**
         Defines an enumeration for queues
@@ -19,3 +20,4 @@ typedef enum Queue {
     PRESENT_QUEUE = 0
 
 } Queue;
+#endif  // QUEUE_CPP

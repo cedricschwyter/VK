@@ -7,7 +7,8 @@
     @file         ConsoleColor.hpp
     @brief        Change color of console output in streams
 */
-#pragma once
+#ifndef CONSOLE_COLOR_HPP
+#define CONSOLE_COLOR_HPP
 #include <iostream>
 #include <Windows.h>
 
@@ -58,3 +59,4 @@ operator<<(std::basic_ostream<_Elem, _Traits>& i_, color& c_) {
     SetConsoleTextAttribute(hStdout, c_.m_color);
     return i_;
 }
+#endif  // CONSOLE_COLOR_HPP

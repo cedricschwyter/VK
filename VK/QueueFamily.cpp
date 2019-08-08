@@ -1,13 +1,14 @@
 /**
     Defines a struct to handle queue families
 
-    @author        D3PSI
-    @version    0.0.1 02.12.2019
+    @author       D3PSI
+    @version      0.0.1 02.12.2019
 
-    @file        QueueFamily.cpp
+    @file         QueueFamily.cpp
     @brief        Definition of QueueFamily struct
 */
-#pragma once
+#ifndef QUEUE_FAMILY_CPP
+#define QUEUE_FAMILY_CPP
 #include <optional>
 
 /**
@@ -31,3 +32,4 @@ struct QueueFamily {
     }
 
 };
+#endif  // QUEUE_FAMILY_CPP
