@@ -263,14 +263,10 @@ __pycache__/
 *.log
 
 # Visual Studio files
-*.sln
-*.user
-*.filters
-*.vcproj
-*.vcxproj
 *.pdb
 *.iobj
 *.ipdb
 
-# Other
-*.html
+# Library documentations
+ext/glfw/docs/
+ext/glm/doc/

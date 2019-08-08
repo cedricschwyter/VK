@@ -11,7 +11,16 @@ The only real requirement your system has to have is a GPU that supports Vulkan 
 
 ## Installing
 
-To install this application, simply execute the following commands:
+### Windows
+
+To build this application under Windows, simply open the `VK.sln` file in the projects root directory in Visual Studio 2019. 
+Under Build-Configuration, select `Vulkan 1.1.114.0` and `64-bit`. Then, you should be able to build the project:
+Run `Build` > `Rebuild All` and the build should run through smoothly.
+If you want to make sure that the application is configured properly for Windows, open the `VK/Version.hpp` file in a text editor and make sure that the line containing `#define WIN_64` is uncommented and that the lines containing `#define WIN_32`, `#define MACOSX` and `#define LINUX` are commented out. Then, rebuild the solution.
+
+### Linux
+
+To build this application under Linux, simply execute the following commands:
 
     git clone https://github.com/D3PSI/VK.git
     cd VK/install/
@@ -28,10 +37,14 @@ or
 
     make run
 
-Either one should work. If it gives you errors about includes from Windows or whatever, make sure to open `VK/Version.hpp` in a text editor and check that the line containing `#define LINUX` is uncommented and that the lines containing `#define WIN_64 `, `#define WIN_32`, `#define MACOSX` are commented out. Then try to recompile the project by `cd`-ing into the projects root directory and running `make run`.
+Either one should work. If it gives you errors about includes from Windows or whatever, make sure to open `VK/Version.hpp` in a text editor and check that the line containing `#define LINUX` is uncommented and that the lines containing `#define WIN_64 `, `#define WIN_32` and `#define MACOSX` are commented out. Then try to recompile the project by `cd`-ing into the projects root directory and running `make run`.
 
-#### Hint
+### Hint
 (If you are a little lazy like me, there are precompiled versions for Windows x64 and Debian x64 hidden somewhere in this repository. I am sure that you will manage to find them.)
+
+##### Another hint
+
+They are located in `bin/`. You are welcome.
 
 ## Uninstalling
 

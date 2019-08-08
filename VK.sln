@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29102.190
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VK", "VK\VK.vcxproj", "{E64190BA-E692-4618-8F9E-343ECD1432A7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+		Vulkan 1.1.114.0|x64 = Vulkan 1.1.114.0|x64
+		Vulkan 1.1.114.0|x86 = Vulkan 1.1.114.0|x86
+		Vulkan 1.1.85.0|x64 = Vulkan 1.1.85.0|x64
+		Vulkan 1.1.85.0|x86 = Vulkan 1.1.85.0|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E64190BA-E692-4618-8F9E-343ECD1432A7}.Debug|x64.ActiveCfg = Debug|x64
+		{E64190BA-E692-4618-8F9E-343ECD1432A7}.Debug|x64.Build.0 = Debug|x64
+		{E64190BA-E692-4618-8F9E-343ECD1432A7}.Debug|x86.ActiveCfg = Debug|Win32
+		{E64190BA-E692-4618-8F9E-343ECD1432A7}.Debug|x86.Build.0 = Debug|Win32
+		{E64190BA-E692-4618-8F9E-343ECD1432A7}.Release|x64.ActiveCfg = Release|x64
+		{E64190BA-E692-4618-8F9E-343ECD1432A7}.Release|x64.Build.0 = Release|x64
+		{E64190BA-E692-4618-8F9E-343ECD1432A7}.Release|x86.ActiveCfg = Release|Win32
+		{E64190BA-E692-4618-8F9E-343ECD1432A7}.Release|x86.Build.0 = Release|Win32
+		{E64190BA-E692-4618-8F9E-343ECD1432A7}.Vulkan 1.1.114.0|x64.ActiveCfg = Vulkan 1.1.114.0|x64
+		{E64190BA-E692-4618-8F9E-343ECD1432A7}.Vulkan 1.1.114.0|x64.Build.0 = Vulkan 1.1.114.0|x64
+		{E64190BA-E692-4618-8F9E-343ECD1432A7}.Vulkan 1.1.114.0|x86.ActiveCfg = Vulkan 1.1.114.0|Win32
+		{E64190BA-E692-4618-8F9E-343ECD1432A7}.Vulkan 1.1.114.0|x86.Build.0 = Vulkan 1.1.114.0|Win32
+		{E64190BA-E692-4618-8F9E-343ECD1432A7}.Vulkan 1.1.85.0|x64.ActiveCfg = Vulkan 1.1.85.0|x64
+		{E64190BA-E692-4618-8F9E-343ECD1432A7}.Vulkan 1.1.85.0|x64.Build.0 = Vulkan 1.1.85.0|x64
+		{E64190BA-E692-4618-8F9E-343ECD1432A7}.Vulkan 1.1.85.0|x86.ActiveCfg = Vulkan 1.1.85.0|Win32
+		{E64190BA-E692-4618-8F9E-343ECD1432A7}.Vulkan 1.1.85.0|x86.Build.0 = Vulkan 1.1.85.0|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {21EE230A-29D7-4659-9E5B-45E63B129BF0}
+	EndGlobalSection
+EndGlobal
