@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.com/D3PSI/VK.svg?branch=master)](https://travis-ci.com/D3PSI/VK)
 # VK
 ## Vulkan part of my Vulkan vs. OpenGL comparison
 
