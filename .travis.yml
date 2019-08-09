@@ -25,8 +25,8 @@ before_script:
   - cd ..
   - sudo git clone https://github.com/glfw/glfw.git
   - cd glfw/
-  - sudo cmake CMakeLists.txt
-  - sudo make
+  - sudo cmake .
+  - sudo make CFLAGS='-std=c99'
   - sudo make install
 
 script: 
