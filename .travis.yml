@@ -15,8 +15,10 @@ compiler: gcc
 before_script:
   - sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
   - sudo apt-get -qq update
-  - sudo apt-get install software-properties-common cmake make --allow-unauthenticated -y libassimp-dev libglm-dev libegl1-mesa-dev libsdl2-dev libsdl2-image-dev libjpeg-dev libwebp-dev libtiff5-dev
+  - sudo apt-get install pkg-config cmake make --allow-unauthenticated -y libassimp-dev libglm-dev libegl1-mesa-dev libsdl2-dev libsdl2-image-dev libjpeg-dev libwebp-dev libtiff5-dev
   - sudo apt-get --only-upgrade --allow-unauthenticated install cmake
+  - export CC=gcc-7
+  - export CXX=g++-7
   - sudo git clone https://github.com/g-truc/glm.git
   - cd glm/
   - sudo cmake CMakeLists.txt
@@ -26,12 +28,10 @@ before_script:
   - sudo git clone https://github.com/glfw/glfw.git
   - cd glfw/
   - sudo cmake .
-  - sudo make CFLAGS='-std=c99'
+  - sudo make
   - sudo make install
 
 script: 
-  - export CC=gcc-7
-  - export CXX=g++-7
   - make
   
 notifications:
