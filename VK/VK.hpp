@@ -50,6 +50,7 @@ namespace vk {
     extern VkCommandPool                        transferCommandPool;
     extern VkFence                              transferFence;
     extern std::mutex                           transferMutex;
+    extern std::mutex                           commandBufferMutex;
 
     extern std::mutex                           loadingMutex;
 

@@ -251,27 +251,8 @@ VK_STATUS_CODE VKEngine::clean() {
     }
     logger::log(EVENT_LOG, "Successfully destroyed models");
 
-    for (auto descSet : descriptorSets) {
-     
-        delete descSet;
-        logger::log(EVENT_LOG, "Successfully destroyed descriptor set");
-
-    }
-    logger::log(EVENT_LOG, "Successfully destroyed descriptor sets");
-
     delete camera;
     logger::log(EVENT_LOG, "Successfully destroyed camera");
-
-    for (size_t i = 0; i < vk::MAX_IN_FLIGHT_FRAMES; i++) {
-
-        vkDestroySemaphore(logicalDevice, renderingCompletedSemaphores[i], allocator);
-        vkDestroySemaphore(logicalDevice, swapchainImageAvailableSemaphores[i], allocator);
-        vkDestroyFence(logicalDevice, inFlightFences[i], allocator);
-
-    }
-    vkDestroyFence(logicalDevice, vk::graphicsFence, allocator);
-    vkDestroyFence(logicalDevice, vk::transferFence, allocator);
-    logger::log(EVENT_LOG, "Successfully destroyed sync-objects");
 
     std::unique_lock< std::mutex > transferLock(vk::transferMutex);
     vkDestroyCommandPool(logicalDevice, vk::transferCommandPool, allocator);
@@ -1610,7 +1591,7 @@ VK_STATUS_CODE VKEngine::recreateSwapchain() {
     if (!firstTimeRecreation) {
 
         vkDeviceWaitIdle(logicalDevice);
-
+        std::unique_lock< std::mutex > commandLock(vk::commandBufferMutex);
         int width = 0;
         int height = 0;
         while (width == 0 || height == 0) {
@@ -1620,10 +1601,13 @@ VK_STATUS_CODE VKEngine::recreateSwapchain() {
 
         }
 
+        commandLock.unlock();
+
         cleanSwapchain();
 
         ASSERT(createSwapchain(), "Failed to create a swapchain with the given parameters", VK_SC_SWAPCHAIN_CREATION_ERROR);
         ASSERT(createSwapchainImageViews(), "Failed to create swapchain image views", VK_SC_SWAPCHAIN_IMAGE_VIEWS_CREATION_ERROR);
+        ASSERT(initializeSynchronizationObjects(), "Failed to initialize sync-objects", VK_SC_SYNCHRONIZATION_OBJECT_INITIALIZATION_ERROR);
         ASSERT(allocateMSAABufferedImage(), "Failed to allocate multisampling-buffer", VK_SC_MSAA_BUFFER_CREATION_ERROR);
         ASSERT(allocateDepthBuffer(), "Failed to allocate depth buffer", VK_SC_DEPTH_BUFFER_CREATION_ERROR);
         ASSERT(createRenderPasses(), "Failed to create render passes", VK_SC_RENDER_PASS_CREATION_ERROR);
@@ -1632,9 +1616,9 @@ VK_STATUS_CODE VKEngine::recreateSwapchain() {
         ASSERT(allocateSwapchainFramebuffers(), "Failed to allocate framebuffers", VK_SC_FRAMEBUFFER_ALLOCATION_ERROR);
         ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 
-        firstTimeRecreation = false;
-
     }
+        
+    firstTimeRecreation = false;
 
     return vk::errorCodeBuffer;
 
@@ -1646,6 +1630,16 @@ VK_STATUS_CODE VKEngine::cleanSwapchain() {
 
     delete standardDescriptorLayout;
     logger::log(EVENT_LOG, "Successfully destroyed descriptor set layout");
+    standardDescriptors.clear();
+
+    for (auto descriptorSet : descriptorSets) {
+
+        delete descriptorSet;
+        logger::log(EVENT_LOG, "Successfully destroyed descriptor set");
+
+    }
+    logger::log(EVENT_LOG, "Successfully destroyed descriptor sets");
+    descriptorSets.clear();
 
     delete mvpBuffer;
     logger::log(EVENT_LOG, "Successfully destroyed uniform buffers");
@@ -1691,6 +1685,17 @@ VK_STATUS_CODE VKEngine::cleanSwapchain() {
     vkDestroySwapchainKHR(logicalDevice, swapchain, allocator);
     logger::log(EVENT_LOG, "Successfully destroyed swapchain");
 
+    for (size_t i = 0; i < vk::MAX_IN_FLIGHT_FRAMES; i++) {
+
+        vkDestroySemaphore(logicalDevice, renderingCompletedSemaphores[i], allocator);
+        vkDestroySemaphore(logicalDevice, swapchainImageAvailableSemaphores[i], allocator);
+        vkDestroyFence(logicalDevice, inFlightFences[i], allocator);
+
+    }
+    vkDestroyFence(logicalDevice, vk::graphicsFence, allocator);
+    vkDestroyFence(logicalDevice, vk::transferFence, allocator);
+    logger::log(EVENT_LOG, "Successfully destroyed sync-objects");
+    
     logger::log(EVENT_LOG, "Successfully cleaned swapchain");
 
     return vk::errorCodeBuffer;
