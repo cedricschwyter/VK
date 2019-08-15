@@ -92,7 +92,7 @@ VK_STATUS_CODE VKEngine::initWindow() {
         mode->height / 2 - vk::HEIGHT / 2
         );
 #endif
-#if defined VK_WINDOW_MODE_BORDERLESS || defined VK_WINDOW_MODE_UNDEFINED
+#if defined VK_WINDOW_MODE_BORDERLESS
     window = glfwCreateWindow(
         mode->width,
         mode->height,
