@@ -226,9 +226,10 @@ VK_STATUS_CODE VKEngine::loop() {
 
         }
 
-        glfwPollEvents();
         processKeyboardInput();
         showNextSwapchainImage();
+        glfwPollEvents();
+        glfwSwapBuffers(window);
     
     }
 
