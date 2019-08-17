@@ -1130,8 +1130,22 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
                
     diffuseSamplerDescriptor                                                        = Descriptor(diffuseSamplerInfo);
 
+    VkDescriptorBufferInfo lightDataBufferInfo                                      = {};
+    lightDataBufferInfo.buffer                                                      = lightDataBuffer->buf;
+    lightDataBufferInfo.offset                                                      = 0;
+    lightDataBufferInfo.range                                                       = sizeof(LightData);
+
+    UniformInfo lightDataInfo                                                       = {};
+    lightDataInfo.binding                                                           = 2;
+    lightDataInfo.stageFlags                                                        = VK_SHADER_STAGE_FRAGMENT_BIT;
+    lightDataInfo.bufferInfo                                                        = lightDataBufferInfo;
+    lightDataInfo.type                                                              = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+
+    lightDataDescriptor = Descriptor(lightDataInfo);
+
     standardDescriptors.push_back(mvpDescriptor);
     standardDescriptors.push_back(diffuseSamplerDescriptor);
+    standardDescriptors.push_back(lightDataDescriptor);
 
     standardDescriptorLayout = new DescriptorSetLayout(standardDescriptors);
 
@@ -1403,6 +1417,7 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
                         std::vector< Descriptor > descriptors;
 
                         descriptors.push_back(mvpDescriptor);
+                        descriptors.push_back(lightDataDescriptor);
 
                         auto meshDescriptors = mesh->getDescriptors();
                         descriptors.insert(descriptors.end(), meshDescriptors.begin(), meshDescriptors.end());
@@ -1713,7 +1728,7 @@ void VKEngine::framebufferResizeCallback(GLFWwindow* window_, int width_, int he
 
 VK_STATUS_CODE VKEngine::allocateUniformBuffers() {
 
-    VkDeviceSize bufferSize = sizeof(MVPBufferObject);
+    VkDeviceSize bufferSize                     = sizeof(MVPBufferObject);
 
     VkBufferCreateInfo mvpBufferCreateInfo      = {};
     mvpBufferCreateInfo.sType                   = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -1722,6 +1737,16 @@ VK_STATUS_CODE VKEngine::allocateUniformBuffers() {
     mvpBufferCreateInfo.sharingMode             = VK_SHARING_MODE_EXCLUSIVE;
 
     mvpBuffer = new UniformBuffer(&mvpBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+    bufferSize                                  = sizeof(LightData); 
+
+    VkBufferCreateInfo lightBufferCreateInfo    = {};
+    lightBufferCreateInfo.sType                 = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    lightBufferCreateInfo.size                  = bufferSize;
+    lightBufferCreateInfo.usage                 = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+    lightBufferCreateInfo.sharingMode           = VK_SHARING_MODE_EXCLUSIVE;
+
+    lightDataBuffer = new UniformBuffer(&lightBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
     logger::log(EVENT_LOG, "Successfully created buffers");
 
@@ -1745,6 +1770,13 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers() {
     mvp.proj                                        = glm::perspective(static_cast< float >(glm::radians(camera->fov)), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 100.0f);
 
     mvpBuffer->fill(&mvp);
+
+    LightData ld                                    = {};
+    ld.lightCol                                     = glm::vec3(1.0f);
+    ld.lightPos                                     = glm::vec3(static_cast< float >(glm::cos(glfwGetTime())), 0.0f, static_cast< float >(glm::sin(glfwGetTime())));
+    ld.viewPos                                      = camera->camPos;
+
+    lightDataBuffer->fill(&ld);
 
     return vk::errorCodeBuffer;
 

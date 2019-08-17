@@ -24,11 +24,15 @@ layout(binding = 0) uniform MVPBuffer {
 
 } mvp;
 
-layout(location = 0) out vec2 fragTexCoord;
+layout(location = 0) out vec3 outPos;
+layout(location = 1) out vec2 outTex;
+layout(location = 2) out vec3 outNor;
 
 void main() {
 
-    gl_Position         = mvp.proj * mvp.view * mvp.model * vec4(pos, 1.0);
-    fragTexCoord        = tex;
+    gl_Position         = mvp.proj * mvp.view * vec4(pos, 1.0);
+    outTex              = tex;
+    outPos              = vec3(mvp.model * vec4(pos, 1.0));
+    outNor              = mat3(transpose(inverse(mvp.model))) * nor;
 
 }

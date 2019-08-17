@@ -58,6 +58,7 @@
 #include "ModelInfo.cpp"
 #include "Queue.cpp"
 #include "AssetLoader.hpp"
+#include "LightData.cpp"
 
 class VKEngine {
 public:
@@ -196,6 +197,8 @@ private:
     bool                                    hasFramebufferBeenResized            = false;
     BaseBuffer*                             mvpBuffer;  
     Descriptor                              mvpDescriptor;
+    BaseBuffer*                             lightDataBuffer;
+    Descriptor                              lightDataDescriptor;
     VkPolygonMode                           polygonMode                          = VK_POLYGON_MODE_FILL;
     BaseImage*                              depthBuffer;
 #ifndef VK_MULTISAMPLING_NONE
