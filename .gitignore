@@ -262,6 +262,9 @@ __pycache__/
 # Application specific log files
 *.log
 
+# Visual Studio code files
+.vscode/
+
 # Visual Studio files
 *.pdb
 *.iobj

@@ -16,7 +16,6 @@ int main() {
 
     vk::init();
 
-    vk::push("res/models/rose/rose.obj");
     vk::push("res/models/nanosuit/nanosuit.obj");
 
     return vk::run();
