@@ -99,23 +99,15 @@ TextureImage::TextureImage(
         static_cast< uint32_t >(h)
         );
     
-    /*vk::imageLayoutTransition(
-        img,
-        imageFormat, 
-        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-        mipLevels
-        );*/
-
-        vk::generateImageMipmaps(
-            img, 
-            imageFormat,
-            w, 
-            h, 
-            mipLevels
-            );
-
     delete stagingBuffer;
+
+    vk::generateImageMipmaps(
+        img, 
+        imageFormat,
+        w, 
+        h, 
+        mipLevels
+        );
 
     imgView = vk::createImageView(img, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 

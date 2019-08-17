@@ -484,11 +484,11 @@ namespace vk {
 
         if (!(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)) {
         
-            logger::log(ERROR_LOG, "Texture image format does not support linear blitting!");
+            logger::log(ERROR_LOG, "Texture image format does not support linear blitting");
 
         }
 
-        VkCommandBuffer commandBuffer                   = startCommandBuffer(TRANSFER_QUEUE);
+        VkCommandBuffer commandBuffer                   = startCommandBuffer(GRAPHICS_QUEUE);
 
         VkImageMemoryBarrier barrier                    = {};
         barrier.sType                                   = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -591,7 +591,7 @@ namespace vk {
             &barrier
             );
 
-        endCommandBuffer(commandBuffer, TRANSFER_QUEUE);
+        endCommandBuffer(commandBuffer, GRAPHICS_QUEUE);
 
     }
 
