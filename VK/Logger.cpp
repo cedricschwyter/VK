@@ -31,17 +31,22 @@ namespace logger {
     std::ofstream            start;
     std::ofstream            event;
 
-    std::mutex                streamBusy;
+    std::mutex               streamBusy;
 
     LOGGER_STATUS_CODE init() {
 #ifndef VK_NO_LOG
 #if defined WIN_64 || defined WIN_32
         if (_mkdir(LOG_DIR) >= 0) return LOGGER_SC_DIRECTORY_CREATION_ERROR;
 #elif defined LINUX
-        if (mkdir(LOG_DIR, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
+        struct stat st;
+        if(stat("/tmp",&st) != 0) {
 
-            logger::log(ERROR_LOG, "Failed to create log directory at " + std::string(LOG_DIR));
-            return LOGGER_SC_DIRECTORY_CREATION_ERROR;
+            if (mkdir(LOG_DIR, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
+
+                logger::log(ERROR_LOG, "Failed to create log directory at " + std::string(LOG_DIR));
+                return LOGGER_SC_DIRECTORY_CREATION_ERROR;
+
+            }
 
         }
 #endif        
