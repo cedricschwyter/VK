@@ -41,7 +41,8 @@ or
 Either one should work. If it gives you errors about includes from Windows or whatever, make sure to open `VK/Version.hpp` in a text editor and check that the line containing `#define LINUX` is uncommented and that the lines containing `#define WIN_64 `, `#define WIN_32` and `#define MACOSX` are commented out. Then try to recompile the project by `cd`-ing into the projects root directory and running `make run`.
 
 ### Hint
-(If you are a little lazy like me, there are precompiled binaries for Windows x64 and Linux x64 hidden somewhere in this repository. I am sure that you will manage to find them.)
+If you are a little lazy like me, there are precompiled binaries for Windows x64 and Linux x64 hidden somewhere in this repository. I am sure that you will manage to find them.
+To actually execute these binaries, copy them and (in the Windows binary's case) all of the dynamic libraries (`.dll`'s) over into the `VK` folder, which is the executables runtime directory.
 
 ##### Another hint
 
