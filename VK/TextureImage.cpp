@@ -127,7 +127,7 @@ TextureImage::TextureImage(
     samplerCreateInfo.mipmapMode                    = VK_SAMPLER_MIPMAP_MODE_LINEAR;
     samplerCreateInfo.mipLodBias                    = 0.0f;
     samplerCreateInfo.minLod                        = 0.0f;
-    samplerCreateInfo.maxLod                        = mipLevels;
+    samplerCreateInfo.maxLod                        = static_cast< float >(mipLevels);
 
     VkResult result = vkCreateSampler(
         vk::engine->logicalDevice,
