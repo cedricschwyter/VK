@@ -1659,6 +1659,7 @@ VK_STATUS_CODE VKEngine::cleanSwapchain() {
     descriptorSets.clear();
 
     delete mvpBuffer;
+    delete lightDataBuffer;
     logger::log(EVENT_LOG, "Successfully destroyed uniform buffers");
 
     delete depthBuffer;

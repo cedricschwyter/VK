@@ -278,6 +278,7 @@
     <ClCompile Include="DescriptorSetLayout.cpp" />
     <ClCompile Include="FPSCamera.cpp" />
     <ClCompile Include="GraphicsPipeline.cpp" />
+    <ClCompile Include="LightData.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelInfo.cpp" />

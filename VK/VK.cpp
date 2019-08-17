@@ -593,6 +593,8 @@ namespace vk {
 
         endCommandBuffer(commandBuffer, GRAPHICS_QUEUE);
 
+        return vk::errorCodeBuffer;
+
     }
 
     VkFormat enumerateSupportedBufferFormat(const std::vector< VkFormat >& candidates_, VkImageTiling tiling_, VkFormatFeatureFlags features_) {
