@@ -256,6 +256,25 @@ namespace vk {
         );
 
     /**
+        Generates mipmaps for texture images
+
+        @param      image_              The VkImage to generate mipmaps from
+        @param      imageFormat_        The format of the original image
+        @param      width_              The width of the original image
+        @param      height_             The height of the original image
+        @param      mipLevels_          The amount of mipmaps to generate
+
+        @return     Returns VK_SC_SUCCESS on success
+     */
+    VK_STATUS_CODE generateImageMipmaps(
+        VkImage         image_, 
+        VkFormat        imageFormat_,
+        int32_t         width_, 
+        int32_t         height_, 
+        uint32_t        mipLevels_
+        );
+
+    /**
         Checks whether a VkFormat has a stencil component
 
         @param      format_         The format in question

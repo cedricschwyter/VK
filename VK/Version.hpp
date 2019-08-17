@@ -17,8 +17,8 @@
 //#define VK_RELEASE_CONSOLE    // enbable this for performance with console
 #define VK_NO_LOG             // enable this for full performance
 
-#define VK_WINDOW_MODE_WINDOWED
-//#define VK_WINDOW_MODE_FULLSCREEN
+//#define VK_WINDOW_MODE_WINDOWED
+#define VK_WINDOW_MODE_FULLSCREEN
 //#define VK_WINDOW_MODE_BORDERLESS
 
 //#define WIN_64  

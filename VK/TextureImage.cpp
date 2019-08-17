@@ -49,13 +49,11 @@ TextureImage::TextureImage(
     }
     else if (ch == 3) {
 
-        // TODO: Reshape data in memory to fit in 4-channel format as 3-channel formats are not supported (mostly)
-        // Probably fixes texturing bug
+        // TODO: Reshape data in memory to fit in 4-channel format as 3-channel formats are not supported (mostly) for beauty
 
         imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
         
     }
-
     else if (ch == 4) {
 
         imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
@@ -76,7 +74,7 @@ TextureImage::TextureImage(
     vk::createImage(
         w, 
         h, 
-        1, 
+        mipLevels, 
         imageFormat, 
         VK_IMAGE_TILING_OPTIMAL, 
         VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 
@@ -91,7 +89,7 @@ TextureImage::TextureImage(
         imageFormat, 
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        1
+        mipLevels
         );
 
     vk::copyBufferToImage(
@@ -101,13 +99,21 @@ TextureImage::TextureImage(
         static_cast< uint32_t >(h)
         );
     
-    vk::imageLayoutTransition(
+    /*vk::imageLayoutTransition(
         img,
         imageFormat, 
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-        1
-        );
+        mipLevels
+        );*/
+
+        vk::generateImageMipmaps(
+            img, 
+            imageFormat,
+            w, 
+            h, 
+            mipLevels
+            );
 
     delete stagingBuffer;
 
@@ -129,7 +135,7 @@ TextureImage::TextureImage(
     samplerCreateInfo.mipmapMode                    = VK_SAMPLER_MIPMAP_MODE_LINEAR;
     samplerCreateInfo.mipLodBias                    = 0.0f;
     samplerCreateInfo.minLod                        = 0.0f;
-    samplerCreateInfo.maxLod                        = 0.0f;
+    samplerCreateInfo.maxLod                        = mipLevels;
 
     VkResult result = vkCreateSampler(
         vk::engine->logicalDevice,
