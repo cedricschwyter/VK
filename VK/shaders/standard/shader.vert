@@ -30,7 +30,7 @@ layout(location = 2) out vec3 outNor;
 
 void main() {
 
-    gl_Position         = mvp.proj * mvp.view * vec4(pos, 1.0);
+    gl_Position         = mvp.proj * mvp.view * mvp.model * vec4(pos, 1.0);
     outTex              = tex;
     outPos              = vec3(mvp.model * vec4(pos, 1.0));
     outNor              = mat3(transpose(inverse(mvp.model))) * nor;
