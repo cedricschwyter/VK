@@ -14,8 +14,13 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
+template< typename Proc >
+Model::Model(const char* path_, GraphicsPipeline& pipeline_, VKEngineModelLoadingLib lib_, Proc model_) : pipeline(pipeline_) {
 
-Model::Model(const char* path_, GraphicsPipeline& pipeline_, VKEngineModelLoadingLib lib_) : pipeline(pipeline_) {
+    static int index = 0;
+    modelMatrixArrayIndex = index++;
+    std::cout << modelMatrixArrayIndex;
+    modelMatrixLambda = model_;
 
     VK_STATUS_CODE result;
 
@@ -303,6 +308,11 @@ TextureImage* Model::textureFromFile(const char *path_, const std::string& direc
     
 }
 
+glm::mat4 Model::getModelMatrix() {
+
+    return modelMatrixLambda();
+
+}
 
 Model::~Model() {
 

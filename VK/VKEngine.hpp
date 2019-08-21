@@ -136,11 +136,13 @@ public:
     /**
         Adds a model to the model loading queue
 
-        @param      path_       The path to the model
+        @param      path_                   The path to the model
+        @param      modelMatrixLambda_      The lambda function to calculate the models model matrix
 
         @return     Returns OGL_SC_SUCCESS on success
     */
-    VK_STATUS_CODE push(const char* path_);
+    template< typename Proc >
+    VK_STATUS_CODE push(const char* path_, Proc modelMatrixLambda_);
 
     /**
         Adds a model to the model loading queue
@@ -195,8 +197,10 @@ private:
     std::vector< VkFence >                  inFlightFences;
     size_t                                  currentSwapchainImage                = 0;
     bool                                    hasFramebufferBeenResized            = false;
-    BaseBuffer*                             mvpBuffer;  
-    Descriptor                              mvpDescriptor;
+    BaseBuffer*                             vpBuffer;  
+    Descriptor                              vpDescriptor;
+    BaseBuffer*                             mBuffer;
+    Descriptor                              mDescriptor;
     BaseBuffer*                             lightDataBuffer;
     Descriptor                              lightDataDescriptor;
     VkPolygonMode                           polygonMode                          = VK_POLYGON_MODE_FILL;

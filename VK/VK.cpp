@@ -715,9 +715,10 @@ namespace vk {
 
     }
 
-    VK_STATUS_CODE push(const char* path_) {
+    template< typename Proc >
+    VK_STATUS_CODE push(const char* path_, Proc modelMatrixLambda_) {
 
-        engine->push(path_);
+        engine->push(path_, modelMatrixLambda_);
         logger::log(EVENT_LOG, "Pushing model at path " + std::string(path_) + " to loading queue");
 
         return vk::errorCodeBuffer;

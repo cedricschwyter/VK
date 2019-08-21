@@ -10,13 +10,29 @@
 #include "VK.hpp"
 
 /**
+    Returns the model matrix for the nanosuit model  
+  
+    @return     Returns a glm::mat4
+*/
+glm::mat4 nanosuit() {
+
+    glm::mat4 model;
+    model           = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    model           = glm::scale(model, glm::vec3(0.02f));
+    model[1][1]     *= -1.0f;
+    
+    return model;
+
+}
+
+/**
     Entry point for the application
 */
 int main() {
 
     vk::init();
 
-    vk::push("res/models/nanosuit/nanosuit.obj");
+    vk::push("res/models/nanosuit/nanosuit.obj", nanosuit);
 
     return vk::run();
 
