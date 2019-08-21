@@ -24,16 +24,20 @@ GraphicsPipeline::GraphicsPipeline(
     const VkPipelineColorBlendAttachmentState*             colorBlendAttachmentState_,
     const VkPipelineColorBlendStateCreateInfo*             colorBlendStateCreateInfo_,
     const VkPipelineDynamicStateCreateInfo*                dynamicStateCreateInfo_,
+    const VkPushConstantRange*                             pushConstants_,
+    const uint32_t                                         pushConstantCount_,
     const DescriptorSetLayout*                             descriptorSetLayout_,
     VkRenderPass                                           renderPass_
     ) {
 
     stages = VertFragShaderStages(vertPath_, fragPath_);
-
+    
     VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo         = {};
     pipelineLayoutCreateInfo.sType                              = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutCreateInfo.setLayoutCount                     = 1;
     pipelineLayoutCreateInfo.pSetLayouts                        = &(descriptorSetLayout_->descriptorSetLayout);
+    pipelineLayoutCreateInfo.pushConstantRangeCount             = pushConstantCount_;
+    pipelineLayoutCreateInfo.pPushConstantRanges                = pushConstants_;
 
     VkResult result = vkCreatePipelineLayout(
         vk::engine->logicalDevice,

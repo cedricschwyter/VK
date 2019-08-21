@@ -1126,7 +1126,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     VkDescriptorBufferInfo mBufferInfo                                              = {};
     mBufferInfo.buffer                                                              = mBuffer->buf;
     mBufferInfo.offset                                                              = 0;
-    mBufferInfo.range                                                               = sizeof(MBufferObject);
+    mBufferInfo.range                                                               = sizeof(MBufferObject) * 50;
 
     UniformInfo mInfo                                                               = {};
     mInfo.binding                                                                   = 1;
@@ -1163,6 +1163,14 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
 
     standardDescriptorLayout = new DescriptorSetLayout(standardDescriptors);
 
+    std::vector< VkPushConstantRange > pushConstants;
+    VkPushConstantRange modelPushConstantRange                                      = {};
+    modelPushConstantRange.offset                                                   = 0;
+    modelPushConstantRange.size                                                     = sizeof(uint32_t);
+    modelPushConstantRange.stageFlags                                               = VK_SHADER_STAGE_VERTEX_BIT;
+
+    pushConstants.push_back(modelPushConstantRange);
+
     standardPipeline = GraphicsPipeline(
         "shaders/standard/vert.spv", 
         "shaders/standard/frag.spv",
@@ -1175,6 +1183,8 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
         &colorBlendAttachmentState,
         &colorBlendStateCreateInfo,
         nullptr,                        // Defined, but not referenced
+        pushConstants.data(),
+        static_cast< uint32_t >(pushConstants.size()),
         standardDescriptorLayout,
         renderPass
         );
@@ -1763,7 +1773,7 @@ VK_STATUS_CODE VKEngine::allocateUniformBuffers() {
 
     vpBuffer = new UniformBuffer(&vpBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-    bufferSize                                  = sizeof(MBufferObject) * models.size();
+    bufferSize                                  = sizeof(MBufferObject) * 50;
 
     VkBufferCreateInfo mBufferCreateInfo        = {};
     mBufferCreateInfo.sType                     = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -1802,13 +1812,13 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers() {
 
     vpBuffer->fill(&mvp);
 
-    std::vector< MBufferObject >    mArray          = {};
-    for (auto model : models) {
+    MBufferObject                   m               = {};
+    for (uint32_t i = 0; i < 50; i++) {
 
-        mArray.push_back({ model->getModelMatrix() });
+        m.model[i] = models[i]->getModelMatrix();
 
     }
-    mBuffer->fill(mArray.data());
+    mBuffer->fill(&m);
 
     LightData ld                                    = {};
     ld.lightCol                                     = glm::vec3(1.0f);
@@ -1979,8 +1989,7 @@ VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
 }
 
-template< typename Proc >
-VK_STATUS_CODE VKEngine::push(const char* path_, Proc modelMatrixLambda_) {
+VK_STATUS_CODE VKEngine::push(const char* path_, std::function< glm::mat4() > modelMatrixLambda_) {
 
     std::unique_lock< std::mutex > lock(modelLoadingQueueMutex);
     modelLoadingQueue.push({ path_, standardPipeline, VK_STANDARD_MODEL_LOADING_LIB });

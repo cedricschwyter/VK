@@ -26,7 +26,7 @@ struct VPBufferObject {
 */
 struct MBufferObject {
 
-    alignas(16) glm::mat4 model;
+    alignas(16) glm::mat4 model[50];
 
 };
 #endif  // MVP_BUFFER_OBJECT_CPP

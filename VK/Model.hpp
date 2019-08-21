@@ -42,8 +42,7 @@ public:
         @param      lib_            The VKEngineModelLoadingLib flag to tell the Model loader which library to use
         @param      model_          A lambda function to calculcate the model matrix for the model
     */
-    template< typename Proc >
-    Model(const char* path_, GraphicsPipeline& pipeline_, VKEngineModelLoadingLib lib_, Proc model_);
+    Model(const char* path_, GraphicsPipeline& pipeline_, VKEngineModelLoadingLib lib_, std::function< glm::mat4() > model_);
 
     /**
         Returns the models model-matrix

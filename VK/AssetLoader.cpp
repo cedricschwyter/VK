@@ -35,7 +35,7 @@ void AssetLoader::operator()() {
             vk::engine->notified = false;
             lock.unlock();
 
-            Model* model = new Model(front.path, front.pipeline, front.lib);
+            Model* model = new Model(front.path, front.pipeline, front.lib, front.modelMatrixLambda);
             models.push_back(model);
 
         }

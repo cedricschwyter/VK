@@ -291,8 +291,7 @@ namespace vk {
 
         @return     Returns VK_SC_SUCCESS on success
     */
-    template < typename Proc >
-    VK_STATUS_CODE push(const char* path_, Proc modelMatrixLambda_);
+    VK_STATUS_CODE push(const char* path_, std::function< glm::mat4() > modelMatrixLambda_);
 
     /**
         Adds a model to the model loading queue

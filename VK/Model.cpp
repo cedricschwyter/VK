@@ -14,8 +14,7 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
-template< typename Proc >
-Model::Model(const char* path_, GraphicsPipeline& pipeline_, VKEngineModelLoadingLib lib_, Proc model_) : pipeline(pipeline_) {
+Model::Model(const char* path_, GraphicsPipeline& pipeline_, VKEngineModelLoadingLib lib_, std::function< glm::mat4() > model_) : pipeline(pipeline_) {
 
     static int index = 0;
     modelMatrixArrayIndex = index++;

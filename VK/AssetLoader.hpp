@@ -10,6 +10,8 @@
 #ifndef ASSET_LOADER_HPP
 #define ASSET_LOADER_HPP
 
+#include <glm/glm.hpp>
+
 #include "Model.hpp"
 #include "ModelInfo.cpp"
 
