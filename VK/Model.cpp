@@ -14,12 +14,12 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
-Model::Model(const char* path_, GraphicsPipeline& pipeline_, VKEngineModelLoadingLib lib_, std::function< glm::mat4() > model_) : pipeline(pipeline_) {
+Model::Model(const char* path_, GraphicsPipeline& pipeline_, VKEngineModelLoadingLib lib_, glm::mat4 (*modelMatrixFunc_)()) : pipeline(pipeline_) {
 
     static int index = 0;
     modelMatrixArrayIndex = index++;
     std::cout << modelMatrixArrayIndex;
-    modelMatrixLambda = model_;
+    modelMatrix = modelMatrixFunc_;
 
     VK_STATUS_CODE result;
 
@@ -309,7 +309,7 @@ TextureImage* Model::textureFromFile(const char *path_, const std::string& direc
 
 glm::mat4 Model::getModelMatrix() {
 
-    return modelMatrixLambda();
+    return (*modelMatrix)();
 
 }
 

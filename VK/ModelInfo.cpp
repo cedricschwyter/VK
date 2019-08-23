@@ -19,7 +19,7 @@ struct ModelInfo {
     const char*                     path;
     GraphicsPipeline&               pipeline;
     VKEngineModelLoadingLib         lib;
-    std::function< glm::mat4() >    modelMatrixLambda;
+    glm::mat4                       (*modelMatrixFunc)();
 
 };
 #endif  // MODEL_INFO_CPP

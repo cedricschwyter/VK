@@ -23,9 +23,9 @@ layout(binding = 0) uniform VPBuffer {
 
 } vp;
 
-layout(binding = 1) uniform MBuffer {
+layout(binding = 1) buffer MBuffer {
 
-    mat4 model[100];
+    mat4 model[];
 
 } m;
 

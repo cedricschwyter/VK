@@ -19,6 +19,9 @@
 #include "GraphicsPipeline.hpp"
 #include "Mesh.hpp"
 
+/**
+    Defines an enumeration for different model loading libraries to choose from
+*/
 typedef enum VKEngineModelLoadingLib {
 
     VKEngineModelLoadingLibASSIMP,
@@ -37,12 +40,12 @@ public:
     /**
         Constructor
 
-        @param      path_           The path to the .obj-file
-        @param      pipeline_       The pipeline to render the model with
-        @param      lib_            The VKEngineModelLoadingLib flag to tell the Model loader which library to use
-        @param      model_          A lambda function to calculcate the model matrix for the model
+        @param      path_               The path to the .obj-file
+        @param      pipeline_           The pipeline to render the model with
+        @param      lib_                The VKEngineModelLoadingLib flag to tell the Model loader which library to use
+        @param      modelMatrixFunc_    A function pointer to calculcate the model matrix for the model
     */
-    Model(const char* path_, GraphicsPipeline& pipeline_, VKEngineModelLoadingLib lib_, std::function< glm::mat4() > model_);
+    Model(const char* path_, GraphicsPipeline& pipeline_, VKEngineModelLoadingLib lib_, glm::mat4 (*modelMatrixFunc_)());
 
     /**
         Returns the models model-matrix
@@ -65,7 +68,7 @@ private:
 
     std::string                                                 directory;
     std::vector< TextureObject >                                texturesLoaded;
-    std::function< glm::mat4() >                                modelMatrixLambda;
+    glm::mat4                                                   (*modelMatrix)();
 
     /**
         Handles and coordinates all loading actions for the specified file, using ASSIMP

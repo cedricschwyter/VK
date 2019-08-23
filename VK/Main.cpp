@@ -32,7 +32,7 @@ int main() {
 
     vk::init();
 
-    vk::push("res/models/nanosuit/nanosuit.obj", nanosuit);
+    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
 
     return vk::run();
 

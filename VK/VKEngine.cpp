@@ -1126,13 +1126,13 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     VkDescriptorBufferInfo mBufferInfo                                              = {};
     mBufferInfo.buffer                                                              = mBuffer->buf;
     mBufferInfo.offset                                                              = 0;
-    mBufferInfo.range                                                               = sizeof(MBufferObject) * 50;
+    mBufferInfo.range                                                               = sizeof(MBufferObject) * VK_MAX_MODEL_MATRIX_ARRAY_SIZE;
 
     UniformInfo mInfo                                                               = {};
     mInfo.binding                                                                   = 1;
     mInfo.stageFlags                                                                = VK_SHADER_STAGE_VERTEX_BIT;
     mInfo.bufferInfo                                                                = mBufferInfo;
-    mInfo.type                                                                      = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    mInfo.type                                                                      = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 
     mDescriptor                                                                     = Descriptor(mInfo);
 
@@ -1773,12 +1773,12 @@ VK_STATUS_CODE VKEngine::allocateUniformBuffers() {
 
     vpBuffer = new UniformBuffer(&vpBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-    bufferSize                                  = sizeof(MBufferObject) * 50;
+    bufferSize                                  = sizeof(MBufferObject) * VK_MAX_MODEL_MATRIX_ARRAY_SIZE;
 
     VkBufferCreateInfo mBufferCreateInfo        = {};
     mBufferCreateInfo.sType                     = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     mBufferCreateInfo.size                      = bufferSize;
-    mBufferCreateInfo.usage                     = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+    mBufferCreateInfo.usage                     = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
     mBufferCreateInfo.sharingMode               = VK_SHARING_MODE_EXCLUSIVE;
 
     mBuffer = new UniformBuffer(&mBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -1989,10 +1989,10 @@ VK_STATUS_CODE VKEngine::loadModelsAndVertexData() {
 
 }
 
-VK_STATUS_CODE VKEngine::push(const char* path_, std::function< glm::mat4() > modelMatrixLambda_) {
+VK_STATUS_CODE VKEngine::push(const char* path_, glm::mat4 (*modelMatrixFunc_)()) {
 
     std::unique_lock< std::mutex > lock(modelLoadingQueueMutex);
-    modelLoadingQueue.push({ path_, standardPipeline, VK_STANDARD_MODEL_LOADING_LIB });
+    modelLoadingQueue.push({ path_, standardPipeline, VK_STANDARD_MODEL_LOADING_LIB, modelMatrixFunc_ });
     notified = true;
     modelLoadingQueueCondVar.notify_one();
     lock.unlock();
@@ -2037,7 +2037,7 @@ VK_STATUS_CODE VKEngine::recreateGraphicsPipelines() {
     vkFreeCommandBuffers(
         logicalDevice,
         vk::graphicsCommandPool,
-        static_cast<uint32_t>(standardCommandBuffers.size()),
+        static_cast< uint32_t >(standardCommandBuffers.size()),
         standardCommandBuffers.data()
         );
     lock.unlock();
