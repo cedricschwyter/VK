@@ -11,6 +11,8 @@
 #define MVP_BUFFER_OBJECT_CPP
 #include <glm/glm.hpp>
 
+#include "Version.hpp"
+
 /**
     Holds view and projection matrices
 */
@@ -26,7 +28,7 @@ struct VPBufferObject {
 */
 struct MBufferObject {
 
-    alignas(16) glm::mat4* model;
+    alignas(16) glm::mat4 model[VK_MAX_MODEL_MATRIX_ARRAY_SIZE];
 
 };
 #endif  // MVP_BUFFER_OBJECT_CPP

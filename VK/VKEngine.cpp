@@ -1813,7 +1813,7 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers() {
     vpBuffer->fill(&mvp);
 
     MBufferObject                   m               = {};
-    for (uint32_t i = 0; i < 50; i++) {
+    for (uint32_t i = 0; i < models.size(); i++) {
 
         m.model[i] = models[i]->getModelMatrix();
 
