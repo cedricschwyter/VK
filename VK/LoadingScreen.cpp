@@ -41,6 +41,7 @@ SDL_STATUS_CODE LoadingScreen::loop() {
     }
 
     clean();
+    logger::log(EVENT_LOG, "Stopping loading screen thread...");
 
     return SDL_SC_SUCCESS;
 

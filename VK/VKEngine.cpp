@@ -18,15 +18,14 @@
 VKEngine::VKEngine() {
 
     ASSERT(initLogger(), "Logger initialization error", LOGGER_SC_UNKNOWN_ERROR);
-    initLoadingScreen();
-
     logger::log(START_LOG, "Initializing...");
-    logger::log(EVENT_LOG, "Initializing loading screen...");
 
 }
 
 VK_STATUS_CODE VKEngine::init() {
 
+    logger::log(EVENT_LOG, "Initializing loading screen...");
+    initLoadingScreen();
     ASSERT(initWindow(), "Window initialization error", VK_SC_WINDOW_ERROR);
     ASSERT(initVulkan(), "Vulkan initialization error", VK_SC_VULKAN_ERROR);
 
@@ -785,12 +784,7 @@ void VKEngine::initLoadingScreen() {
     loadingScreen = new LoadingScreen();
 
     logger::log(EVENT_LOG, "Starting loading screen thread...");
-    std::thread t0([=]() {
-
-        loadingScreen->loop();
-        logger::log(EVENT_LOG, "Stopping loading screen thread...");
-
-    });
+    std::thread t0(&LoadingScreen::loop, loadingScreen);
     t0.detach();
 
 }
