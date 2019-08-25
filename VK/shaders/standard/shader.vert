@@ -23,17 +23,11 @@ layout(binding = 0) uniform VPBuffer {
 
 } vp;
 
-layout(binding = 1) buffer MBuffer {
+layout( push_constant ) uniform MBuffer {
 
-    mat4 model[];
+    mat4 model;
 
 } m;
-
-layout( push_constant ) uniform modelMatrixIndex {
-
-    int index;
-
-} index;
 
 layout(location = 0) out vec3 outPos;
 layout(location = 1) out vec2 outTex;
@@ -41,9 +35,9 @@ layout(location = 2) out vec3 outNor;
 
 void main() {
 
-    gl_Position         = vp.proj * vp.view * m.model[index.index] * vec4(pos, 1.0);
+    gl_Position         = vp.proj * vp.view * m.model * vec4(pos, 1.0);
     outTex              = tex;
-    outPos              = vec3(m.model[index.index] * vec4(pos, 1.0));
-    outNor              = mat3(transpose(inverse(m.model[index.index]))) * nor;
+    outPos              = vec3(m.model * vec4(pos, 1.0));
+    outNor              = mat3(transpose(inverse(m.model))) * nor;
 
 }

@@ -1123,21 +1123,8 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     
     vpDescriptor                                                                    = Descriptor(vpInfo);
 
-    VkDescriptorBufferInfo mBufferInfo                                              = {};
-    mBufferInfo.buffer                                                              = mBuffer->buf;
-    mBufferInfo.offset                                                              = 0;
-    mBufferInfo.range                                                               = sizeof(MBufferObject) * VK_MAX_MODEL_MATRIX_ARRAY_SIZE;
-
-    UniformInfo mInfo                                                               = {};
-    mInfo.binding                                                                   = 1;
-    mInfo.stageFlags                                                                = VK_SHADER_STAGE_VERTEX_BIT;
-    mInfo.bufferInfo                                                                = mBufferInfo;
-    mInfo.type                                                                      = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-
-    mDescriptor                                                                     = Descriptor(mInfo);
-
     UniformInfo diffuseSamplerInfo                                                  = {};
-    diffuseSamplerInfo.binding                                                      = 2;
+    diffuseSamplerInfo.binding                                                      = 1;
     diffuseSamplerInfo.stageFlags                                                   = VK_SHADER_STAGE_FRAGMENT_BIT;
     diffuseSamplerInfo.type                                                         = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
                
@@ -1149,7 +1136,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     lightDataBufferInfo.range                                                       = sizeof(LightData);
 
     UniformInfo lightDataInfo                                                       = {};
-    lightDataInfo.binding                                                           = 3;
+    lightDataInfo.binding                                                           = 2;
     lightDataInfo.stageFlags                                                        = VK_SHADER_STAGE_FRAGMENT_BIT;
     lightDataInfo.bufferInfo                                                        = lightDataBufferInfo;
     lightDataInfo.type                                                              = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1157,16 +1144,16 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     lightDataDescriptor = Descriptor(lightDataInfo);
 
     standardDescriptors.push_back(vpDescriptor);
-    standardDescriptors.push_back(mDescriptor);
     standardDescriptors.push_back(diffuseSamplerDescriptor);
     standardDescriptors.push_back(lightDataDescriptor);
 
     standardDescriptorLayout = new DescriptorSetLayout(standardDescriptors);
 
+    glm::mat4 modelMatrixSizeMatrix(1.0f);
     std::vector< VkPushConstantRange > pushConstants;
     VkPushConstantRange modelPushConstantRange                                      = {};
     modelPushConstantRange.offset                                                   = 0;
-    modelPushConstantRange.size                                                     = sizeof(uint32_t);
+    modelPushConstantRange.size                                                     = sizeof(modelMatrixSizeMatrix);
     modelPushConstantRange.stageFlags                                               = VK_SHADER_STAGE_VERTEX_BIT;
 
     pushConstants.push_back(modelPushConstantRange);
@@ -1441,7 +1428,6 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
                         std::vector< Descriptor > descriptors;
 
                         descriptors.push_back(vpDescriptor);
-                        descriptors.push_back(mDescriptor);
                         descriptors.push_back(lightDataDescriptor);
 
                         auto meshDescriptors = mesh->getDescriptors();
@@ -1453,13 +1439,15 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
                         descSet->bind(standardCommandBuffers, static_cast< uint32_t >(i), standardPipeline);
                         descriptorSets.push_back(descSet);
 
+                        glm::mat4 modelMatrix = model->getModelMatrix();
+
                         vkCmdPushConstants(
                             standardCommandBuffers[i],
                             standardPipeline.pipelineLayout,
                             VK_SHADER_STAGE_VERTEX_BIT,
                             0,
-                            sizeof(uint32_t),
-                            &(model->modelMatrixArrayIndex)
+                            sizeof(modelMatrix),
+                            &modelMatrix
                             );
 
                         mesh->draw(standardCommandBuffers, static_cast< uint32_t >(i));
@@ -1773,16 +1761,6 @@ VK_STATUS_CODE VKEngine::allocateUniformBuffers() {
 
     vpBuffer = new UniformBuffer(&vpBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-    bufferSize                                  = sizeof(MBufferObject) * VK_MAX_MODEL_MATRIX_ARRAY_SIZE;
-
-    VkBufferCreateInfo mBufferCreateInfo        = {};
-    mBufferCreateInfo.sType                     = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    mBufferCreateInfo.size                      = bufferSize;
-    mBufferCreateInfo.usage                     = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-    mBufferCreateInfo.sharingMode               = VK_SHARING_MODE_EXCLUSIVE;
-
-    mBuffer = new UniformBuffer(&mBufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
     bufferSize                                  = sizeof(LightData); 
 
     VkBufferCreateInfo lightBufferCreateInfo    = {};
@@ -1811,14 +1789,6 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers() {
     mvp.proj                                        = glm::perspective(static_cast< float >(glm::radians(camera->fov)), swapchainImageExtent.width / static_cast< float >(swapchainImageExtent.height), 0.1f, 100.0f);
 
     vpBuffer->fill(&mvp);
-
-    MBufferObject                   m               = {};
-    for (uint32_t i = 0; i < models.size(); i++) {
-
-        m.model[i] = models[i]->getModelMatrix();
-
-    }
-    mBuffer->fill(&m);
 
     LightData ld                                    = {};
     ld.lightCol                                     = glm::vec3(1.0f);

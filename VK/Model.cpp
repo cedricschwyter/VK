@@ -16,9 +16,6 @@
 
 Model::Model(const char* path_, GraphicsPipeline& pipeline_, VKEngineModelLoadingLib lib_, glm::mat4 (*modelMatrixFunc_)()) : pipeline(pipeline_) {
 
-    static int index = 0;
-    modelMatrixArrayIndex = index++;
-    std::cout << modelMatrixArrayIndex;
     modelMatrix = modelMatrixFunc_;
 
     VK_STATUS_CODE result;

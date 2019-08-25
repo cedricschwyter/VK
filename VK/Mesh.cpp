@@ -62,7 +62,7 @@ std::vector< Descriptor > Mesh::getDescriptors() {
         imageInfo.imageView                 = reinterpret_cast< TextureImage* >(textures[i].img)->imgView;
 
         UniformInfo samplerInfo             = {};
-        samplerInfo.binding                 = textures[i].type + 1;
+        samplerInfo.binding                 = textures[i].type;
         samplerInfo.stageFlags              = VK_SHADER_STAGE_FRAGMENT_BIT;
         samplerInfo.imageInfo               = imageInfo;
         samplerInfo.type                    = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;

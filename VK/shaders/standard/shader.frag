@@ -14,9 +14,9 @@ layout(location = 0) in vec3 outPos;
 layout(location = 1) in vec2 outTex;
 layout(location = 2) in vec3 outNor;
 
-layout(binding = 2) uniform sampler2D diffSampler;
+layout(binding = 1) uniform sampler2D diffSampler;
 
-layout(binding = 3) uniform LightData {
+layout(binding = 2) uniform LightData {
 
     vec3 lightPos;
     vec3 viewPos;

@@ -35,7 +35,6 @@ public:
 
     GraphicsPipeline                                            pipeline;
     std::vector< Mesh* >                                        meshes;
-    uint32_t                                                    modelMatrixArrayIndex;
 
     /**
         Constructor

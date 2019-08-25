@@ -17,6 +17,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
 #include <vector>
@@ -198,8 +199,6 @@ private:
     bool                                    hasFramebufferBeenResized            = false;
     BaseBuffer*                             vpBuffer;  
     Descriptor                              vpDescriptor;
-    BaseBuffer*                             mBuffer;
-    Descriptor                              mDescriptor;
     BaseBuffer*                             lightDataBuffer;
     Descriptor                              lightDataDescriptor;
     VkPolygonMode                           polygonMode                          = VK_POLYGON_MODE_FILL;

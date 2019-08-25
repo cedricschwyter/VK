@@ -37,8 +37,6 @@
 //#define VK_MULTISAMPLING_x32
 //#define VK_MULTISAMPLING_x64
 
-#define VK_MAX_MODEL_MATRIX_ARRAY_SIZE 100      // Define the maximum number of models to render for optimal performance
-
 // Default values
 
 #ifdef VK_NO_LOG

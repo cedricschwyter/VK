@@ -28,7 +28,7 @@ struct VPBufferObject {
 */
 struct MBufferObject {
 
-    alignas(16) glm::mat4 model[VK_MAX_MODEL_MATRIX_ARRAY_SIZE];
+    alignas(16) glm::mat4 model;
 
 };
 #endif  // MVP_BUFFER_OBJECT_CPP
