@@ -511,6 +511,7 @@ namespace vk {
             barrier.srcAccessMask                       = VK_ACCESS_TRANSFER_WRITE_BIT;
             barrier.dstAccessMask                       = VK_ACCESS_TRANSFER_READ_BIT;
 
+            std::unique_lock< std::mutex > graphicsLock(graphicsMutex);
             vkCmdPipelineBarrier(
                 commandBuffer,
                 VK_PIPELINE_STAGE_TRANSFER_BIT,
@@ -523,6 +524,7 @@ namespace vk {
                 1,
                 &barrier
                 );
+            graphicsLock.unlock();
 
             VkImageBlit blit                            = {};
             blit.srcOffsets[0]                          = { 0, 0, 0 };
@@ -538,6 +540,7 @@ namespace vk {
             blit.dstSubresource.baseArrayLayer          = 0;
             blit.dstSubresource.layerCount              = 1;
 
+            graphicsLock.lock();
             vkCmdBlitImage(
                 commandBuffer,
                 image_,
@@ -548,12 +551,14 @@ namespace vk {
                 &blit,
                 VK_FILTER_LINEAR
                 );
+            graphicsLock.unlock();
 
             barrier.oldLayout                           = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
             barrier.newLayout                           = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
             barrier.srcAccessMask                       = VK_ACCESS_TRANSFER_READ_BIT;
             barrier.dstAccessMask                       = VK_ACCESS_SHADER_READ_BIT;
 
+            graphicsLock.lock();
             vkCmdPipelineBarrier(
                 commandBuffer,
                 VK_PIPELINE_STAGE_TRANSFER_BIT,
@@ -566,6 +571,7 @@ namespace vk {
                 1, 
                 &barrier
                 );
+            graphicsLock.unlock();
 
             if (mipWidth > 1) mipWidth /= 2;
             if (mipHeight > 1) mipHeight /= 2;
@@ -578,6 +584,7 @@ namespace vk {
         barrier.srcAccessMask                       = VK_ACCESS_TRANSFER_WRITE_BIT;
         barrier.dstAccessMask                       = VK_ACCESS_SHADER_READ_BIT;
 
+        std::unique_lock< std::mutex > graphicsLock(graphicsMutex);
         vkCmdPipelineBarrier(
             commandBuffer,
             VK_PIPELINE_STAGE_TRANSFER_BIT, 
@@ -590,6 +597,7 @@ namespace vk {
             1, 
             &barrier
             );
+        graphicsLock.unlock();
 
         endCommandBuffer(commandBuffer, GRAPHICS_QUEUE);
 
