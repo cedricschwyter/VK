@@ -286,11 +286,12 @@ namespace vk {
     /**
         Adds a model to the model loading queue
 
-        @param      path_       The path to the model
+        @param      path_                   The path to the model
+        @param      modelMatrixFunc_        The function pointer to calculate the models model matrix
 
         @return     Returns VK_SC_SUCCESS on success
     */
-    VK_STATUS_CODE push(const char* path_);
+    VK_STATUS_CODE push(const char* path_, glm::mat4 (*modelMatrixFunc_)());
 
     /**
         Adds a model to the model loading queue

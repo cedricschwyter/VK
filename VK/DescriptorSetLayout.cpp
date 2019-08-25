@@ -23,7 +23,7 @@ DescriptorSetLayout::DescriptorSetLayout(const std::vector< Descriptor >& descri
         binding.descriptorType                      = descriptors_[i].info.type;
         binding.descriptorCount                     = 1;
         binding.stageFlags                          = descriptors_[i].info.stageFlags;
-
+        
         bindings[i] = binding;
 
     }

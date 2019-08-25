@@ -16,13 +16,18 @@ layout(location = 2) in vec2 tex;
 layout(location = 3) in vec3 tan;
 layout(location = 4) in vec3 bit;
 
-layout(binding = 0) uniform MVPBuffer {
+layout(binding = 0) uniform VPBuffer {
 
-    mat4 model;
     mat4 view;
     mat4 proj;
 
-} mvp;
+} vp;
+
+layout( push_constant ) uniform MBuffer {
+
+    mat4 model;
+
+} m;
 
 layout(location = 0) out vec3 outPos;
 layout(location = 1) out vec2 outTex;
@@ -30,9 +35,9 @@ layout(location = 2) out vec3 outNor;
 
 void main() {
 
-    gl_Position         = mvp.proj * mvp.view * mvp.model * vec4(pos, 1.0);
+    gl_Position         = vp.proj * vp.view * m.model * vec4(pos, 1.0);
     outTex              = tex;
-    outPos              = vec3(mvp.model * vec4(pos, 1.0));
-    outNor              = mat3(transpose(inverse(mvp.model))) * nor;
+    outPos              = vec3(m.model * vec4(pos, 1.0));
+    outNor              = mat3(transpose(inverse(m.model))) * nor;
 
 }

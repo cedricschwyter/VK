@@ -17,6 +17,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
 #include <vector>
@@ -136,11 +137,12 @@ public:
     /**
         Adds a model to the model loading queue
 
-        @param      path_       The path to the model
+        @param      path_                   The path to the model
+        @param      modelMatrixFunc_        The function pointer to calculate the models model matrix
 
         @return     Returns OGL_SC_SUCCESS on success
     */
-    VK_STATUS_CODE push(const char* path_);
+    VK_STATUS_CODE push(const char* path_, glm::mat4 (*modelMatrixFunc_)());
 
     /**
         Adds a model to the model loading queue
@@ -195,8 +197,8 @@ private:
     std::vector< VkFence >                  inFlightFences;
     size_t                                  currentSwapchainImage                = 0;
     bool                                    hasFramebufferBeenResized            = false;
-    BaseBuffer*                             mvpBuffer;  
-    Descriptor                              mvpDescriptor;
+    BaseBuffer*                             vpBuffer;  
+    Descriptor                              vpDescriptor;
     BaseBuffer*                             lightDataBuffer;
     Descriptor                              lightDataDescriptor;
     VkPolygonMode                           polygonMode                          = VK_POLYGON_MODE_FILL;

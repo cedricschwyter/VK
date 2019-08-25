@@ -715,9 +715,9 @@ namespace vk {
 
     }
 
-    VK_STATUS_CODE push(const char* path_) {
+    VK_STATUS_CODE push(const char* path_, glm::mat4 (*modelMatrixFunc_)()) {
 
-        engine->push(path_);
+        engine->push(path_, modelMatrixFunc_);
         logger::log(EVENT_LOG, "Pushing model at path " + std::string(path_) + " to loading queue");
 
         return vk::errorCodeBuffer;

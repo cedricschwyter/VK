@@ -40,6 +40,8 @@ public:
         @param        colorBlendAttachmentState_          A pointer to a color blend attachment state structure
         @param        colorBlendStateCreateInfo_          A pointer to a color blend state create info structure
         @param        dynamicStateCreateInfo_             A pointer to a dynamic state create info structure
+        @param        pushConstants_                      A pointer to an array of VkPushConstantRange structs
+        @param        pushConstantCount_                  The number of push constant bindings
         @param        descriptorSetLayout_                A descriptor set layout
         @param        renderPass_                         A valid VkRenderPass handle
     */
@@ -55,6 +57,8 @@ public:
         const VkPipelineColorBlendAttachmentState*          colorBlendAttachmentState_,
         const VkPipelineColorBlendStateCreateInfo*          colorBlendStateCreateInfo_,
         const VkPipelineDynamicStateCreateInfo*             dynamicStateCreateInfo_,
+        const VkPushConstantRange*                          pushConstants_,
+        const uint32_t                                      pushConstantCount_,
         const DescriptorSetLayout*                          descriptorSetLayout_,
         VkRenderPass                                        renderPass_
         );
