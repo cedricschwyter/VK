@@ -42,6 +42,22 @@ glm::mat4 rose() {
 }
 
 /**
+    Returns the model matrix for the floating_city model  
+  
+    @return     Returns a glm::mat4
+*/
+glm::mat4 city() {
+
+    glm::mat4 model;
+    model           = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+    model           = glm::scale(model, glm::vec3(0.02f));
+    model[1][1]     *= -1.0f;
+
+    return model;
+
+}
+
+/**
     Entry point for the application
 */
 int main() {
@@ -50,104 +66,7 @@ int main() {
 
     vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
     vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
-    vk::push("res/models/rose/rose.obj", &rose);
+    vk::push("res/models/floating_city/floating_city.obj", &city);
 
     return vk::run();
 

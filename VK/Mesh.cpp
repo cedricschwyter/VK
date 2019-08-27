@@ -54,6 +54,11 @@ std::vector< Descriptor > Mesh::getDescriptors() {
 
     std::vector< Descriptor > descriptors;
 
+    uint32_t diffuseNr      = 0;
+    uint32_t specularNr     = 0;
+    uint32_t normalNr       = 0;
+    uint32_t heightNr       = 0;
+
     for (unsigned int i = 0; i < textures.size(); i++) {
 
         VkDescriptorImageInfo imageInfo     = {};
@@ -62,7 +67,14 @@ std::vector< Descriptor > Mesh::getDescriptors() {
         imageInfo.imageView                 = reinterpret_cast< TextureImage* >(textures[i].img)->imgView;
 
         UniformInfo samplerInfo             = {};
-        samplerInfo.binding                 = textures[i].type;
+        if (textures[i].type == TT_DIFFUSE)
+            samplerInfo.binding             = textures[i].type + diffuseNr++;
+        else if (textures[i].type == TT_SPECULAR)
+            samplerInfo.binding             = textures[i].type + specularNr++;
+        else if (textures[i].type == TT_NORMAL)
+            samplerInfo.binding             = textures[i].type + normalNr++;
+        else if (textures[i].type == TT_HEIGHT)
+            samplerInfo.binding             = textures[i].type + heightNr++;
         samplerInfo.stageFlags              = VK_SHADER_STAGE_FRAGMENT_BIT;
         samplerInfo.imageInfo               = imageInfo;
         samplerInfo.type                    = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;

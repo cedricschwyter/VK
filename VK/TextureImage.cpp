@@ -47,6 +47,11 @@ TextureImage::TextureImage(
         imageFormat = VK_FORMAT_R8_UNORM;
     
     }
+    else if (ch == 2) {
+
+        imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
+
+    }
     else if (ch == 3) {
 
         // TODO: Reshape data in memory to fit in 4-channel format as 3-channel formats are not supported (mostly) for beauty

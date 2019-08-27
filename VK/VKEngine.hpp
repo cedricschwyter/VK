@@ -206,7 +206,10 @@ private:
 #ifndef VK_MULTISAMPLING_NONE
     BaseImage*                              msaaBufferImage;
 #endif
-    Descriptor                              diffuseSamplerDescriptor;
+    TextureImage*                           NOIMAGESUBSTITUENT;
+    Descriptor                              noImageSubstituentDescriptor;
+    Descriptor                              diffuseSampler1Descriptor;
+    Descriptor                              diffuseSampler2Descriptor;
     bool                                    initialized                          = false;
     std::vector< Model* >                   models;
     bool                                    firstTimeRecreation                  = true;

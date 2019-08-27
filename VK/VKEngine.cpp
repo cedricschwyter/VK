@@ -244,6 +244,8 @@ VK_STATUS_CODE VKEngine::clean() {
 
     ASSERT(cleanSwapchain(), "Failed to clean swapchain", VK_SC_SWAPCHAIN_CLEAN_ERROR);
 
+    delete NOIMAGESUBSTITUENT;
+
     for (auto model : models) {
 
         delete model;
@@ -1102,6 +1104,13 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     dynamicStateCreateInfo.dynamicStateCount                                        = static_cast< uint32_t >(dynamicStates.size());
     dynamicStateCreateInfo.pDynamicStates                                           = dynamicStates.data();
                              
+    NOIMAGESUBSTITUENT = new TextureImage(
+        "res/textures/application/transparent.png", 
+        VK_FORMAT_R8G8B8A8_UNORM, 
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT
+        );
+
     /* UNIFORM BINDINGS */    
 
     VkDescriptorBufferInfo vpBufferInfo                                             = {};
@@ -1117,12 +1126,29 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     
     vpDescriptor                                                                    = Descriptor(vpInfo);
 
+    VkDescriptorImageInfo noImageSubstituentImageInfo                               = {};
+    noImageSubstituentImageInfo.sampler                                             = NOIMAGESUBSTITUENT->imgSampler;
+    noImageSubstituentImageInfo.imageView                                           = NOIMAGESUBSTITUENT->imgView;
+    noImageSubstituentImageInfo.imageLayout                                         = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+    UniformInfo noImageSubstituentInfo                                              = {};
+    noImageSubstituentInfo.binding                                                  = 15;
+    noImageSubstituentInfo.stageFlags                                               = VK_SHADER_STAGE_FRAGMENT_BIT;
+    noImageSubstituentInfo.imageInfo                                                = noImageSubstituentImageInfo;
+    noImageSubstituentInfo.type                                                     = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+
+    noImageSubstituentDescriptor                                                    = Descriptor(noImageSubstituentInfo);
+
     UniformInfo diffuseSamplerInfo                                                  = {};
     diffuseSamplerInfo.binding                                                      = 1;
     diffuseSamplerInfo.stageFlags                                                   = VK_SHADER_STAGE_FRAGMENT_BIT;
     diffuseSamplerInfo.type                                                         = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
                
-    diffuseSamplerDescriptor                                                        = Descriptor(diffuseSamplerInfo);
+    diffuseSampler1Descriptor                                                       = Descriptor(diffuseSamplerInfo);
+
+    diffuseSamplerInfo.binding                                                      = 2;
+
+    diffuseSampler2Descriptor                                                       = Descriptor(diffuseSamplerInfo);
 
     VkDescriptorBufferInfo lightDataBufferInfo                                      = {};
     lightDataBufferInfo.buffer                                                      = lightDataBuffer->buf;
@@ -1130,7 +1156,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     lightDataBufferInfo.range                                                       = sizeof(LightData);
 
     UniformInfo lightDataInfo                                                       = {};
-    lightDataInfo.binding                                                           = 2;
+    lightDataInfo.binding                                                           = 3;
     lightDataInfo.stageFlags                                                        = VK_SHADER_STAGE_FRAGMENT_BIT;
     lightDataInfo.bufferInfo                                                        = lightDataBufferInfo;
     lightDataInfo.type                                                              = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1138,7 +1164,8 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     lightDataDescriptor = Descriptor(lightDataInfo);
 
     standardDescriptors.push_back(vpDescriptor);
-    standardDescriptors.push_back(diffuseSamplerDescriptor);
+    standardDescriptors.push_back(diffuseSampler1Descriptor);
+    standardDescriptors.push_back(diffuseSampler2Descriptor);
     standardDescriptors.push_back(lightDataDescriptor);
 
     standardDescriptorLayout = new DescriptorSetLayout(standardDescriptors);
@@ -1427,6 +1454,37 @@ VK_STATUS_CODE VKEngine::allocateCommandBuffers() {
                         auto meshDescriptors = mesh->getDescriptors();
                         descriptors.insert(descriptors.end(), meshDescriptors.begin(), meshDescriptors.end());
 
+                        if (meshDescriptors.size() != standardDescriptors.size()) {
+
+                            for (auto standardDescriptor : standardDescriptors) {
+
+                                if (standardDescriptor.info.type != VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) continue;
+
+                                uint32_t binding            = standardDescriptor.info.binding;
+                                bool hasCorrectBinding      = false;
+
+                                for (auto meshDescriptor : meshDescriptors) {
+
+                                    if (meshDescriptor.info.binding == binding) {
+
+                                        hasCorrectBinding = true;
+
+                                    }
+
+                                }
+
+                                if (!hasCorrectBinding) {
+                                                                    
+                                    noImageSubstituentDescriptor.info.binding = binding;
+
+                                    descriptors.push_back(noImageSubstituentDescriptor);
+
+                                }
+
+                            }
+
+                        }
+
                         DescriptorSet* descSet = new DescriptorSet(descriptors);
                         descSet->update(descriptors);
 
@@ -1670,7 +1728,7 @@ VK_STATUS_CODE VKEngine::cleanSwapchain() {
         delete descriptorSet;
         logger::log(EVENT_LOG, "Successfully destroyed descriptor set");
 
-    }
+    } 
     logger::log(EVENT_LOG, "Successfully destroyed descriptor sets");
     descriptorSets.clear();
 
