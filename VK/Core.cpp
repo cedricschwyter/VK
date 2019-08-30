@@ -1918,10 +1918,9 @@ namespace vk {
 
             vpBuffer->fill(&mvp);
 
-            float                           radius          = 5.0f;
             LightData ld                                    = {};
             ld.lightCol                                     = glm::vec3(1.0f);
-            ld.lightPos                                     = glm::vec3(static_cast< float >(glm::cos(glfwGetTime())) * radius, static_cast< float >(glm::sin(glfwGetTime())) * radius, static_cast< float >(glm::sin(glfwGetTime())) * radius);
+            ld.lightPos                                     = glm::vec3(1.0f, -1.0f, 1.0f);
             ld.viewPos                                      = camera->camPos;
 
             lightDataBuffer->fill(&ld);

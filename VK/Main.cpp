@@ -32,9 +32,15 @@ glm::mat4 nanosuit() {
 */
 glm::mat4 rose() {
 
+    static auto                     start           = std::chrono::high_resolution_clock::now();
+    auto                            current         = std::chrono::high_resolution_clock::now();
+                                
+    float                           delta           = std::chrono::duration< float, std::chrono::seconds::period >(current - start).count();        // Namespaces are a fricking mess in <chrono>
+            
     glm::mat4 model;
-    model           = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 2.0f, 0.0f));
-    model           = glm::scale(model, glm::vec3(0.02f));
+    model           = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    model           = glm::translate(model, glm::vec3(1.0f, 0.05f, 0.0f));
+    model           = glm::scale(model, glm::vec3(0.005f));
     model[1][1]     *= -1.0f;
 
     return model;
@@ -64,9 +70,9 @@ int main() {
 
     vk::init();
 
-    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
+    //vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
     vk::push("res/models/rose/rose.obj", &rose);
-    vk::push("res/models/floating_city/floating_city.obj", &city);
+    //vk::push("res/models/floating_city/floating_city.obj", &city);
 
     return vk::run();
 
