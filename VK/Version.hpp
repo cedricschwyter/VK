@@ -37,6 +37,8 @@
 //#define VK_MULTISAMPLING_x32
 //#define VK_MULTISAMPLING_x64
 
+//#define VK_VERTEX_DEDUPLICATION       // Toggle Vertex Deduplication, may be buggy
+
 // Default values
 
 #ifdef VK_NO_LOG
