@@ -20,7 +20,7 @@ DescriptorPool::DescriptorPool(const DescriptorSetLayout* layout_) {
     for (uint32_t i = 0; i < layout_->descriptors.size(); i++) {
 
         descriptorPoolSizes[i].type                         = layout_->descriptors[i].info.type;
-        descriptorPoolSizes[i].descriptorCount              = static_cast< uint32_t > (VKCore::swapchainImages.size());
+        descriptorPoolSizes[i].descriptorCount              = static_cast< uint32_t > (vk::core::swapchainImages.size());
 
     }
 
@@ -28,12 +28,12 @@ DescriptorPool::DescriptorPool(const DescriptorSetLayout* layout_) {
     descriptorPoolCreateInfo.sType                          = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     descriptorPoolCreateInfo.poolSizeCount                  = static_cast< uint32_t >(descriptorPoolSizes.size());
     descriptorPoolCreateInfo.pPoolSizes                     = descriptorPoolSizes.data();
-    descriptorPoolCreateInfo.maxSets                        = static_cast< uint32_t >(VKCore::swapchainImages.size());
+    descriptorPoolCreateInfo.maxSets                        = static_cast< uint32_t >(vk::core::swapchainImages.size());
 
     VkResult result = vkCreateDescriptorPool(
-        VKCore::logicalDevice,
+        vk::core::logicalDevice,
         &descriptorPoolCreateInfo,
-        VKCore::allocator,
+        vk::core::allocator,
         &descriptorPool
         );
     ASSERT(result, "Failed to create descriptor pool", VK_SC_DESCRIPTOR_POOL_ERROR);
@@ -42,7 +42,7 @@ DescriptorPool::DescriptorPool(const DescriptorSetLayout* layout_) {
 
 DescriptorPool::~DescriptorPool() {
 
-    vkDestroyDescriptorPool(VKCore::logicalDevice, descriptorPool, VKCore::allocator);
+    vkDestroyDescriptorPool(vk::core::logicalDevice, descriptorPool, vk::core::allocator);
     logger::log(EVENT_LOG, "Successfully destroyed descriptor pool");
 
 }

@@ -17,23 +17,23 @@ DescriptorSet::DescriptorSet(std::vector< Descriptor > descriptors_) {
     descriptorSetLayout = new DescriptorSetLayout(descriptors_);
     descriptorPool = new DescriptorPool(descriptorSetLayout);
 
-    std::vector< VkDescriptorSetLayout > layouts(VKCore::swapchainImages.size(), descriptorSetLayout->descriptorSetLayout);
+    std::vector< VkDescriptorSetLayout > layouts(vk::core::swapchainImages.size(), descriptorSetLayout->descriptorSetLayout);
 
     VkDescriptorSetAllocateInfo allocateInfo        = {};
     allocateInfo.sType                              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     allocateInfo.descriptorPool                     = descriptorPool->descriptorPool;
-    allocateInfo.descriptorSetCount                 = static_cast< uint32_t >(VKCore::swapchainImages.size());
+    allocateInfo.descriptorSetCount                 = static_cast< uint32_t >(vk::core::swapchainImages.size());
     allocateInfo.pSetLayouts                        = layouts.data();
 
-    descriptorSets.resize(VKCore::swapchainImages.size());
-    VkResult result = vkAllocateDescriptorSets(VKCore::logicalDevice, &allocateInfo, descriptorSets.data());
+    descriptorSets.resize(vk::core::swapchainImages.size());
+    VkResult result = vkAllocateDescriptorSets(vk::core::logicalDevice, &allocateInfo, descriptorSets.data());
     ASSERT(result, "Failed to allocate descriptor sets", VK_SC_DESCRIPTOR_SET_CREATION_ERROR);
 
 }
 
 void DescriptorSet::update(std::vector< Descriptor > descriptors_) {
 
-    for (size_t i = 0; i < VKCore::swapchainImages.size(); i++) {
+    for (size_t i = 0; i < vk::core::swapchainImages.size(); i++) {
         
         for (size_t j = 0; j < descriptors_.size(); j++) {
 
@@ -48,7 +48,7 @@ void DescriptorSet::update(std::vector< Descriptor > descriptors_) {
             writeDescriptorSet.pImageInfo                   = &(descriptors_[j].info.imageInfo);
 
             vkUpdateDescriptorSets(
-                VKCore::logicalDevice,
+                vk::core::logicalDevice,
                 1,
                 &writeDescriptorSet,
                 0,

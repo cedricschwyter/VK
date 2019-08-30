@@ -18,7 +18,7 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="VKCore.cpp">
+    <ClCompile Include="Core.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Logger.cpp">
@@ -140,7 +140,7 @@
     <ClInclude Include="VK_STATUS_CODE.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="VKCore.hpp">
+    <ClInclude Include="Core.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Logger.hpp">

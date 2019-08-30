@@ -19,32 +19,32 @@ VertFragShaderStages::VertFragShaderStages() {
 
 VertFragShaderStages::VertFragShaderStages(const char* vertPath_, const char* fragPath_) {
 
-    const std::vector< char > vertCode                    = vk::loadFile(vertPath_);
-    const std::vector< char > fragCode                    = vk::loadFile(fragPath_);
+    const std::vector< char > vertCode                      = vk::loadFile(vertPath_);
+    const std::vector< char > fragCode                      = vk::loadFile(fragPath_);
 
-    vertModule                                            = createShaderModuleFromBinary(&vertCode);
-    fragModule                                            = createShaderModuleFromBinary(&fragCode);
+    vertModule                                              = createShaderModuleFromBinary(&vertCode);
+    fragModule                                              = createShaderModuleFromBinary(&fragCode);
 
-    vertStageInfo                                        = {};
-    vertStageInfo.sType                                    = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    vertStageInfo.stage                                    = VK_SHADER_STAGE_VERTEX_BIT;
-    vertStageInfo.module                                = vertModule;
-    vertStageInfo.pName                                    = "main";
+    vertStageInfo                                           = {};
+    vertStageInfo.sType                                     = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    vertStageInfo.stage                                     = VK_SHADER_STAGE_VERTEX_BIT;
+    vertStageInfo.module                                    = vertModule;
+    vertStageInfo.pName                                     = "main";
 
-    fragStageInfo                                        = {};
-    fragStageInfo.sType                                    = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    fragStageInfo.stage                                    = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragStageInfo.module                                = fragModule;
-    fragStageInfo.pName                                    = "main";
+    fragStageInfo                                           = {};
+    fragStageInfo.sType                                     = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    fragStageInfo.stage                                     = VK_SHADER_STAGE_FRAGMENT_BIT;
+    fragStageInfo.module                                    = fragModule;
+    fragStageInfo.pName                                     = "main";
 
-    stages                                                = { vertStageInfo, fragStageInfo };
+    stages                                                  = { vertStageInfo, fragStageInfo };
 
 }
 
 VK_STATUS_CODE VertFragShaderStages::destroyModules() {
 
-    vkDestroyShaderModule(VKCore::logicalDevice, vertModule, VKCore::allocator);
-    vkDestroyShaderModule(VKCore::logicalDevice, fragModule, VKCore::allocator);
+    vkDestroyShaderModule(vk::core::logicalDevice, vertModule, vk::core::allocator);
+    vkDestroyShaderModule(vk::core::logicalDevice, fragModule, vk::core::allocator);
 
     return vk::errorCodeBuffer;
 
@@ -61,9 +61,9 @@ VkShaderModule VertFragShaderStages::createShaderModuleFromBinary(const std::vec
 
     VkShaderModule module;
     VkResult result = vkCreateShaderModule(
-        VKCore::logicalDevice,
+        vk::core::logicalDevice,
         &shaderModuleCreateInfo, 
-        VKCore::allocator,
+        vk::core::allocator,
         &module
         );
     ASSERT(result, "Failed to create shader module", VK_SC_SHADER_MODULE_CREATION_ERROR);

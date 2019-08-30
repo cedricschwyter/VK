@@ -14,17 +14,17 @@
 
 MSAARenderImage::MSAARenderImage() {
 
-    imgFormat = VKCore::swapchainImageFormat;
+    imgFormat = vk::core::swapchainImageFormat;
     
     vk::createImage(
-        VKCore::swapchainImageExtent.width,
-        VKCore::swapchainImageExtent.height,
+        vk::core::swapchainImageExtent.width,
+        vk::core::swapchainImageExtent.height,
         1,
         imgFormat,
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        VKCore::MSAASampleCount,
+        vk::core::MSAASampleCount,
         img,
         imgMem
         );

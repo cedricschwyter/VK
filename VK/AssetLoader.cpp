@@ -21,25 +21,25 @@ void AssetLoader::operator()() {
 
     while (true) {
 
-        std::unique_lock< std::mutex > lock(VKCore::modelLoadingQueueMutex);
-        VKCore::modelLoadingQueueCondVar.wait(lock, []() {
+        std::unique_lock< std::mutex > lock(vk::core::modelLoadingQueueMutex);
+        vk::core::modelLoadingQueueCondVar.wait(lock, []() {
                 
-            return VKCore::notified || VKCore::finished;
+            return vk::core::notified || vk::core::finished;
                 
             });
 
-        if (!VKCore::modelLoadingQueue.empty()) {
+        if (!vk::core::modelLoadingQueue.empty()) {
 
-            auto front = VKCore::modelLoadingQueue.front();
-            VKCore::modelLoadingQueue.pop();
-            VKCore::notified = false;
+            auto front = vk::core::modelLoadingQueue.front();
+            vk::core::modelLoadingQueue.pop();
+            vk::core::notified = false;
             lock.unlock();
 
             Model* model = new Model(front.path, front.pipeline, front.lib, front.modelMatrixFunc);
             models.push_back(model);
 
         }
-        else if (VKCore::finished) { 
+        else if (vk::core::finished) { 
 
             break; 
         

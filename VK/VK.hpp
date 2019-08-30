@@ -15,7 +15,7 @@
 
 #include <iostream>
 
-#include "VKCore.hpp"
+#include "Core.hpp"
 #include "VK_STATUS_CODE.hpp"
 
 

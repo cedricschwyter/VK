@@ -41,8 +41,8 @@ namespace vk {
     VK_STATUS_CODE init() {
 
         std::scoped_lock< std::mutex > lock(loadingMutex);
-        VKCore::preInit();
-        VKCore::init();
+        vk::core::preInit();
+        vk::core::init();
 
         return errorCodeBuffer;
 
@@ -53,7 +53,7 @@ namespace vk {
         try {
 
             return 
-            VKCore::run();
+            vk::core::run();
 
         }
         catch (std::exception& e) {
@@ -213,7 +213,7 @@ namespace vk {
         allocInfo.commandBufferCount            = 1;
 
         VkCommandBuffer commandBuffer;
-        vkAllocateCommandBuffers(VKCore::logicalDevice, &allocInfo, &commandBuffer);
+        vkAllocateCommandBuffers(vk::core::logicalDevice, &allocInfo, &commandBuffer);
 
         VkCommandBufferBeginInfo beginInfo      = {};
         beginInfo.sType                         = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -278,7 +278,7 @@ namespace vk {
         vkQueueWaitIdle(queue);
 
         vkFreeCommandBuffers(
-            VKCore::logicalDevice,
+            vk::core::logicalDevice,
             commandPool,
             1,
             &commandBuffer_
@@ -456,9 +456,9 @@ namespace vk {
 
         VkImageView imgView;
         VkResult result = vkCreateImageView(
-            VKCore::logicalDevice,
+            vk::core::logicalDevice,
             &imageViewCreateInfo,
-            VKCore::allocator,
+            vk::core::allocator,
             &imgView
             );
         ASSERT(result, "Failed to create image view", VK_SC_IMAGE_VIEW_CREATION_ERROR);
@@ -480,7 +480,7 @@ namespace vk {
         
         // Check if image format supports linear blitting
         VkFormatProperties formatProperties;
-        vkGetPhysicalDeviceFormatProperties(VKCore::physicalDevice, imageFormat_, &formatProperties);
+        vkGetPhysicalDeviceFormatProperties(vk::core::physicalDevice, imageFormat_, &formatProperties);
 
         if (!(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)) {
         
@@ -610,7 +610,7 @@ namespace vk {
         for (VkFormat format : candidates_) {
 
             VkFormatProperties properties;
-            vkGetPhysicalDeviceFormatProperties(VKCore::physicalDevice, format, &properties);
+            vkGetPhysicalDeviceFormatProperties(vk::core::physicalDevice, format, &properties);
 
             if (tiling_ == VK_IMAGE_TILING_LINEAR && (properties.linearTilingFeatures & features_) == features_) {      // Does the format support linear tiling?
 
@@ -634,7 +634,7 @@ namespace vk {
     uint32_t enumerateSuitableMemoryType(uint32_t typeFilter_, VkMemoryPropertyFlags memoryPropertyFlags_) {
 
         VkPhysicalDeviceMemoryProperties memProp;
-        vkGetPhysicalDeviceMemoryProperties(VKCore::physicalDevice, &memProp);
+        vkGetPhysicalDeviceMemoryProperties(vk::core::physicalDevice, &memProp);
 
         for (uint32_t i = 0; i < memProp.memoryTypeCount; i++) {
 
@@ -682,15 +682,15 @@ namespace vk {
         imgCreateInfo.sharingMode               = VK_SHARING_MODE_EXCLUSIVE;
 
         VkResult result = vkCreateImage(
-            VKCore::logicalDevice,
+            vk::core::logicalDevice,
             &imgCreateInfo,
-            VKCore::allocator,
+            vk::core::allocator,
             &img_
             );
         ASSERT(result, "Failed to create image from the given parameters", VK_SC_IMAGE_CREATION_ERROR);
 
         VkMemoryRequirements memReqs;
-        vkGetImageMemoryRequirements(VKCore::logicalDevice, img_, &memReqs);
+        vkGetImageMemoryRequirements(vk::core::logicalDevice, img_, &memReqs);
 
         VkMemoryAllocateInfo memoryAllocInfo        = {};
         memoryAllocInfo.sType                       = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -698,15 +698,15 @@ namespace vk {
         memoryAllocInfo.memoryTypeIndex             = vk::enumerateSuitableMemoryType(memReqs.memoryTypeBits, properties_);
 
         result = vkAllocateMemory(
-            VKCore::logicalDevice,
+            vk::core::logicalDevice,
             &memoryAllocInfo,
-            VKCore::allocator,
+            vk::core::allocator,
             &imgMem_
             );
         ASSERT(result, "Failed to allocate image memory", VK_SC_IMAGE_MEMORY_ALLOCATION_ERROR);
 
         vkBindImageMemory(
-            VKCore::logicalDevice,
+            vk::core::logicalDevice,
             img_,
             imgMem_,
             0
@@ -725,7 +725,7 @@ namespace vk {
 
     VK_STATUS_CODE push(const char* path_, glm::mat4 (*modelMatrixFunc_)()) {
 
-        VKCore::push(path_, modelMatrixFunc_);
+        vk::core::push(path_, modelMatrixFunc_);
         logger::log(EVENT_LOG, "Pushing model at path " + std::string(path_) + " to loading queue");
 
         return vk::errorCodeBuffer;
@@ -734,7 +734,7 @@ namespace vk {
 
     VK_STATUS_CODE push(ModelInfo info_) {
 
-        VKCore::push(info_);
+        vk::core::push(info_);
         logger::log(EVENT_LOG, "Pushing model at path " + std::string(info_.path) + " to loading queue");
 
         return vk::errorCodeBuffer;
@@ -768,13 +768,13 @@ namespace vk {
 
         std::scoped_lock< std::mutex > lock(*mutex);
         vkWaitForFences(
-            VKCore::logicalDevice,
+            vk::core::logicalDevice,
             1,
             &fence,
             VK_TRUE,
             std::numeric_limits< uint64_t >::max()
             );
-        vkResetFences(VKCore::logicalDevice, 1, &fence);
+        vkResetFences(vk::core::logicalDevice, 1, &fence);
     
     }
 

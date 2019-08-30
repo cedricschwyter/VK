@@ -18,16 +18,16 @@ BaseBuffer::BaseBuffer(const VkBufferCreateInfo* bufferCreateInfo_, VkMemoryProp
 
     logger::log(EVENT_LOG, "Creating buffer...");
     VkResult result = vkCreateBuffer(
-        VKCore::logicalDevice,
+        vk::core::logicalDevice,
         bufferCreateInfo_,
-        VKCore::allocator,
+        vk::core::allocator,
         &buf
         );
     ASSERT(result, "Failed to create buffer", VK_SC_BUFFER_CREATION_ERROR);
     logger::log(EVENT_LOG, "Successfully created buffer");
 
     VkMemoryRequirements memoryRequirements;
-    vkGetBufferMemoryRequirements(VKCore::logicalDevice, buf, &memoryRequirements);
+    vkGetBufferMemoryRequirements(vk::core::logicalDevice, buf, &memoryRequirements);
 
     VkMemoryAllocateInfo memoryAllocateInfo                = {};
     memoryAllocateInfo.sType                               = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -35,9 +35,9 @@ BaseBuffer::BaseBuffer(const VkBufferCreateInfo* bufferCreateInfo_, VkMemoryProp
     memoryAllocateInfo.memoryTypeIndex                     = vk::enumerateSuitableMemoryType(memoryRequirements.memoryTypeBits, properties_);
 
     result = vkAllocateMemory(
-        VKCore::logicalDevice,
+        vk::core::logicalDevice,
         &memoryAllocateInfo,
-        VKCore::allocator,
+        vk::core::allocator,
         &mem
         );
     ASSERT(result, "Failed to allocate buffer memory", VK_SC_BUFFER_ALLOCATION_ERROR);
@@ -50,7 +50,7 @@ BaseBuffer::BaseBuffer(VkDeviceSize size_, VkBufferUsageFlags usage_, VkMemoryPr
 
     logger::log(EVENT_LOG, "Creating buffer...");
 
-    QueueFamily family                        = VKCore::findSuitableQueueFamily(VKCore::physicalDevice);
+    QueueFamily family                        = vk::core::findSuitableQueueFamily(vk::core::physicalDevice);
     std::vector< uint32_t > indices           = { family.transferFamilyIndex.value() };
 
     bufferCreateInfo.sType                    = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -61,16 +61,16 @@ BaseBuffer::BaseBuffer(VkDeviceSize size_, VkBufferUsageFlags usage_, VkMemoryPr
     bufferCreateInfo.queueFamilyIndexCount    = static_cast< uint32_t >(indices.size());
 
     VkResult result = vkCreateBuffer(
-        VKCore::logicalDevice,
+        vk::core::logicalDevice,
         &bufferCreateInfo, 
-        VKCore::allocator,
+        vk::core::allocator,
         &buf
         );
     ASSERT(result, "Failed to create buffer", VK_SC_BUFFER_CREATION_ERROR);
     logger::log(EVENT_LOG, "Successfully created buffer");
 
     VkMemoryRequirements memoryRequirements;
-    vkGetBufferMemoryRequirements(VKCore::logicalDevice, buf, &memoryRequirements);
+    vkGetBufferMemoryRequirements(vk::core::logicalDevice, buf, &memoryRequirements);
 
     VkMemoryAllocateInfo memoryAllocateInfo         = {};
     memoryAllocateInfo.sType                        = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -78,9 +78,9 @@ BaseBuffer::BaseBuffer(VkDeviceSize size_, VkBufferUsageFlags usage_, VkMemoryPr
     memoryAllocateInfo.memoryTypeIndex              = vk::enumerateSuitableMemoryType(memoryRequirements.memoryTypeBits, properties_);
 
     result = vkAllocateMemory(
-        VKCore::logicalDevice,
+        vk::core::logicalDevice,
         &memoryAllocateInfo,
-        VKCore::allocator,
+        vk::core::allocator,
         &mem
         );
     ASSERT(result, "Failed to allocate buffer memory", VK_SC_BUFFER_ALLOCATION_ERROR);
@@ -91,10 +91,10 @@ BaseBuffer::BaseBuffer(VkDeviceSize size_, VkBufferUsageFlags usage_, VkMemoryPr
 
 BaseBuffer::~BaseBuffer() {
 
-    vkDestroyBuffer(VKCore::logicalDevice, buf, VKCore::allocator);
+    vkDestroyBuffer(vk::core::logicalDevice, buf, vk::core::allocator);
     logger::log(EVENT_LOG, "Successfully destroyed buffer");
 
-    vkFreeMemory(VKCore::logicalDevice, mem, VKCore::allocator);
+    vkFreeMemory(vk::core::logicalDevice, mem, vk::core::allocator);
     logger::log(EVENT_LOG, "Successfully destroyed buffer memory");
 
 }
@@ -102,7 +102,7 @@ BaseBuffer::~BaseBuffer() {
 VK_STATUS_CODE BaseBuffer::bind() {
     
     VkResult result = vkBindBufferMemory(
-        VKCore::logicalDevice,
+        vk::core::logicalDevice,
         buf,
         mem,
         static_cast< uint64_t >(0)
@@ -117,7 +117,7 @@ VK_STATUS_CODE BaseBuffer::fill(const void* bufData_) {
 
     void* data;
     vkMapMemory(
-        VKCore::logicalDevice,
+        vk::core::logicalDevice,
         mem,
         0,
         bufferCreateInfo.size,
@@ -125,7 +125,7 @@ VK_STATUS_CODE BaseBuffer::fill(const void* bufData_) {
         &data
         );
     memcpy(data, bufData_, static_cast< size_t >(bufferCreateInfo.size));
-    vkUnmapMemory(VKCore::logicalDevice, mem);
+    vkUnmapMemory(vk::core::logicalDevice, mem);
 
     return vk::errorCodeBuffer;
 
@@ -135,7 +135,7 @@ VK_STATUS_CODE BaseBuffer::fill(const unsigned char* bufData_) {
 
     void* data;
     vkMapMemory(
-        VKCore::logicalDevice,
+        vk::core::logicalDevice,
         mem,
         0,
         bufferCreateInfo.size,
@@ -143,7 +143,7 @@ VK_STATUS_CODE BaseBuffer::fill(const unsigned char* bufData_) {
         &data
         );
     memcpy(data, bufData_, static_cast<size_t>(bufferCreateInfo.size));
-    vkUnmapMemory(VKCore::logicalDevice, mem);
+    vkUnmapMemory(vk::core::logicalDevice, mem);
 
     return vk::errorCodeBuffer;
 
@@ -151,7 +151,7 @@ VK_STATUS_CODE BaseBuffer::fill(const unsigned char* bufData_) {
 
 VK_STATUS_CODE BaseBuffer::fillS(const void* bufData_, size_t bufSize_) {
 
-    QueueFamily family                      = VKCore::findSuitableQueueFamily(VKCore::physicalDevice);
+    QueueFamily family                      = vk::core::findSuitableQueueFamily(vk::core::physicalDevice);
     std::vector< uint32_t > indices         = { family.transferFamilyIndex.value() };
 
     VkBufferCreateInfo bufferCreateInfo     = {};

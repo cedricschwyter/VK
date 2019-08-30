@@ -304,7 +304,7 @@
     <ClCompile Include="Version.hpp" />
     <ClCompile Include="VK.cpp" />
     <ClCompile Include="VK.hpp" />
-    <ClCompile Include="VKCore.cpp" />
+    <ClCompile Include="Core.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetLoader.hpp" />
@@ -332,7 +332,7 @@
     <ClInclude Include="UniformBuffer.hpp" />
     <ClInclude Include="VertexBuffer.hpp" />
     <ClInclude Include="VertFragShaderStages.hpp" />
-    <ClInclude Include="VKCore.hpp" />
+    <ClInclude Include="Core.hpp" />
     <ClInclude Include="VK_STATUS_CODE.hpp" />
   </ItemGroup>
   <ItemGroup>
