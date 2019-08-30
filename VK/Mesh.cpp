@@ -20,7 +20,7 @@ Mesh::Mesh(
     )
     : pipeline(pipeline_), vertices(vertices_), indices(indices_), textures(textures_) {
 
-    QueueFamily family                                          = vk::engine->findSuitableQueueFamily(vk::engine->physicalDevice);
+    QueueFamily family                                          = VKCore::findSuitableQueueFamily(VKCore::physicalDevice);
 
     std::vector< uint32_t > queueFamilyIndices                  = { family.graphicsFamilyIndex.value(), family.transferFamilyIndex.value() };
 

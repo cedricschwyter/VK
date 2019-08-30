@@ -135,9 +135,9 @@ TextureImage::TextureImage(
     samplerCreateInfo.maxLod                        = static_cast< float >(mipLevels);
 
     VkResult result = vkCreateSampler(
-        vk::engine->logicalDevice,
+        VKCore::logicalDevice,
         &samplerCreateInfo,
-        vk::engine->allocator,
+        VKCore::allocator,
         &imgSampler
         );
     ASSERT(result, "Failed to create sampler", VK_SC_SAMPLER_CREATION_ERROR);
@@ -149,7 +149,7 @@ TextureImage::TextureImage(
 VK_STATUS_CODE TextureImage::bind() {
 
     VkResult result = vkBindImageMemory(
-        vk::engine->logicalDevice,
+        VKCore::logicalDevice,
         img,
         mem,
         0
@@ -162,8 +162,8 @@ VK_STATUS_CODE TextureImage::bind() {
 
 TextureImage::~TextureImage() {
 
-    vkDestroySampler(vk::engine->logicalDevice, imgSampler, vk::engine->allocator);
-    vkDestroyImageView(vk::engine->logicalDevice, imgView, vk::engine->allocator);
-    vkDestroyImage(vk::engine->logicalDevice, img, vk::engine->allocator);
+    vkDestroySampler(VKCore::logicalDevice, imgSampler, VKCore::allocator);
+    vkDestroyImageView(VKCore::logicalDevice, imgView, VKCore::allocator);
+    vkDestroyImage(VKCore::logicalDevice, img, VKCore::allocator);
 
 }

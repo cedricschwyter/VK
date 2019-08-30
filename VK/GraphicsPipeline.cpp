@@ -40,9 +40,9 @@ GraphicsPipeline::GraphicsPipeline(
     pipelineLayoutCreateInfo.pPushConstantRanges                = pushConstants_;
 
     VkResult result = vkCreatePipelineLayout(
-        vk::engine->logicalDevice,
+        VKCore::logicalDevice,
         &pipelineLayoutCreateInfo,
-        vk::engine->allocator,
+        VKCore::allocator,
         &pipelineLayout
         );
     ASSERT(result, "Failed to create pipeline layout", VK_SC_PIPELINE_LAYOUT_CREATION_ERROR);
@@ -67,11 +67,11 @@ GraphicsPipeline::GraphicsPipeline(
     graphicsPipelineCreateInfo.basePipelineIndex                       = -1;
 
     result = vkCreateGraphicsPipelines(
-        vk::engine->logicalDevice,
+        VKCore::logicalDevice,
         VK_NULL_HANDLE,                        // No pipeline cache will be used
         1,                                    // Create only one pipeline, might change in the future
         &graphicsPipelineCreateInfo,
-        vk::engine->allocator,
+        VKCore::allocator,
         &pipeline
         );
     ASSERT(result, "Failed to create graphics pipeline", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
@@ -88,10 +88,10 @@ VK_STATUS_CODE GraphicsPipeline::destroyShaderModules() {
 
 VK_STATUS_CODE GraphicsPipeline::destroy() {
 
-    vkDestroyPipeline(vk::engine->logicalDevice, pipeline, vk::engine->allocator);
+    vkDestroyPipeline(VKCore::logicalDevice, pipeline, VKCore::allocator);
     logger::log(EVENT_LOG, "Successfully destroyed graphics pipeline");
 
-    vkDestroyPipelineLayout(vk::engine->logicalDevice, pipelineLayout, vk::engine->allocator);
+    vkDestroyPipelineLayout(VKCore::logicalDevice, pipelineLayout, VKCore::allocator);
     logger::log(EVENT_LOG, "Successfully destroyed pipeline layout");
 
     return vk::errorCodeBuffer;

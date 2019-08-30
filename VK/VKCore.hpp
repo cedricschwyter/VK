@@ -1,11 +1,11 @@
 /**
-    Declares the VKEngine class
+    Declares the VKCore namespace with all its functions
 
     @author       D3PSI
     @version      0.0.1 02.12.2019
 
-    @file         VKEngine.hpp
-    @brief        Declaration of the VKEngine class
+    @file         VKCore.hpp
+    @brief        Declaration of the VKCore namespace
 */
 #ifndef VK_ENGINE_HPP
 #define VK_ENGINE_HPP
@@ -61,47 +61,90 @@
 #include "AssetLoader.hpp"
 #include "LightData.cpp"
 
-class VKEngine {
-public:
+/**
+    Holds the core of the Vulkan render engine 
+*/
+namespace VKCore {
 
-    VkPhysicalDevice                        physicalDevice;
-    VkDevice                                logicalDevice;
-    VkAllocationCallbacks*                  allocator;
-    std::vector< VkImage >                  swapchainImages;
-    VkFormat                                swapchainImageFormat;
-    VkExtent2D                              swapchainImageExtent;
-    BaseCamera*                             camera;
-    VkSampleCountFlagBits                   MSAASampleCount                         = VK_SAMPLE_COUNT_1_BIT;
-    std::queue< ModelInfo >                 modelLoadingQueue;
-    std::mutex                              modelLoadingQueueMutex;
-    std::condition_variable                 modelLoadingQueueCondVar;
-    bool                                    finished                                = false;
-    bool                                    notified                                = false;
-    std::condition_variable                 assetsLoadedCondVar;
-    std::mutex                              assetsLoadedMutex;
-    bool                                    assetsLoaded                            = false;
-    std::thread                             assetThread;
-    bool                                    readyToRun                              = false;
+    extern VkPhysicalDevice                        physicalDevice;
+    extern VkDevice                                logicalDevice;
+    extern VkAllocationCallbacks*                  allocator;
+    extern std::vector< VkImage >                  swapchainImages;
+    extern VkFormat                                swapchainImageFormat;
+    extern VkExtent2D                              swapchainImageExtent;
+    extern BaseCamera*                             camera;
+    extern VkSampleCountFlagBits                   MSAASampleCount;
+    extern std::queue< ModelInfo >                 modelLoadingQueue;
+    extern std::mutex                              modelLoadingQueueMutex;
+    extern std::condition_variable                 modelLoadingQueueCondVar;
+    extern bool                                    finished;
+    extern bool                                    notified;
+    extern std::condition_variable                 assetsLoadedCondVar;
+    extern std::mutex                              assetsLoadedMutex;
+    extern bool                                    assetsLoaded;
+    extern std::thread                             assetThread;
+    extern bool                                    readyToRun;
+    extern GLFWwindow*                             window;
+    extern GLFWmonitor*                            monitor;
+    extern VkInstance                              instance;
+    extern const std::vector< const char* >        validationLayers;
+    extern const bool                              validationLayersEnabled;
+    extern VkDebugUtilsMessengerEXT                validationLayerDebugMessenger;
+    extern VkQueue                                 presentationQueue;
+    extern VkSurfaceKHR                            surface;
+    extern const std::vector< const char* >        requiredExtensions;
+    extern LoadingScreen*                          loadingScreen;
+    extern VkSwapchainKHR                          swapchain;
+    extern std::vector< VkImageView >              swapchainImageViews;
+    extern std::vector< VkFramebuffer >            swapchainFramebuffers;
+    extern VkRenderPass                            renderPass;
+    extern GraphicsPipeline                        standardPipeline;
+    extern std::vector< Descriptor >               standardDescriptors;
+    extern DescriptorSetLayout*                    standardDescriptorLayout;
+    extern std::vector< VkCommandBuffer >          standardCommandBuffers;
+    extern std::vector< VkSemaphore >              swapchainImageAvailableSemaphores;
+    extern std::vector< VkSemaphore >              renderingCompletedSemaphores;
+    extern std::vector< VkFence >                  inFlightFences;
+    extern size_t                                  currentSwapchainImage;
+    extern bool                                    hasFramebufferBeenResized;
+    extern BaseBuffer*                             vpBuffer;  
+    extern Descriptor                              vpDescriptor;
+    extern BaseBuffer*                             lightDataBuffer;
+    extern Descriptor                              lightDataDescriptor;
+    extern VkPolygonMode                           polygonMode;
+    extern BaseImage*                              depthBuffer;
+#ifndef VK_MULTISAMPLING_NONE
+    extern BaseImage*                              msaaBufferImage;
+#endif
+    extern TextureImage*                           noImageSubstituent;
+    extern Descriptor                              noImageSubstituentDescriptor;
+    extern Descriptor                              diffuseSampler1Descriptor;
+    extern Descriptor                              diffuseSampler2Descriptor;
+    extern bool                                    initialized;
+    extern std::vector< Model* >                   models;
+    extern bool                                    firstTimeRecreation;
+    extern std::vector< DescriptorSet* >           descriptorSets;
+    
+    extern std::vector< std::thread* >             modelLoadingQueueThreads;
+    extern std::vector< AssetLoader* >             assetLoaders;
+    extern uint32_t                                maxThreads;
+    
+    extern std::vector< std::thread* >             renderThreads;
 
     /**
-        Default constructor
+        Pre-runs before init()
     */
-    VKEngine(void);
+    void preInit(void);
 
     /**
-        Default destructor
-    */
-    ~VKEngine(void) = default;
-
-    /**
-        Initializes VKEngine and loads dependencies
+        Initializes VKCore and loads dependencies
 
         @return     Returns VK_SC_SUCCESS on success
     */
     VK_STATUS_CODE init(void);
 
     /**
-        Runs VKEngine
+        Runs VKCore
 
         @return     Returns VK_SC_SUCCESS on success
     */
@@ -159,67 +202,6 @@ public:
         @return        Returns a QueueFamily struct
     */
     QueueFamily findSuitableQueueFamily(VkPhysicalDevice device_);
-
-private:
-
-    GLFWwindow*                             window;
-    GLFWmonitor*                            monitor;
-    VkInstance                              instance                             = VK_NULL_HANDLE;
-    const std::vector< const char* >        validationLayers                     = {
-    
-        "VK_LAYER_LUNARG_standard_validation"
-    
-    };
-#ifndef VK_RELEASE
-    const bool                              validationLayersEnabled              = true;
-#else
-    const bool                              validationLayersEnabled              = false;
-#endif
-    VkDebugUtilsMessengerEXT                validationLayerDebugMessenger        = VK_NULL_HANDLE;
-    VkQueue                                 presentationQueue                    = VK_NULL_HANDLE;
-    VkSurfaceKHR                            surface                              = VK_NULL_HANDLE;
-    const std::vector< const char* >        requiredExtensions                   = {
-    
-        VK_KHR_SWAPCHAIN_EXTENSION_NAME
-    
-    };
-    LoadingScreen*                          loadingScreen                        = nullptr;
-    VkSwapchainKHR                          swapchain                            = VK_NULL_HANDLE;
-    std::vector< VkImageView >              swapchainImageViews;
-    std::vector< VkFramebuffer >            swapchainFramebuffers;
-    VkRenderPass                            renderPass;
-    GraphicsPipeline                        standardPipeline;
-    std::vector< Descriptor >               standardDescriptors;
-    DescriptorSetLayout*                    standardDescriptorLayout;
-    std::vector< VkCommandBuffer >          standardCommandBuffers;
-    std::vector< VkSemaphore >              swapchainImageAvailableSemaphores;
-    std::vector< VkSemaphore >              renderingCompletedSemaphores;
-    std::vector< VkFence >                  inFlightFences;
-    size_t                                  currentSwapchainImage                = 0;
-    bool                                    hasFramebufferBeenResized            = false;
-    BaseBuffer*                             vpBuffer;  
-    Descriptor                              vpDescriptor;
-    BaseBuffer*                             lightDataBuffer;
-    Descriptor                              lightDataDescriptor;
-    VkPolygonMode                           polygonMode                          = VK_POLYGON_MODE_FILL;
-    BaseImage*                              depthBuffer;
-#ifndef VK_MULTISAMPLING_NONE
-    BaseImage*                              msaaBufferImage;
-#endif
-    TextureImage*                           noImageSubstituent;
-    Descriptor                              noImageSubstituentDescriptor;
-    Descriptor                              diffuseSampler1Descriptor;
-    Descriptor                              diffuseSampler2Descriptor;
-    bool                                    initialized                          = false;
-    std::vector< Model* >                   models;
-    bool                                    firstTimeRecreation                  = true;
-    std::vector< DescriptorSet* >           descriptorSets;
-
-    std::vector< std::thread* >             modelLoadingQueueThreads;
-    std::vector< AssetLoader* >             assetLoaders;
-    uint32_t                                maxThreads                           = std::thread::hardware_concurrency();
-
-    std::vector< std::thread* >             renderThreads;
 
     /**
         Contains the main loop

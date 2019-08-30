@@ -15,7 +15,7 @@
 
 #include <iostream>
 
-#include "VKEngine.hpp"
+#include "VKCore.hpp"
 #include "VK_STATUS_CODE.hpp"
 
 
@@ -26,7 +26,6 @@ namespace vk {
 
     extern VK_STATUS_CODE                       errorCodeBuffer;
     
-    extern VKEngine*                            engine;
     extern const unsigned int                   HEIGHT;
     extern const unsigned int                   WIDTH;
     extern const char*                          TITLE;
