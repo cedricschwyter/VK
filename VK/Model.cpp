@@ -174,12 +174,12 @@ Mesh* Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
         }
 
         indices.push_back(uniqueVertices[vertex]);
-#elif not defined VK_VERTEX_DEDUPLICATION
+#elif !defined VK_VERTEX_DEDUPLICATION
         vertices.push_back(vertex);
 #endif
     }
 #ifndef VK_VERTEX_DEDUPLICATION
-    for(unsigned int i = 0; i < mesh_->mNumFaces; i++) {
+    for (unsigned int i = 0; i < mesh_->mNumFaces; i++) {
 
         aiFace face = mesh_->mFaces[i];
         for(unsigned int j = 0; j < face.mNumIndices; j++)
