@@ -165,17 +165,24 @@ Mesh* Model::processASSIMPMesh(aiMesh* mesh_, const aiScene* scene_) {
 
         }
 
-        if (uniqueVertices.count(vertex) == 0) {
+        //if (uniqueVertices.count(vertex) == 0) {
 
-            uniqueVertices[vertex] = static_cast< uint32_t >(vertices.size());
+            //uniqueVertices[vertex] = static_cast< uint32_t >(vertices.size());
             vertices.push_back(vertex);
 
-        }
+        //}
 
-        indices.push_back(uniqueVertices[vertex]);
-    
+        //indices.push_back(uniqueVertices[vertex]);
+
     }
 
+        for(unsigned int i = 0; i < mesh_->mNumFaces; i++) {
+
+            aiFace face = mesh_->mFaces[i];
+            for(unsigned int j = 0; j < face.mNumIndices; j++)
+                indices.push_back(face.mIndices[j]);
+        
+        }
     std::vector< TextureObject > textures;
 
     aiMaterial* material = scene_->mMaterials[mesh_->mMaterialIndex];
