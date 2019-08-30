@@ -244,7 +244,7 @@ VK_STATUS_CODE VKEngine::clean() {
 
     ASSERT(cleanSwapchain(), "Failed to clean swapchain", VK_SC_SWAPCHAIN_CLEAN_ERROR);
 
-    delete NOIMAGESUBSTITUENT;
+    delete noImageSubstituent;
 
     for (auto model : models) {
 
@@ -1055,7 +1055,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     rasterizationStateCreateInfo.rasterizerDiscardEnable                            = VK_FALSE;
     rasterizationStateCreateInfo.polygonMode                                        = polygonMode;
     rasterizationStateCreateInfo.lineWidth                                          = 1.0f;
-    rasterizationStateCreateInfo.cullMode                                           = VK_CULL_MODE_BACK_BIT;
+    rasterizationStateCreateInfo.cullMode                                           = VK_CULL_MODE_NONE;
     rasterizationStateCreateInfo.frontFace                                          = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterizationStateCreateInfo.depthBiasEnable                                    = VK_FALSE;
 
@@ -1104,7 +1104,7 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     dynamicStateCreateInfo.dynamicStateCount                                        = static_cast< uint32_t >(dynamicStates.size());
     dynamicStateCreateInfo.pDynamicStates                                           = dynamicStates.data();
                              
-    NOIMAGESUBSTITUENT = new TextureImage(
+    noImageSubstituent = new TextureImage(
         "res/textures/application/transparent.png", 
         VK_FORMAT_R8G8B8A8_UNORM, 
         VK_IMAGE_TILING_OPTIMAL,
@@ -1127,8 +1127,8 @@ VK_STATUS_CODE VKEngine::createGraphicsPipelines() {
     vpDescriptor                                                                    = Descriptor(vpInfo);
 
     VkDescriptorImageInfo noImageSubstituentImageInfo                               = {};
-    noImageSubstituentImageInfo.sampler                                             = NOIMAGESUBSTITUENT->imgSampler;
-    noImageSubstituentImageInfo.imageView                                           = NOIMAGESUBSTITUENT->imgView;
+    noImageSubstituentImageInfo.sampler                                             = noImageSubstituent->imgSampler;
+    noImageSubstituentImageInfo.imageView                                           = noImageSubstituent->imgView;
     noImageSubstituentImageInfo.imageLayout                                         = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
     UniformInfo noImageSubstituentInfo                                              = {};
@@ -1842,9 +1842,10 @@ VK_STATUS_CODE VKEngine::updateUniformBuffers() {
 
     vpBuffer->fill(&mvp);
 
+    float                           radius          = 5.0f;
     LightData ld                                    = {};
     ld.lightCol                                     = glm::vec3(1.0f);
-    ld.lightPos                                     = glm::vec3(static_cast< float >(glm::cos(glfwGetTime())), 0.0f, static_cast< float >(glm::sin(glfwGetTime())));
+    ld.lightPos                                     = glm::vec3(static_cast< float >(glm::cos(glfwGetTime())) * radius, 0.0f, static_cast< float >(glm::sin(glfwGetTime())) * radius);
     ld.viewPos                                      = camera->camPos;
 
     lightDataBuffer->fill(&ld);

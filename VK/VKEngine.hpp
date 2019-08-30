@@ -206,7 +206,7 @@ private:
 #ifndef VK_MULTISAMPLING_NONE
     BaseImage*                              msaaBufferImage;
 #endif
-    TextureImage*                           NOIMAGESUBSTITUENT;
+    TextureImage*                           noImageSubstituent;
     Descriptor                              noImageSubstituentDescriptor;
     Descriptor                              diffuseSampler1Descriptor;
     Descriptor                              diffuseSampler2Descriptor;
