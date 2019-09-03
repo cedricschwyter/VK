@@ -38,9 +38,9 @@ glm::mat4 rose() {
     float                           delta           = std::chrono::duration< float, std::chrono::seconds::period >(current - start).count();        // Namespaces are a fricking mess in <chrono>
             
     glm::mat4 model;
-    model           = glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    model           = glm::translate(model, glm::vec3(1.0f, 0.05f, 0.0f));
+    model           = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.05f, 0.0f));
     model           = glm::scale(model, glm::vec3(0.005f));
+    model           = glm::rotate(model, delta * glm::radians(90.0f), glm::vec3(0.0f, 0.05f, 0.0f));
     model[1][1]     *= -1.0f;
 
     return model;

@@ -1434,6 +1434,7 @@ namespace vk {
 
             VkCommandPoolCreateInfo commandPoolCreateInfo          = {};
             commandPoolCreateInfo.sType                            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+            commandPoolCreateInfo.flags                            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
             commandPoolCreateInfo.queueFamilyIndex                 = family.graphicsFamilyIndex.value();
 
             std::unique_lock< std::mutex > graphicsLock(vk::graphicsMutex);
@@ -1490,113 +1491,113 @@ namespace vk {
             ASSERT(result, "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
             logger::log(EVENT_LOG, "Successfully allocated command buffers");
 
-            logger::log(EVENT_LOG, "Recording command buffers...");
-            for (size_t i = 0; i < standardCommandBuffers.size(); i++) {
+            for (uint32_t i = 0; i < swapchainImages.size(); i++) {
+
+                recordCommandBuffer(i);
+
+            }
+
+            return vk::errorCodeBuffer;
+
+        }
+
+        VK_STATUS_CODE recordCommandBuffer(uint32_t imageIndex_) {
             
-                logger::log(EVENT_LOG, "Recording command buffer...");
-                VkCommandBufferBeginInfo commandBufferBeginInfo            = {};
-                commandBufferBeginInfo.sType                               = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-                commandBufferBeginInfo.flags                               = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+            VkCommandBufferBeginInfo commandBufferBeginInfo            = {};
+            commandBufferBeginInfo.sType                               = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+            commandBufferBeginInfo.flags                               = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT | VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT;
 
-                result = vkBeginCommandBuffer(standardCommandBuffers[i], &commandBufferBeginInfo);
-                ASSERT(result, "Failed to allocate command buffer", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
+            VkResult result = vkBeginCommandBuffer(standardCommandBuffers[imageIndex_], &commandBufferBeginInfo);
+            ASSERT(result, "Failed to begin command buffer", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
 
-                VkRenderPassBeginInfo renderPassBeginInfo                  = {};
-                renderPassBeginInfo.sType                                  = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-                renderPassBeginInfo.renderPass                             = renderPass;
-                renderPassBeginInfo.framebuffer                            = swapchainFramebuffers[i];
-                renderPassBeginInfo.renderArea.offset                      = {0, 0};
-                renderPassBeginInfo.renderArea.extent                      = swapchainImageExtent;
+            VkRenderPassBeginInfo renderPassBeginInfo                  = {};
+            renderPassBeginInfo.sType                                  = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            renderPassBeginInfo.renderPass                             = renderPass;
+            renderPassBeginInfo.framebuffer                            = swapchainFramebuffers[imageIndex_];
+            renderPassBeginInfo.renderArea.offset                      = {0, 0};
+            renderPassBeginInfo.renderArea.extent                      = swapchainImageExtent;
                 
-                std::array< VkClearValue, 2 > clearColorValues             = {}; 
-                clearColorValues[0].color                                  = { 122.0f / 255.0f, 122.0f / 255.0f, 122.0f / 255.0f, 1.0f };
-                clearColorValues[1].depthStencil                           = {1.0f, 0};
+            std::array< VkClearValue, 2 > clearColorValues             = {}; 
+            clearColorValues[0].color                                  = { 122.0f / 255.0f, 122.0f / 255.0f, 122.0f / 255.0f, 1.0f };
+            clearColorValues[1].depthStencil                           = {1.0f, 0};
 
-                renderPassBeginInfo.clearValueCount                        = static_cast< uint32_t >(clearColorValues.size());
-                renderPassBeginInfo.pClearValues                           = clearColorValues.data();
+            renderPassBeginInfo.clearValueCount                        = static_cast< uint32_t >(clearColorValues.size());
+            renderPassBeginInfo.pClearValues                           = clearColorValues.data();
 
-                vkCmdBeginRenderPass(standardCommandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);        // Rendering commands will be embedded in the primary command buffer
+            vkCmdBeginRenderPass(standardCommandBuffers[imageIndex_], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);        // Rendering commands will be embedded in the primary command buffer
 
-                    vkCmdBindPipeline(standardCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, standardPipeline.pipeline);
+                vkCmdBindPipeline(standardCommandBuffers[imageIndex_], VK_PIPELINE_BIND_POINT_GRAPHICS, standardPipeline.pipeline);
 
-                        for (Model* model : models) {
+                    for (Model* model : models) {
                         
-                            for (Mesh* mesh : model->meshes) {
+                        for (Mesh* mesh : model->meshes) {
 
-                                std::vector< Descriptor > descriptors;
+                            std::vector< Descriptor > descriptors;
 
-                                descriptors.push_back(vpDescriptor);
-                                descriptors.push_back(lightDataDescriptor);
+                            descriptors.push_back(vpDescriptor);
+                            descriptors.push_back(lightDataDescriptor);
 
-                                auto meshDescriptors = mesh->getDescriptors();
-                                descriptors.insert(descriptors.end(), meshDescriptors.begin(), meshDescriptors.end());
+                            auto meshDescriptors = mesh->getDescriptors();
+                            descriptors.insert(descriptors.end(), meshDescriptors.begin(), meshDescriptors.end());
 
-                                if (meshDescriptors.size() != standardDescriptors.size()) {
+                            if (meshDescriptors.size() != standardDescriptors.size()) {
 
-                                    for (auto standardDescriptor : standardDescriptors) {
+                                for (auto standardDescriptor : standardDescriptors) {
 
-                                        if (standardDescriptor.info.type != VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) continue;
+                                    if (standardDescriptor.info.type != VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) continue;
 
-                                        uint32_t binding            = standardDescriptor.info.binding;
-                                        bool hasCorrectBinding      = false;
+                                    uint32_t binding            = standardDescriptor.info.binding;
+                                    bool hasCorrectBinding      = false;
 
-                                        for (auto meshDescriptor : meshDescriptors) {
+                                    for (auto meshDescriptor : meshDescriptors) {
 
-                                            if (meshDescriptor.info.binding == binding) {
+                                        if (meshDescriptor.info.binding == binding) {
 
-                                                hasCorrectBinding = true;
-
-                                            }
-
-                                        }
-
-                                        if (!hasCorrectBinding) {
-                                                                            
-                                            noImageSubstituentDescriptor.info.binding = binding;
-
-                                            descriptors.push_back(noImageSubstituentDescriptor);
+                                            hasCorrectBinding = true;
 
                                         }
 
                                     }
 
+                                    if (!hasCorrectBinding) {
+                                                                            
+                                        noImageSubstituentDescriptor.info.binding = binding;
+
+                                        descriptors.push_back(noImageSubstituentDescriptor);
+
+                                    }
+
                                 }
 
-                                DescriptorSet* descSet = new DescriptorSet(descriptors);
-                                descSet->update(descriptors);
-
-                                descSet->bind(standardCommandBuffers, static_cast< uint32_t >(i), standardPipeline);
-                                descriptorSets.push_back(descSet);
-
-                                glm::mat4 modelMatrix = model->getModelMatrix();
-
-                                vkCmdPushConstants(
-                                    standardCommandBuffers[i],
-                                    standardPipeline.pipelineLayout,
-                                    VK_SHADER_STAGE_VERTEX_BIT,
-                                    0,
-                                    sizeof(modelMatrix),
-                                    &modelMatrix
-                                    );
-
-                                mesh->draw(standardCommandBuffers, static_cast< uint32_t >(i));
-
                             }
-                        
+
+                            DescriptorSet* descSet = new DescriptorSet(descriptors);
+                            descSet->update(descriptors);
+
+                            descSet->bind(standardCommandBuffers, static_cast< uint32_t >(imageIndex_), standardPipeline);
+                            descriptorSets.push_back(descSet);
+
+                            glm::mat4 modelMatrix = model->getModelMatrix();
+
+                            vkCmdPushConstants(
+                                standardCommandBuffers[imageIndex_],
+                                standardPipeline.pipelineLayout,
+                                VK_SHADER_STAGE_VERTEX_BIT,
+                                0,
+                                sizeof(modelMatrix),
+                                &modelMatrix
+                                );
+
+                            mesh->draw(standardCommandBuffers, static_cast< uint32_t >(imageIndex_));
+
                         }
+                      
+                    }
 
-                vkCmdEndRenderPass(standardCommandBuffers[i]);
+            vkCmdEndRenderPass(standardCommandBuffers[imageIndex_]);
 
-                result = vkEndCommandBuffer(standardCommandBuffers[i]);
-                ASSERT(result, "Failed to record command buffer", VK_SC_COMMAND_BUFFER_RECORDING_ERROR);
-
-                logger::log(EVENT_LOG, "Successfully recorded command buffer");
-
-            }
-
-            logger::log(EVENT_LOG, "Successfully recorded command buffers");
-
-            return vk::errorCodeBuffer;
+            result = vkEndCommandBuffer(standardCommandBuffers[imageIndex_]);
+            return static_cast< VK_STATUS_CODE >(ASSERT(result, "Failed to record command buffer", VK_SC_COMMAND_BUFFER_RECORDING_ERROR));
 
         }
 
@@ -1611,6 +1612,9 @@ namespace vk {
                 );
             vkResetFences(logicalDevice, 1, &inFlightFences[currentSwapchainImage]);
 
+            vkResetCommandBuffer(standardCommandBuffers[currentSwapchainImage], 0);
+            recordCommandBuffer(currentSwapchainImage);
+            
             uint32_t swapchainImageIndex;
             VkResult result = vkAcquireNextImageKHR(
                 logicalDevice,

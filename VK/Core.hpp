@@ -397,11 +397,20 @@ namespace vk {
         VK_STATUS_CODE allocateCommandPools(void);
 
         /**
-            Creates, allocates and recordes command buffers for later submission onto the queues
+            Creates, and allocates command buffers for later submission onto the queues
 
             @return        Returns VK_SC_SUCCESS on success
         */
         VK_STATUS_CODE allocateCommandBuffers(void);
+
+        /*
+            Records a command buffer for rendering
+
+            @param      imageIndex_     The current swapchain image index
+
+            @return     Returns VK_SC_SUCCESS on success
+        */
+        VK_STATUS_CODE recordCommandBuffer(uint32_t imageIndex_);
 
         /**
             Displays the swapchain image, that is up next to be displayed
