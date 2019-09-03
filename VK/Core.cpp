@@ -18,82 +18,82 @@ namespace vk {
 
     namespace core {
 
-        VkPhysicalDevice                        physicalDevice;
-        VkDevice                                logicalDevice;
-        VkAllocationCallbacks*                  allocator;
-        std::vector< VkImage >                  swapchainImages;
-        VkFormat                                swapchainImageFormat;
-        VkExtent2D                              swapchainImageExtent;
-        BaseCamera*                             camera;
-        VkSampleCountFlagBits                   MSAASampleCount                      = VK_SAMPLE_COUNT_1_BIT;
-        std::queue< ModelInfo >                 modelLoadingQueue;
-        std::mutex                              modelLoadingQueueMutex;
-        std::condition_variable                 modelLoadingQueueCondVar;
-        bool                                    finished                             = false;
-        bool                                    notified                             = false;
-        std::condition_variable                 assetsLoadedCondVar;
-        std::mutex                              assetsLoadedMutex;
-        bool                                    assetsLoaded                         = false;
-        std::thread                             assetThread;
-        bool                                    readyToRun                           = false;
-        GLFWwindow*                             window;
-        GLFWmonitor*                            monitor;
-        VkInstance                              instance                             = VK_NULL_HANDLE;
-        const std::vector< const char* >        validationLayers                     = {
+        VkPhysicalDevice                                    physicalDevice;
+        VkDevice                                            logicalDevice;
+        VkAllocationCallbacks*                              allocator;
+        std::vector< VkImage >                              swapchainImages;
+        VkFormat                                            swapchainImageFormat;
+        VkExtent2D                                          swapchainImageExtent;
+        BaseCamera*                                         camera;
+        VkSampleCountFlagBits                               MSAASampleCount                      = VK_SAMPLE_COUNT_1_BIT;
+        std::queue< ModelInfo >                             modelLoadingQueue;
+        std::mutex                                          modelLoadingQueueMutex;
+        std::condition_variable                             modelLoadingQueueCondVar;
+        bool                                                finished                             = false;
+        bool                                                notified                             = false;
+        std::condition_variable                             assetsLoadedCondVar;
+        std::mutex                                          assetsLoadedMutex;
+        bool                                                assetsLoaded                         = false;
+        std::thread                                         assetThread;
+        bool                                                readyToRun                           = false;
+        GLFWwindow*                                         window;
+        GLFWmonitor*                                        monitor;
+        VkInstance                                          instance                             = VK_NULL_HANDLE;
+        const std::vector< const char* >                    validationLayers                     = {
         
             "VK_LAYER_LUNARG_standard_validation"
         
         };
     #ifndef VK_RELEASE
-        const bool                              validationLayersEnabled              = true;
+        const bool                                          validationLayersEnabled              = true;
     #else
-        const bool                              validationLayersEnabled              = false;
+        const bool                                          validationLayersEnabled              = false;
     #endif
-        VkDebugUtilsMessengerEXT                validationLayerDebugMessenger        = VK_NULL_HANDLE;
-        VkQueue                                 presentationQueue                    = VK_NULL_HANDLE;
-        VkSurfaceKHR                            surface                              = VK_NULL_HANDLE;
-        const std::vector< const char* >        requiredExtensions                   = {
+        VkDebugUtilsMessengerEXT                            validationLayerDebugMessenger        = VK_NULL_HANDLE;
+        VkQueue                                             presentationQueue                    = VK_NULL_HANDLE;
+        VkSurfaceKHR                                        surface                              = VK_NULL_HANDLE;
+        const std::vector< const char* >                    requiredExtensions                   = {
         
             VK_KHR_SWAPCHAIN_EXTENSION_NAME
         
         };
-        LoadingScreen*                          loadingScreen                        = nullptr;
-        VkSwapchainKHR                          swapchain                            = VK_NULL_HANDLE;
-        std::vector< VkImageView >              swapchainImageViews;
-        std::vector< VkFramebuffer >            swapchainFramebuffers;
-        VkRenderPass                            renderPass;
-        GraphicsPipeline                        standardPipeline;
-        std::vector< Descriptor >               standardDescriptors;
-        DescriptorSetLayout*                    standardDescriptorLayout;
-        std::vector< VkCommandBuffer >          standardCommandBuffers;
-        std::vector< VkSemaphore >              swapchainImageAvailableSemaphores;
-        std::vector< VkSemaphore >              renderingCompletedSemaphores;
-        std::vector< VkFence >                  inFlightFences;
-        size_t                                  currentSwapchainImage                = 0;
-        bool                                    hasFramebufferBeenResized            = false;
-        BaseBuffer*                             vpBuffer;  
-        Descriptor                              vpDescriptor;
-        BaseBuffer*                             lightDataBuffer;
-        Descriptor                              lightDataDescriptor;
-        VkPolygonMode                           polygonMode                          = VK_POLYGON_MODE_FILL;
-        BaseImage*                              depthBuffer;
+        LoadingScreen*                                      loadingScreen                        = nullptr;
+        VkSwapchainKHR                                      swapchain                            = VK_NULL_HANDLE;
+        std::vector< VkImageView >                          swapchainImageViews;
+        std::vector< VkFramebuffer >                        swapchainFramebuffers;
+        VkRenderPass                                        renderPass;
+        GraphicsPipeline                                    standardPipeline;
+        std::vector< Descriptor >                           standardDescriptors;
+        DescriptorSetLayout*                                standardDescriptorLayout;
+        std::vector< VkCommandBuffer >                      standardCommandBuffers;
+        std::vector< VkSemaphore >                          swapchainImageAvailableSemaphores;
+        std::vector< VkSemaphore >                          renderingCompletedSemaphores;
+        std::vector< VkFence >                              inFlightFences;
+        size_t                                              currentSwapchainImage                = 0;
+        bool                                                hasFramebufferBeenResized            = false;
+        BaseBuffer*                                         vpBuffer;  
+        Descriptor                                          vpDescriptor;
+        BaseBuffer*                                         lightDataBuffer;
+        Descriptor                                          lightDataDescriptor;
+        VkPolygonMode                                       polygonMode                          = VK_POLYGON_MODE_FILL;
+        BaseImage*                                          depthBuffer;
     #ifndef VK_MULTISAMPLING_NONE
-        BaseImage*                              msaaBufferImage;
+        BaseImage*                                          msaaBufferImage;
     #endif
-        TextureImage*                           noImageSubstituent;
-        Descriptor                              noImageSubstituentDescriptor;
-        Descriptor                              diffuseSampler1Descriptor;
-        Descriptor                              diffuseSampler2Descriptor;
-        bool                                    initialized                          = false;
-        std::vector< Model* >                   models;
-        bool                                    firstTimeRecreation                  = true;
-        std::vector< DescriptorSet* >           descriptorSets;
+        TextureImage*                                       noImageSubstituent;
+        Descriptor                                          noImageSubstituentDescriptor;
+        Descriptor                                          diffuseSampler1Descriptor;
+        Descriptor                                          diffuseSampler2Descriptor;
+        bool                                                initialized                          = false;
+        std::vector< Model* >                               models;
+        bool                                                firstTimeRecreation                  = true;
+        std::vector< std::vector< DescriptorSet* > >        descriptorSets;
 
-        std::vector< std::thread* >             modelLoadingQueueThreads;
-        std::vector< AssetLoader* >             assetLoaders;
-        uint32_t                                maxThreads                           = std::thread::hardware_concurrency();
+        std::vector< std::thread* >                         modelLoadingQueueThreads;
+        std::vector< AssetLoader* >                         assetLoaders;
+        uint32_t                                            maxThreads                           = std::thread::hardware_concurrency();
 
-        std::vector< std::thread* >             renderThreads;
+        std::vector< std::thread* >                         renderThreads;
 
         void preInit() {
 
@@ -1489,7 +1489,7 @@ namespace vk {
                 );
             ASSERT(result, "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
             logger::log(EVENT_LOG, "Successfully allocated command buffers");
-
+            descriptorSets.resize(swapchainImages.size());
             for (uint32_t i = 0; i < swapchainImages.size(); i++) {
 
                 recordCommandBuffer(i);
@@ -1501,7 +1501,14 @@ namespace vk {
         }
 
         VK_STATUS_CODE recordCommandBuffer(uint32_t imageIndex_) {
-            
+
+            for (auto desc : descriptorSets[imageIndex_]) {
+
+                delete desc;
+
+            }
+            descriptorSets[imageIndex_].clear();
+
             VkCommandBufferBeginInfo commandBufferBeginInfo            = {};
             commandBufferBeginInfo.sType                               = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
             commandBufferBeginInfo.flags                               = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT | VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT;
@@ -1574,7 +1581,7 @@ namespace vk {
                             descSet->update(descriptors);
 
                             descSet->bind(standardCommandBuffers, static_cast< uint32_t >(imageIndex_), standardPipeline);
-                            descriptorSets.push_back(descSet);
+                            descriptorSets[imageIndex_].push_back(descSet);
 
                             glm::mat4 modelMatrix = model->getModelMatrix();
 
@@ -1609,10 +1616,8 @@ namespace vk {
                 VK_TRUE,
                 std::numeric_limits< uint64_t >::max()
                 );
-            vkResetFences(logicalDevice, 1, &inFlightFences[currentSwapchainImage]);
 
-            vkResetCommandBuffer(standardCommandBuffers[currentSwapchainImage], 0);
-            recordCommandBuffer(currentSwapchainImage);
+            vkResetFences(logicalDevice, 1, &inFlightFences[currentSwapchainImage]);
 
             uint32_t swapchainImageIndex;
             VkResult result = vkAcquireNextImageKHR(
@@ -1632,6 +1637,11 @@ namespace vk {
             
             }
             ASSERT(result, "Failed to acquire swapchain image", VK_SC_SWAPCHAIN_IMAGE_ACQUIRE_ERROR);
+
+            std::unique_lock< std::mutex > gLock(vk::graphicsMutex);
+            vkResetCommandBuffer(standardCommandBuffers[swapchainImageIndex], 0);
+            recordCommandBuffer(static_cast<uint32_t>(swapchainImageIndex));
+            gLock.unlock();
 
             ASSERT(updateUniformBuffers(), "Failed to update uniform buffers", VK_SC_UNIFORM_BUFFER_UPDATE_ERROR);
 
@@ -1803,12 +1813,16 @@ namespace vk {
             logger::log(EVENT_LOG, "Successfully destroyed descriptor set layout");
             standardDescriptors.clear();
 
-            for (auto descriptorSet : descriptorSets) {
+            for (auto vec : descriptorSets) {
 
-                delete descriptorSet;
-                logger::log(EVENT_LOG, "Successfully destroyed descriptor set");
+                for (auto descriptorSet : vec) {
 
-            } 
+                    delete descriptorSet;
+                    logger::log(EVENT_LOG, "Successfully destroyed descriptor set");
+
+                }
+
+            }
             logger::log(EVENT_LOG, "Successfully destroyed descriptor sets");
             descriptorSets.clear();
 
@@ -2143,11 +2157,15 @@ namespace vk {
             logger::log(EVENT_LOG, "Successfully freed command buffers");
             delete standardDescriptorLayout;
             standardDescriptors.clear();
-            for (auto descSet : descriptorSets) {
+            for (auto vec : descriptorSets) {
+                
+                for (auto descSet : vec) {
 
-                delete descSet;
-                logger::log(EVENT_LOG, "Successfully destroyed descriptor set");
+                    delete descSet;
+                    logger::log(EVENT_LOG, "Successfully destroyed descriptor set");
 
+             
+                }
             }
             descriptorSets.clear();
             logger::log(EVENT_LOG, "Successfully destroyed descriptor sets");
