@@ -288,15 +288,14 @@ namespace vk {
 
                 if (currentTime - lastTime >= seconds) {
 
-        #ifndef VK_NO_LOG
-                    std::string fps                = "Average FPS (last " + std::to_string(seconds) + " seconds):    %f\t";
-                    std::string frametime          = "Average Frametime (last " + std::to_string(seconds) + " seconds):    %f ms\t";
-                    std::string maxFPS             = "Max FPS:    %f\n";
+                    std::string fps                = "Average FPS (last " + std::to_string(seconds) + " seconds):    " + std::to_string(double(nbFrames / seconds)) + "\t";
+                    std::string frametime          = "Average Frametime (last " + std::to_string(seconds) + " seconds):    " + std::to_string(double((1000.0 * seconds) / nbFrames)) + " ms\t";
+                    std::string maxFPS             = "Max FPS:    " + std::to_string(double(maxfps / seconds)) + "\n";
 
-                    printf(fps.c_str(), double(nbFrames / seconds));
-                    printf(frametime.c_str(), double((1000.0 * seconds) / nbFrames));
-                    printf(maxFPS.c_str(), double(maxfps / seconds));
-        #endif
+                    logger::log(EVENT_LOG, fps);
+                    logger::log(EVENT_LOG, frametime);
+                    logger::log(EVENT_LOG, maxFPS);
+
                     nbFrames = 0;
                     lastTime += seconds;
 
@@ -1614,7 +1613,7 @@ namespace vk {
 
             vkResetCommandBuffer(standardCommandBuffers[currentSwapchainImage], 0);
             recordCommandBuffer(currentSwapchainImage);
-            
+
             uint32_t swapchainImageIndex;
             VkResult result = vkAcquireNextImageKHR(
                 logicalDevice,
