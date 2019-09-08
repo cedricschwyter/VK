@@ -70,9 +70,9 @@ int main() {
 
     vk::init();
 
-    //vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
+    vk::push("res/models/nanosuit/nanosuit.obj", &nanosuit);
     vk::push("res/models/rose/rose.obj", &rose);
-    //vk::push("res/models/floating_city/floating_city.obj", &city);
+    vk::push("res/models/floating_city/floating_city.obj", &city);
 
     return vk::run();
 

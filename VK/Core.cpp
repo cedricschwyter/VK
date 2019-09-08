@@ -321,7 +321,7 @@ namespace vk {
             ASSERT(cleanSwapchain(), "Failed to clean swapchain", VK_SC_SWAPCHAIN_CLEAN_ERROR);
 
             delete noImageSubstituent;
-
+            
             for (auto model : models) {
 
                 delete model;
@@ -2169,6 +2169,7 @@ namespace vk {
             }
             descriptorSets.clear();
             logger::log(EVENT_LOG, "Successfully destroyed descriptor sets");
+            delete noImageSubstituent;
             standardPipeline.destroy();
             ASSERT(createGraphicsPipelines(), "Failed to create graphics pipelines", VK_SC_GRAPHICS_PIPELINE_CREATION_ERROR);
             ASSERT(allocateCommandBuffers(), "Failed to allocate command buffers", VK_SC_COMMAND_BUFFER_ALLOCATION_ERROR);
