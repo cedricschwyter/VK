@@ -19,8 +19,9 @@ before_script:
   - sudo apt-get --only-upgrade --allow-unauthenticated install cmake
   - export CC=gcc-7
   - export CXX=g++-7
-  - sudo git clone https://github.com/g-truc/glm.git
-  - cd glm/
+  - sudo wget https://github.com/g-truc/glm/archive/0.9.9.5.tar.gz
+  - sudo tar -xzvf 0.9.9.5.tar.gz
+  - cd glm-0.9.9.5/
   - sudo cmake CMakeLists.txt
   - sudo make
   - sudo make install
