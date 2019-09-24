@@ -52,8 +52,7 @@ namespace vk {
 
         try {
 
-            return 
-            vk::core::run();
+            return vk::core::run();
 
         }
         catch (std::exception& e) {
