@@ -46,6 +46,5 @@ DescriptorSetLayout::DescriptorSetLayout(const std::vector< Descriptor >& descri
 DescriptorSetLayout::~DescriptorSetLayout() {
 
     vkDestroyDescriptorSetLayout(vk::core::logicalDevice, descriptorSetLayout, vk::core::allocator);
-    logger::log(EVENT_LOG, "Successfully destroyed descriptor set layout");
 
 }

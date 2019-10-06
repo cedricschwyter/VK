@@ -525,8 +525,7 @@ namespace vk {
             debugUtilsMessengerCreateInfo.sType                                     = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
             debugUtilsMessengerCreateInfo.messageSeverity                           = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
                                                                                     | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
-                                                                                    | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT
-                                                                                    | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT;
+                                                                                    | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
             debugUtilsMessengerCreateInfo.messageType                               = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT
                                                                                     | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
                                                                                     | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
@@ -2123,23 +2122,6 @@ namespace vk {
             lock.unlock();
 
             return vk::errorCodeBuffer;
-
-        }
-
-        void multithreadedNextSwapchainImage() {
-
-            renderThreads.resize(swapchainImages.size());
-
-            for (uint32_t i = 0; i < renderThreads.size(); i++) {
-            
-                renderThreads[i] = new std::thread([=]() {
-                    
-
-                    
-                });
-
-            
-            }
 
         }
 

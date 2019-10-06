@@ -43,6 +43,5 @@ DescriptorPool::DescriptorPool(const DescriptorSetLayout* layout_) {
 DescriptorPool::~DescriptorPool() {
 
     vkDestroyDescriptorPool(vk::core::logicalDevice, descriptorPool, vk::core::allocator);
-    logger::log(EVENT_LOG, "Successfully destroyed descriptor pool");
 
 }

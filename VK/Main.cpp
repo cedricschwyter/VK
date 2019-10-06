@@ -12,7 +12,7 @@
 namespace dp {
 
     const float         pi              = 3.1415926535897932384626f;        // 23 digits in decimal (rounded), which will equal ~32 digits in binary
-    const float         g               = 9.8060000000000000000000f;        // which is the maximum floating point precision I want to use here 
+    const float         g               = 0.9806000000000000000000f;        // which is the maximum floating point precision I want to use here 
 
     float               p1_length       = 10.0f;
     float               p2_length       = 10.0f;
@@ -26,8 +26,8 @@ namespace dp {
     glm::vec3           p1_pos          = glm::vec3(p1_length * glm::cos(glm::radians(p1_theta)), 0.0f, p1_length * glm::sin(glm::radians(p1_theta)));
     glm::vec3           p2_origin       = p1_pos;
     glm::vec3           p2_pos          = glm::vec3(p2_length * glm::cos(glm::radians(p2_theta)), 0.0f, p2_length * glm::sin(glm::radians(p2_theta)));
-    float               p1_mass         = 20.0f;
-    float               p2_mass         = 20.0f;
+    float               p1_mass         = 0.002f;
+    float               p2_mass         = 0.002f;
     float               delta_p1_vel    = -0.000001f;
     float               delta_p2_vel    = -0.000001f;
     std::mutex          p1_pos_mutex;
@@ -101,7 +101,8 @@ namespace dp {
         std::scoped_lock< std::mutex > lock(p1_pos_mutex);
         glm::mat4 model;
         model = glm::translate(glm::mat4(1.0f), p1_pos);
-        model = glm::scale(model, glm::vec3(p1_mass));
+        model = glm::scale(model, glm::vec3(p1_mass / 10.0f));
+        std::cout << p1_pos.x << " " << p1_pos.y << " " << p1_pos.z << std::endl;
 
         return model;
 
@@ -116,7 +117,7 @@ namespace dp {
 
         std::scoped_lock< std::mutex > lock(p2_pos_mutex);
         glm::mat4 model;
-        model = glm::translate(glm::mat4(1.0f), p2_pos);
+        model = glm::translate(glm::mat4(1.0f), p2_pos / 10.0f);
         model = glm::scale(model, glm::vec3(p2_mass));
 
         return model;
@@ -152,9 +153,9 @@ namespace dp {
         p2_acc = getAccP2();
 
         p1_origin       = ORIGIN;
-        p1_pos          = glm::vec3(p1_length * glm::cos(glm::radians(p1_theta)), 0.0f, p1_length * glm::sin(glm::radians(p1_theta)));
+        p1_pos          = glm::vec3(p1_length / 10.0f * glm::cos(glm::radians(p1_theta)), 0.0f, p1_length / 10.0f * glm::sin(glm::radians(p1_theta)));
         p2_origin       = p1_pos;
-        p2_pos          = glm::vec3(p2_length * glm::cos(glm::radians(p2_theta)), 0.0f, p2_length * glm::sin(glm::radians(p2_theta)));
+        p2_pos          = glm::vec3(p2_length / 10.0f * glm::cos(glm::radians(p2_theta)), 0.0f, p2_length / 10.0f * glm::sin(glm::radians(p2_theta)));
 
         p1_vel          += p1_acc;
         p2_vel          += p2_acc;
