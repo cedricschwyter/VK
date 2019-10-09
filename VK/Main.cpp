@@ -23,9 +23,9 @@ namespace dp {
     float               p1_acc          = 0.0f;
     float               p2_acc          = 0.0f;
     glm::vec3           p1_origin       = ORIGIN;
-    glm::vec3           p1_pos          = glm::vec3(p1_length * glm::cos(glm::radians(p1_theta)), 0.0f, p1_length * glm::sin(glm::radians(p1_theta)));
+    glm::vec3           p1_pos          = glm::vec3(p1_length * glm::cos(glm::radians(p1_theta)), p1_length * glm::sin(glm::radians(p1_theta)), 0.0f);
     glm::vec3           p2_origin       = p1_pos;
-    glm::vec3           p2_pos          = glm::vec3(p2_length * glm::cos(glm::radians(p2_theta)), 0.0f, p2_length * glm::sin(glm::radians(p2_theta)));
+    glm::vec3           p2_pos          = glm::vec3(p2_length * glm::cos(glm::radians(p2_theta)), p2_length * glm::sin(glm::radians(p2_theta)), 0.0f);
     float               p1_mass         = 0.002f;
     float               p2_mass         = 0.002f;
     float               delta_p1_vel    = -0.000001f;
@@ -147,22 +147,30 @@ namespace dp {
     */
     void computePendulumState() {
 
-        std::scoped_lock< std::mutex > p1lock(p1_pos_mutex);
-        std::scoped_lock< std::mutex > p2lock(p2_pos_mutex);
-        p1_acc = getAccP1();
-        p2_acc = getAccP2();
+        double          now       = glfwGetTime();
+        static double   last      = 0.0;
 
-        p1_origin       = ORIGIN;
-        p1_pos          = glm::vec3(p1_length / 10.0f * glm::cos(glm::radians(p1_theta)), 0.0f, p1_length / 10.0f * glm::sin(glm::radians(p1_theta)));
-        p2_origin       = p1_pos;
-        p2_pos          = glm::vec3(p2_length / 10.0f * glm::cos(glm::radians(p2_theta)), 0.0f, p2_length / 10.0f * glm::sin(glm::radians(p2_theta)));
+        if (now - last >= 1 / 60.0) {
 
-        p1_vel          += p1_acc;
-        p2_vel          += p2_acc;
-        p1_theta        += p1_vel;
-        p2_theta        += p2_vel;
-        p1_vel          += delta_p1_vel;
-        p2_vel          += delta_p2_vel;
+            std::scoped_lock< std::mutex > p1lock(p1_pos_mutex);
+            std::scoped_lock< std::mutex > p2lock(p2_pos_mutex);
+            p1_acc = getAccP1();
+            p2_acc = getAccP2();
+
+            p1_origin       = ORIGIN;
+            p1_pos          = glm::vec3(p1_length / 10.0f * glm::cos(glm::radians(p1_theta)), p1_length / 10.0f * glm::sin(glm::radians(p1_theta)), 0.0f);
+            p2_origin       = p1_pos;
+            p2_pos          = glm::vec3(p2_length / 10.0f * glm::cos(glm::radians(p2_theta)), p2_length / 10.0f * glm::sin(glm::radians(p2_theta)), 0.0f);
+
+            p1_vel          += p1_acc;
+            p2_vel          += p2_acc;
+            p1_theta        += p1_vel;
+            p2_theta        += p2_vel;
+            p1_vel          += delta_p1_vel;
+            p2_vel          += delta_p2_vel;
+            last            = now;
+
+        }
 
     }
 
