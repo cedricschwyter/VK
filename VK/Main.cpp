@@ -26,8 +26,8 @@ namespace dp {
     glm::vec3           p1_pos          = glm::vec3(p1_length * glm::cos(glm::radians(p1_theta)), p1_length * glm::sin(glm::radians(p1_theta)), 0.0f);
     glm::vec3           p2_origin       = p1_pos;
     glm::vec3           p2_pos          = glm::vec3(p2_length * glm::cos(glm::radians(p2_theta)), p2_length * glm::sin(glm::radians(p2_theta)), 0.0f);
-    float               p1_mass         = 0.002f;
-    float               p2_mass         = 0.002f;
+    float               p1_mass         = 1.0f;
+    float               p2_mass         = 1.0f;
     float               delta_p1_vel    = -0.000001f;
     float               delta_p2_vel    = -0.000001f;
     std::mutex          p1_pos_mutex;
@@ -73,6 +73,9 @@ namespace dp {
     glm::mat4 stick1() {
 
         glm::mat4 model;
+        model = glm::translate(glm::mat4(1.0f), ORIGIN);
+        model = glm::scale(model, glm::vec3(0.0f, 0.0f, p1_length));
+        model = glm::rotate(model, glm::radians(p1_theta), glm::vec3(1.0f, 0.0f, 0.0f));
 
         return model;
 
@@ -85,10 +88,14 @@ namespace dp {
     */
     glm::mat4 stick2() {
 
+        std::scoped_lock< std::mutex > lock(p1_pos_mutex);
         glm::mat4 model;
+        model = glm::translate(glm::mat4(1.0f), p1_pos);
+        model = glm::scale(model, glm::vec3(0.0f, 0.0f, p2_length));
+        model = glm::rotate(model, glm::radians(p2_theta), glm::vec3(1.0f, 0.0f, 0.0f));
 
         return model;
-
+        
     }
 
     /**
@@ -101,8 +108,7 @@ namespace dp {
         std::scoped_lock< std::mutex > lock(p1_pos_mutex);
         glm::mat4 model;
         model = glm::translate(glm::mat4(1.0f), p1_pos);
-        model = glm::scale(model, glm::vec3(p1_mass / 10.0f));
-        std::cout << p1_pos.x << " " << p1_pos.y << " " << p1_pos.z << std::endl;
+        model = glm::scale(model, glm::vec3(p1_mass / 100.0f));
 
         return model;
 
@@ -117,8 +123,8 @@ namespace dp {
 
         std::scoped_lock< std::mutex > lock(p2_pos_mutex);
         glm::mat4 model;
-        model = glm::translate(glm::mat4(1.0f), p2_pos / 10.0f);
-        model = glm::scale(model, glm::vec3(p2_mass));
+        model = glm::translate(glm::mat4(1.0f), p2_pos);
+        model = glm::scale(model, glm::vec3(p2_mass / 100.0f));
 
         return model;
 
@@ -135,8 +141,8 @@ namespace dp {
 
         vk::push("res/models/tennisball/Tennis Ball-1.obj", &ball1);
         vk::push("res/models/tennisball/Tennis Ball-1.obj", &ball2);
-        //vk::push("res/models/stick/lathi.obj", ST_STANDARD, &stick1);
-        //vk::push("res/models/stick/lathi.obj", ST_STANDARD, &stick2);
+        vk::push("res/models/stick/lathi.obj", &stick1);
+        vk::push("res/models/stick/lathi.obj", &stick2);
 
         return vk::run();
 
@@ -150,7 +156,7 @@ namespace dp {
         double          now       = glfwGetTime();
         static double   last      = 0.0;
 
-        if (now - last >= 1 / 60.0) {
+        if (now - last >= 1 / 60.0f) {
 
             std::scoped_lock< std::mutex > p1lock(p1_pos_mutex);
             std::scoped_lock< std::mutex > p2lock(p2_pos_mutex);
@@ -158,9 +164,9 @@ namespace dp {
             p2_acc = getAccP2();
 
             p1_origin       = ORIGIN;
-            p1_pos          = glm::vec3(p1_length / 10.0f * glm::cos(glm::radians(p1_theta)), p1_length / 10.0f * glm::sin(glm::radians(p1_theta)), 0.0f);
+            p1_pos          = glm::vec3(p1_length * glm::cos(glm::radians(p1_theta)), p1_length * glm::sin(glm::radians(p1_theta)), 0.0f);
             p2_origin       = p1_pos;
-            p2_pos          = glm::vec3(p2_length / 10.0f * glm::cos(glm::radians(p2_theta)), p2_length / 10.0f * glm::sin(glm::radians(p2_theta)), 0.0f);
+            p2_pos          = glm::vec3(p2_length * glm::cos(glm::radians(p2_theta)), p2_length * glm::sin(glm::radians(p2_theta)), 0.0f);
 
             p1_vel          += p1_acc;
             p2_vel          += p2_acc;
