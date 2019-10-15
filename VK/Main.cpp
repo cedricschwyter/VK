@@ -12,12 +12,12 @@
 namespace dp {
 
     const float         pi              = 3.1415926535897932384626f;        // 23 digits in decimal (rounded), which will equal ~32 digits in binary
-    const float         g               = 0.9806000000000000000000f;        // which is the maximum floating point precision I want to use here 
+    const float         g               = 9.806000000000000000000f;        // which is the maximum floating point precision I want to use here 
 
     float               p1_length       = 10.0f;
     float               p2_length       = 10.0f;
-    float               p1_theta        = pi / 4.0f;
-    float               p2_theta        = pi / 4.0f;
+    float               p1_theta        = pi;
+    float               p2_theta        = pi;
     float               p1_vel          = 0.1f;
     float               p2_vel          = 0.1f;
     float               p1_acc          = 0.0f;
@@ -73,9 +73,9 @@ namespace dp {
     glm::mat4 stick1() {
 
         glm::mat4 model;
-        model = glm::translate(glm::mat4(1.0f), ORIGIN);
-        model = glm::scale(model, glm::vec3(0.0f, 0.0f, p1_length));
-        model = glm::rotate(model, glm::radians(p1_theta), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::mat4(1.0f);
+        model = glm::scale(model, glm::vec3(p1_length));
+        model = glm::rotate(model, glm::radians(p1_theta), glm::vec3(0.0f, 0.0f, 1.0f));
 
         return model;
 
@@ -91,8 +91,8 @@ namespace dp {
         std::scoped_lock< std::mutex > lock(p1_pos_mutex);
         glm::mat4 model;
         model = glm::translate(glm::mat4(1.0f), p1_pos);
-        model = glm::scale(model, glm::vec3(0.0f, 0.0f, p2_length));
-        model = glm::rotate(model, glm::radians(p2_theta), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(p2_length));
+        model = glm::rotate(model, glm::radians(p2_theta), glm::vec3(0.0f, 0.0f, 1.0f));
 
         return model;
         
@@ -105,9 +105,9 @@ namespace dp {
     */
     glm::mat4 ball1() {
 
-        std::scoped_lock< std::mutex > lock(p1_pos_mutex);
         glm::mat4 model;
-        model = glm::translate(glm::mat4(1.0f), p1_pos);
+        model = glm::translate(glm::mat4(1.0f), glm::vec3(p1_length, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(p1_theta), glm::vec3(0.0f, 0.0f, 1.0f));
         model = glm::scale(model, glm::vec3(p1_mass / 100.0f));
 
         return model;
@@ -121,9 +121,12 @@ namespace dp {
     */
     glm::mat4 ball2() {
 
-        std::scoped_lock< std::mutex > lock(p2_pos_mutex);
+        std::scoped_lock< std::mutex > lock(p1_pos_mutex);
         glm::mat4 model;
-        model = glm::translate(glm::mat4(1.0f), p2_pos);
+        model = glm::translate(glm::mat4(1.0f), glm::vec3(p1_length, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(p1_theta), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::translate(model, glm::vec3(p2_length, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(p2_theta), glm::vec3(0.0f, 0.0f, 1.0f));
         model = glm::scale(model, glm::vec3(p2_mass / 100.0f));
 
         return model;
