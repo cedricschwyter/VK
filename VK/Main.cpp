@@ -19,7 +19,7 @@ namespace dp {
     float               p1_theta        = pi;
     float               p2_theta        = pi;
     float               p1_vel          = 0.1f;
-    float               p2_vel          = 0.1f;
+    float               p2_vel          = 1.1f;
     float               p1_acc          = 0.0f;
     float               p2_acc          = 0.0f;
     glm::vec3           p1_origin       = ORIGIN;
@@ -28,8 +28,10 @@ namespace dp {
     glm::vec3           p2_pos          = glm::vec3(p2_length * glm::cos(glm::radians(p2_theta)), p2_length * glm::sin(glm::radians(p2_theta)), 0.0f);
     float               p1_mass         = 1.0f;
     float               p2_mass         = 1.0f;
-    float               delta_p1_vel    = -0.000001f;
-    float               delta_p2_vel    = -0.000001f;
+    float               emax            = 0.0f;
+    float               etot            = 0.0f;
+    float               delta_p1_vel    = 0.001f;
+    float               delta_p2_vel    = 0.001f;
     std::mutex          p1_pos_mutex;
     std::mutex          p2_pos_mutex;
 
@@ -63,6 +65,39 @@ namespace dp {
 
         return temp;
 
+    }
+
+    /**
+        Returns the maximum energy of the system
+
+        @return     Returns a float representing the max allowed energy total of the douple pendulum
+    */
+    float getEmax() {
+    
+        float temp = 2.0f * g * (p1_mass * p1_length + p2_mass * (p1_length + p2_length)) + 
+            0.5f * p1_mass * p1_vel * p1_vel + 0.5f * p2_mass * p2_vel * p2_vel;
+
+        std::cout << "EMax: " << temp << std::endl;
+
+        return temp;
+    
+    }
+
+    /**
+        Returns the total energy of the system
+
+        @return     Returns a float representing the energy of the douple pendulum
+    */
+    float getEtot() {
+    
+        float temp = g * (p1_mass * (p1_length * glm::cos(glm::radians(p1_theta)) + p1_length) + 
+            p2_mass * (p1_length * glm::cos(glm::radians(p1_theta)) + 
+            p2_length * glm::cos(glm::radians(p2_theta)) + p1_length + p2_length)) + 
+            0.5f * p1_mass * p1_vel * p1_vel + 0.5f * p2_mass * p2_vel * p2_vel;
+        std::cout << temp << std::endl;
+
+        return temp;
+    
     }
 
     /**
@@ -158,6 +193,8 @@ namespace dp {
 
         double          now       = glfwGetTime();
         static double   last      = 0.0;
+        static float    emax      = getEmax();
+        dp::emax                  = emax;
 
         if (now - last >= 1 / 60.0f) {
 
@@ -165,6 +202,7 @@ namespace dp {
             std::scoped_lock< std::mutex > p2lock(p2_pos_mutex);
             p1_acc = getAccP1();
             p2_acc = getAccP2();
+            etot = getEtot();
 
             p1_origin       = ORIGIN;
             p1_pos          = glm::vec3(p1_length * glm::cos(glm::radians(p1_theta)), p1_length * glm::sin(glm::radians(p1_theta)), 0.0f);
@@ -175,8 +213,8 @@ namespace dp {
             p2_vel          += p2_acc;
             p1_theta        += p1_vel;
             p2_theta        += p2_vel;
-            p1_vel          += delta_p1_vel;
-            p2_vel          += delta_p2_vel;
+            //p1_vel          = p1_vel < 0.0f ? p1_vel + delta_p1_vel : p1_vel - delta_p1_vel;
+            //p2_vel          = p2_vel < 0.0f ? p2_vel + delta_p2_vel : p2_vel - delta_p2_vel;
             last            = now;
 
         }
