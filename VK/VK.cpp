@@ -25,6 +25,7 @@ namespace vk {
     const double                        SPEED                       = 2.0;
     const double                        SENS                        = 0.1;
     const double                        FOV                         = 45.0;
+    glm::vec3                           centerCameraTarget          = ORIGIN;
 
     VkCommandPool                       graphicsCommandPool         = VK_NULL_HANDLE;
     VkQueue                             graphicsQueue               = VK_NULL_HANDLE;
@@ -37,6 +38,8 @@ namespace vk {
     std::mutex                          commandBufferMutex;
 
     std::mutex                          loadingMutex;
+
+    void                                (*kipCallback)(GLFWwindow*);
 
     VK_STATUS_CODE init() {
 
@@ -774,6 +777,18 @@ namespace vk {
             std::numeric_limits< uint64_t >::max()
             );
         vkResetFences(vk::core::logicalDevice, 1, &fence);
+    
+    }
+
+    void keyboardInputCallback(GLFWwindow* window_) {
+    
+        (*kipCallback)(window_);
+    
+    }
+
+    void setKeyboardInputCallback(void (*kipCallback_)(GLFWwindow* window_)) {
+    
+        kipCallback = kipCallback_;
     
     }
 

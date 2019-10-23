@@ -79,7 +79,7 @@ void CenterCamera::updateCameraVectors() {
     tempPos.y = static_cast< float >(glm::sin(glm::radians(pitch)));
     tempPos.z = static_cast< float >(glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch)));
 
-    camPos = radius * glm::normalize(tempPos);
+    camPos = camTar + radius * glm::normalize(tempPos);
     camFront = glm::normalize(camTar - camPos);
 
     camRight = glm::normalize(glm::cross(camFront, worldUp));

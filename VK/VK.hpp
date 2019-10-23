@@ -40,6 +40,7 @@ namespace vk {
     extern const double                         SPEED;
     extern const double                         SENS;
     extern const double                         FOV;
+    extern glm::vec3                            centerCameraTarget;
 
     extern VkCommandPool                        graphicsCommandPool;
     extern VkQueue                              graphicsQueue;
@@ -52,6 +53,7 @@ namespace vk {
     extern std::mutex                           commandBufferMutex;
 
     extern std::mutex                           loadingMutex;
+    extern void                                 (*kipCallback)(GLFWwindow*);
 
     /**
         Initializes the VKEngine object
@@ -307,6 +309,20 @@ namespace vk {
         @param      queue_      The queue to wait on
     */
     void waitForQueue(Queue queue_);
+
+    /**
+        Calls the keyboard input callback function defined by the user
+
+        @param      window_     A pointer to the GLFWwindow of the application
+    */
+    void keyboardInputCallback(GLFWwindow* window_);
+
+    /**
+        Sets the keyboard input callback
+
+        @param      kipCallback_    The functionpointer to the callback function
+    */
+    void setKeyboardInputCallback(void (*kipCallback_)(GLFWwindow* window_));
 
 }
 #endif  // VK_HPP

@@ -12,17 +12,17 @@
 namespace dp {
 
     const float         pi              = 3.1415926535897932384626f;        // 23 digits in decimal (rounded), which will equal ~32 digits in binary
-    const float         g               = 9.806000000000000000000f;        // which is the maximum floating point precision I want to use here 
+    const float         g               = 0.9806000000000000000000f;        // which is the maximum floating point precision I want to use here 
 
-    float               p1_length       = 10.0f;
-    float               p2_length       = 10.0f;
+    float               p1_length       = 1.0f;
+    float               p2_length       = 1.0f;
     float               p1_theta        = pi;
     float               p2_theta        = pi;
-    float               p1_vel          = 0.1f;
+    float               p1_vel          = 1.0f;
     float               p2_vel          = 0.1f;
     float               p1_acc          = 0.0f;
     float               p2_acc          = 0.0f;
-    glm::vec3           p1_origin       = ORIGIN;
+    glm::vec3           p1_origin       = glm::vec3(0.0f, -1.0f, 4.0f);
     glm::vec3           p1_pos          = glm::vec3(p1_length * glm::cos(glm::radians(p1_theta)), p1_length * glm::sin(glm::radians(p1_theta)), 0.0f);
     glm::vec3           p2_origin       = p1_pos;
     glm::vec3           p2_pos          = glm::vec3(p2_length * glm::cos(glm::radians(p2_theta)), p2_length * glm::sin(glm::radians(p2_theta)), 0.0f);
@@ -30,10 +30,12 @@ namespace dp {
     float               p2_mass         = 0.002f;
     float               emax            = 0.0f;
     float               etot            = 0.0f;
-    float               delta_p1_vel    = 0.0001f;
-    float               delta_p2_vel    = 0.0001f;
+    float               delta_p1_vel    = 0.1f;
+    float               delta_p2_vel    = 0.1f;
     std::mutex          p1_pos_mutex;
     std::mutex          p2_pos_mutex;
+
+    bool                paused          = false;
 
     /**
         Returns the nominal acceleration of p1
@@ -105,8 +107,8 @@ namespace dp {
     glm::mat4 stick1() {
 
         glm::mat4 model;
-        model = glm::mat4(1.0f);
-        model = glm::scale(model, glm::vec3(p1_length / 90.0f));
+        model = glm::translate(glm::mat4(1.0f), p1_origin);
+        model = glm::scale(model, glm::vec3(p1_length / 8.5f));
         model = glm::rotate(model, glm::radians(p1_theta), glm::vec3(0.0f, 0.0f, 1.0f));
 
         return model;
@@ -122,8 +124,8 @@ namespace dp {
 
         std::scoped_lock< std::mutex > lock(p1_pos_mutex);
         glm::mat4 model;
-        model = glm::translate(glm::mat4(1.0f), p1_pos);
-        model = glm::scale(model, glm::vec3(p2_length / 90.0f));
+        model = glm::translate(glm::mat4(1.0f), p1_origin + p1_pos);
+        model = glm::scale(model, glm::vec3(p2_length / 8.5f));
         model = glm::rotate(model, glm::radians(p2_theta), glm::vec3(0.0f, 0.0f, 1.0f));
 
         return model;
@@ -139,7 +141,8 @@ namespace dp {
 
         std::scoped_lock< std::mutex > lock(p1_pos_mutex);
         glm::mat4 model;
-        model = glm::translate(glm::mat4(1.0f), p1_pos);
+        model = glm::translate(glm::mat4(1.0f), p1_origin + p1_pos);
+        model = glm::rotate(model, glm::radians(p1_theta), glm::vec3(0.0f, 0.0f, 1.0f));
         model = glm::scale(model, glm::vec3(p1_mass));
 
         return model;
@@ -156,10 +159,62 @@ namespace dp {
         std::scoped_lock< std::mutex > p1lock(p1_pos_mutex);
         std::scoped_lock< std::mutex > p2lock(p2_pos_mutex);
         glm::mat4 model;
-        model = glm::translate(glm::mat4(1.0f), p1_pos + p2_pos);
+        model = glm::translate(glm::mat4(1.0f), p2_origin + p2_pos);
+        model = glm::rotate(model, glm::radians(p2_theta), glm::vec3(0.0f, 0.0f, 1.0f));
         model = glm::scale(model, glm::vec3(p2_mass));
 
         return model;
+
+    }
+
+    /**
+        Serves as keyboard input callback
+    */
+    void keyboardInput(GLFWwindow* window_) {
+
+        if (glfwGetKey(window_, GLFW_KEY_SPACE) == GLFW_PRESS) {
+
+            static double   start   = glfwGetTime() - 1.0;      // -1.0 prevents bug for first time pause
+            double          now     = glfwGetTime();
+
+            if (now - start > 0.5) paused = !paused;
+            start = glfwGetTime();
+
+        }
+
+        if (glfwGetKey(window_, GLFW_KEY_T) == GLFW_PRESS) {
+            
+            if (paused) {
+
+                p1_theta                += pi / 50.0f;
+
+                p1_acc                  = getAccP1();
+                p2_acc                  = getAccP2();
+                p1_pos                  = glm::vec3(p1_length * glm::cos(glm::radians(p1_theta + 90.0f)), p1_length * glm::sin(glm::radians(p1_theta + 90.0f)), 0.0f);
+                p2_origin               = p1_origin + p1_pos;
+                p2_pos                  = glm::vec3(p2_length * glm::cos(glm::radians(p2_theta + 90.0f)), p2_length * glm::sin(glm::radians(p2_theta + 90.0f)), 0.0f);
+                dp::emax                = getEmax();
+
+            }
+        
+        }
+
+        if (glfwGetKey(window_, GLFW_KEY_B) == GLFW_PRESS) {
+
+            if (paused) {
+
+                p2_theta                += pi / 50.0f;
+
+                p1_acc                  = getAccP1();
+                p2_acc                  = getAccP2();
+                p1_pos                  = glm::vec3(p1_length * glm::cos(glm::radians(p1_theta + 90.0f)), p1_length * glm::sin(glm::radians(p1_theta + 90.0f)), 0.0f);
+                p2_origin               = p1_origin + p1_pos;
+                p2_pos                  = glm::vec3(p2_length * glm::cos(glm::radians(p2_theta + 90.0f)), p2_length * glm::sin(glm::radians(p2_theta + 90.0f)), 0.0f);
+                dp::emax                = getEmax();
+
+            }
+
+        }
 
     }
 
@@ -177,6 +232,8 @@ namespace dp {
         vk::push("res/models/stick/lathi.obj", &stick1);
         vk::push("res/models/stick/lathi.obj", &stick2);
 
+        vk::setKeyboardInputCallback(&keyboardInput);
+
         return vk::run();
 
     }
@@ -186,10 +243,25 @@ namespace dp {
     */
     void computePendulumState() {
 
+        static bool onetime = true;
+        if (onetime) {
+        
+            emax = getEmax();
+            onetime = false;
+
+        }
+
         double          now       = glfwGetTime();
         static double   last      = 0.0;
-        static float    emax      = getEmax();
-        dp::emax                  = emax;
+        vk::centerCameraTarget    = glm::vec3(p1_origin.x, p1_origin.y + 0.6f, p1_origin.z);
+
+        if (paused) {
+
+            p1_vel = 0.0f;
+            p2_vel = 0.0f;
+            return;
+
+        }
 
         if (now - last >= 1 / 60.0f) {
 
@@ -199,17 +271,21 @@ namespace dp {
             p2_acc = getAccP2();
             etot = getEtot();
 
-            p1_origin       = ORIGIN;
-            p1_pos          = glm::vec3(p1_length / 10.0f * glm::cos(glm::radians(p1_theta + 90.0f)), p1_length / 10.0f * glm::sin(glm::radians(p1_theta + 90.0f)), 0.0f);
-            p2_origin       = p1_pos;
-            p2_pos          = glm::vec3(p2_length / 10.0f * glm::cos(glm::radians(p2_theta + 90.0f)), p2_length / 10.0f * glm::sin(glm::radians(p2_theta + 90.0f)), 0.0f);
+            p1_pos          = glm::vec3(p1_length * glm::cos(glm::radians(p1_theta + 90.0f)), p1_length * glm::sin(glm::radians(p1_theta + 90.0f)), 0.0f);
+            p2_origin       = p1_origin + p1_pos;
+            p2_pos          = glm::vec3(p2_length * glm::cos(glm::radians(p2_theta + 90.0f)), p2_length * glm::sin(glm::radians(p2_theta + 90.0f)), 0.0f);
 
             p1_vel          += p1_acc;
             p2_vel          += p2_acc;
             p1_theta        += p1_vel;
             p2_theta        += p2_vel;
-            p1_vel          = p1_vel < 0.0f ? p1_vel + delta_p1_vel : p1_vel - delta_p1_vel;
-            p2_vel          = p2_vel < 0.0f ? p2_vel + delta_p2_vel : p2_vel - delta_p2_vel;
+            while (etot > emax) {
+
+                p1_vel          = p1_vel < 0.0f ? p1_vel + delta_p1_vel : p1_vel - delta_p1_vel;
+                p2_vel          = p2_vel < 0.0f ? p2_vel + delta_p2_vel : p2_vel - delta_p2_vel;
+                etot = getEtot();
+
+            }
             last            = now;
 
         }

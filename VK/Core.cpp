@@ -2003,7 +2003,7 @@ namespace vk {
                     else {
 
                         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-                        camera = new CenterCamera(ORIGIN, 5.0f);
+                        camera = new CenterCamera(vk::centerCameraTarget, 5.0f);
                         pressed = true;
 
                     }
@@ -2013,6 +2013,7 @@ namespace vk {
 
             }
             camera->processKeyboardInput(window);
+            vk::keyboardInputCallback(window);
 
         }
 
