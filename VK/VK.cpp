@@ -19,7 +19,7 @@ namespace vk {
     const unsigned int                  HEIGHT                      = 720;
     const char*                         TITLE                       = "VK by D3PSI";
     const unsigned int                  MAX_IN_FLIGHT_FRAMES        = 3;
-    const double                        YAW                         = 0.0;
+    const double                        YAW                         = 90.0;
     const double                        PITCH                       = 0.0;
     const double                        ROLL                        = 0.0;
     const double                        SPEED                       = 2.0;

@@ -16,7 +16,7 @@ namespace dp {
 
     float               p1_length       = 1.0f;
     float               p2_length       = 1.0f;
-    float               p1_theta        = pi;
+    float               p1_theta        = pi / 4.0f;
     float               p2_theta        = pi;
     float               p1_vel          = 1.0f;
     float               p2_vel          = 0.1f;
@@ -30,8 +30,8 @@ namespace dp {
     float               p2_mass         = 0.002f;
     float               emax            = 0.0f;
     float               etot            = 0.0f;
-    float               delta_p1_vel    = 0.1f;
-    float               delta_p2_vel    = 0.1f;
+    float               delta_p1_vel    = 0.00001f;
+    float               delta_p2_vel    = 0.00001f;
     std::mutex          p1_pos_mutex;
     std::mutex          p2_pos_mutex;
 
@@ -168,7 +168,24 @@ namespace dp {
     }
 
     /**
+        Returns the model matrix for the environment model
+
+        @return     Returns a glm::mat4
+    */
+    glm::mat4 environment() {
+    
+        glm::mat4 model;
+        model           = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+        model           = glm::translate(model, glm::vec3(0.0f, 150.0f, 0.0f));
+        model[1][1]     *= -1.0f;
+        return model;
+
+    }
+
+    /**
         Serves as keyboard input callback
+    
+        @param      window_     A pointer to the GLFWwindow
     */
     void keyboardInput(GLFWwindow* window_) {
 
@@ -188,12 +205,14 @@ namespace dp {
 
                 p1_theta                += pi / 50.0f;
 
+                p1_vel                  = 0.0f;
+                p2_vel                  = 0.0f;
                 p1_acc                  = getAccP1();
                 p2_acc                  = getAccP2();
                 p1_pos                  = glm::vec3(p1_length * glm::cos(glm::radians(p1_theta + 90.0f)), p1_length * glm::sin(glm::radians(p1_theta + 90.0f)), 0.0f);
                 p2_origin               = p1_origin + p1_pos;
                 p2_pos                  = glm::vec3(p2_length * glm::cos(glm::radians(p2_theta + 90.0f)), p2_length * glm::sin(glm::radians(p2_theta + 90.0f)), 0.0f);
-                dp::emax                = getEmax();
+                emax                    = getEmax();
 
             }
         
@@ -205,12 +224,14 @@ namespace dp {
 
                 p2_theta                += pi / 50.0f;
 
+                p1_vel                  = 0.0f;
+                p2_vel                  = 0.0f;
                 p1_acc                  = getAccP1();
                 p2_acc                  = getAccP2();
                 p1_pos                  = glm::vec3(p1_length * glm::cos(glm::radians(p1_theta + 90.0f)), p1_length * glm::sin(glm::radians(p1_theta + 90.0f)), 0.0f);
                 p2_origin               = p1_origin + p1_pos;
                 p2_pos                  = glm::vec3(p2_length * glm::cos(glm::radians(p2_theta + 90.0f)), p2_length * glm::sin(glm::radians(p2_theta + 90.0f)), 0.0f);
-                dp::emax                = getEmax();
+                emax                    = getEmax();
 
             }
 
@@ -231,6 +252,7 @@ namespace dp {
         vk::push("res/models/tennisball/Tennis Ball-1.obj", &ball2);
         vk::push("res/models/stick/lathi.obj", &stick1);
         vk::push("res/models/stick/lathi.obj", &stick2);
+        vk::push("res/models/floating_city/floating_city.obj", &environment);
 
         vk::setKeyboardInputCallback(&keyboardInput);
 
@@ -267,9 +289,9 @@ namespace dp {
 
             std::scoped_lock< std::mutex > p1lock(p1_pos_mutex);
             std::scoped_lock< std::mutex > p2lock(p2_pos_mutex);
-            p1_acc = getAccP1();
-            p2_acc = getAccP2();
-            etot = getEtot();
+            p1_acc          = getAccP1();
+            p2_acc          = getAccP2();
+            etot            = getEtot();
 
             p1_pos          = glm::vec3(p1_length * glm::cos(glm::radians(p1_theta + 90.0f)), p1_length * glm::sin(glm::radians(p1_theta + 90.0f)), 0.0f);
             p2_origin       = p1_origin + p1_pos;
@@ -281,10 +303,10 @@ namespace dp {
             p2_theta        += p2_vel;
             while (etot > emax) {
 
-                p1_vel          = p1_vel < 0.0f ? p1_vel + delta_p1_vel : p1_vel - delta_p1_vel;
-                p2_vel          = p2_vel < 0.0f ? p2_vel + delta_p2_vel : p2_vel - delta_p2_vel;
-                etot = getEtot();
-
+                p1_vel      = p1_vel < 0.0f ? p1_vel + delta_p1_vel : p1_vel - delta_p1_vel;
+                p2_vel      = p2_vel < 0.0f ? p2_vel + delta_p2_vel : p2_vel - delta_p2_vel;
+                etot        = getEtot();
+            
             }
             last            = now;
 
