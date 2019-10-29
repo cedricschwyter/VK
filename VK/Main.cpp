@@ -30,8 +30,10 @@ namespace dp {
     float               p2_mass         = 0.002f;
     float               emax            = 0.0f;
     float               etot            = 0.0f;
-    float               delta_p1_vel    = 0.00001f;
-    float               delta_p2_vel    = 0.00001f;
+    float               lmax            = 0.0f;
+    float               ltot            = 0.0f;
+    float               delta_p1_vel    = 0.0f;
+    float               delta_p2_vel    = 0.0f;
     std::mutex          p1_pos_mutex;
     std::mutex          p2_pos_mutex;
 
@@ -97,6 +99,76 @@ namespace dp {
 
         return temp;
     
+    }
+
+    /**
+        Returns the maximum angular momentum of the system
+
+        @return     Returns a float representing the max allowed angular momentum total of the douple pendulum
+    */
+    float getLmax() {
+
+        float temp = p1_mass * p1_vel * ((2.0f / 5.0f) * p1_mass + p1_length * p1_length) + 
+            p2_mass * p2_vel * ((2.0f / 5.0f) * p2_mass + p2_length * p2_length);
+
+        return temp;
+
+    }
+
+    /**
+        Returns the total angular momentum of the system
+
+        @return     Returns a float representing the angular momentum of the douple pendulum
+    */
+    float getLtot() {
+
+        return getLmax();
+
+    }
+
+    /**
+        Returns the calculated delta_p1_vel
+
+        @return     Returns the new delta_p1_vel
+    */
+    float getDeltaP1Vel() {
+
+        float temp = glm::sqrt((2.0f * g * (5.0f * p2_length * p2_length + 2.0f * p2_mass) * 
+            (p1_length * (p1_mass + p2_mass) * glm::cos(glm::radians(p1_theta)) + p2_length * p2_mass * 
+            glm::cos(glm::radians(p2_theta)) + 10.0f * p2_length * p2_length * (-emax + g * (p1_length * 
+            (p1_mass + p2_mass) + p2_length * p2_mass)) + 5.0f * lmax + 4.0f * p2_mass * (-emax + g * 
+            (p1_length * (p1_mass + p2_mass) + p2_length + p2_mass)))) / 
+            (p1_mass * (5.0f * p1_length * p1_length - 5.0f * p2_length + 2.0f * p1_mass - 2.0f * p2_mass)));
+
+        temp = glm::abs(temp);
+
+        float delta = temp - p1_vel;
+        std::cout << delta << std::endl;
+        
+        return glm::abs(delta);
+
+    }
+
+    /**
+        Returns the calculated delta_p2_vel
+
+        @return     Returns the new delta_p2_vel
+    */
+    float getDeltaP2Vel() {
+
+        float temp = glm::sqrt((2.0f * g * (5.0f * p1_length * p1_length + 2.0f * p1_mass) * 
+            (p1_length * (p1_mass + p2_mass) * glm::cos(glm::radians(p1_theta)) + p2_length * p2_mass * 
+            glm::cos(glm::radians(p2_theta)) + 10.0f * p1_length * p1_length * (-emax + g * (p1_length * 
+            (p1_mass + p2_mass) + p2_length * p2_mass)) + 5.0f * lmax + 4.0f * p1_mass * (-emax + g * 
+            (p1_length * (p1_mass + p2_mass) + p2_length + p2_mass)))) / 
+            (-p2_mass * (5.0f * p1_length * p1_length - 5.0f * p2_length + 2.0f * p1_mass - 2.0f * p2_mass)));;
+
+        temp = glm::abs(temp);
+
+        float delta = temp - p1_vel;
+        
+        return glm::abs(delta);
+
     }
 
     /**
@@ -213,6 +285,7 @@ namespace dp {
                 p2_origin               = p1_origin + p1_pos;
                 p2_pos                  = glm::vec3(p2_length * glm::cos(glm::radians(p2_theta + 90.0f)), p2_length * glm::sin(glm::radians(p2_theta + 90.0f)), 0.0f);
                 emax                    = getEmax();
+                lmax                    = getLmax();
 
             }
         
@@ -232,6 +305,7 @@ namespace dp {
                 p2_origin               = p1_origin + p1_pos;
                 p2_pos                  = glm::vec3(p2_length * glm::cos(glm::radians(p2_theta + 90.0f)), p2_length * glm::sin(glm::radians(p2_theta + 90.0f)), 0.0f);
                 emax                    = getEmax();
+                lmax                    = getLmax();
 
             }
 
@@ -269,6 +343,7 @@ namespace dp {
         if (onetime) {
         
             emax = getEmax();
+            lmax = getLmax();
             onetime = false;
 
         }
@@ -291,7 +366,6 @@ namespace dp {
             std::scoped_lock< std::mutex > p2lock(p2_pos_mutex);
             p1_acc          = getAccP1();
             p2_acc          = getAccP2();
-            etot            = getEtot();
 
             p1_pos          = glm::vec3(p1_length * glm::cos(glm::radians(p1_theta + 90.0f)), p1_length * glm::sin(glm::radians(p1_theta + 90.0f)), 0.0f);
             p2_origin       = p1_origin + p1_pos;
@@ -301,11 +375,19 @@ namespace dp {
             p2_vel          += p2_acc;
             p1_theta        += p1_vel;
             p2_theta        += p2_vel;
-            while (etot > emax) {
+            etot            = getEtot();
+            ltot            = getLtot();
+            std::cout << "Etot: " << etot << " Ltot: " << ltot << std::endl;
+            std::cout << "Emax: " << emax << " Lmax: " << lmax << std::endl;
+            std::cout << "p1_vel: " << p1_vel << " p2_vel: " << p2_vel << std::endl;
+            if (etot > emax) {
 
-                p1_vel      = p1_vel < 0.0f ? p1_vel + delta_p1_vel : p1_vel - delta_p1_vel;
-                p2_vel      = p2_vel < 0.0f ? p2_vel + delta_p2_vel : p2_vel - delta_p2_vel;
-                etot        = getEtot();
+                delta_p1_vel = getDeltaP1Vel();
+                delta_p2_vel = getDeltaP2Vel();
+                std::cout << "p1: " << delta_p1_vel << " p2: " << delta_p2_vel << std::endl;
+
+                p1_vel      = p1_acc >= 0.0f ? p1_vel + delta_p1_vel : p1_vel - delta_p1_vel;
+                p2_vel      = p2_acc >= 0.0f ? p2_vel + delta_p2_vel : p2_vel - delta_p2_vel;
             
             }
             last            = now;
