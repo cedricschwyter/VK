@@ -7,8 +7,8 @@
     @file         Core.hpp
     @brief        Declaration of the Core namespace
 */
-#ifndef VK_ENGINE_HPP
-#define VK_ENGINE_HPP
+#ifndef VK_CORE_HPP
+#define VK_CORE_HPP
 #include "Version.hpp"
 
 #define GLFW_INCLUDE_VULKAN
@@ -535,4 +535,4 @@ namespace vk {
     }
 
 }
-#endif  // VK_ENGINE_HPPmake
+#endif  // VK_CORE_HPP
