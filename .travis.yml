@@ -26,8 +26,9 @@ before_script:
   - sudo make
   - sudo make install
   - cd ..
-  - sudo git clone https://github.com/glfw/glfw.git
-  - cd glfw/
+  - sudo wget https://github.com/glfw/glfw/archive/3.3.tar.gz
+  - sudo tar -xzvf 3.3.tar.gz
+  - cd glfw-3.3
   - sudo cmake .
   - sudo make
   - sudo make install
