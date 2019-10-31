@@ -95,7 +95,7 @@ namespace dp {
         float temp = g * (p1_mass * (p1_length * glm::cos(glm::radians(p1_theta)) + p1_length) + 
             p2_mass * (p1_length * glm::cos(glm::radians(p1_theta)) + 
             p2_length * glm::cos(glm::radians(p2_theta)) + p1_length + p2_length)) + 
-            0.5f * p1_mass * p1_vel * p1_vel + 0.5f * p2_mass * p2_vel * p2_vel;
+            0.5f * p1_mass * p1_vel * p1_vel * p1_length * p1_length + 0.5f * p2_mass * p2_vel * p2_vel * p2_length * p2_length;
 
         return temp;
     
@@ -275,7 +275,7 @@ namespace dp {
             
             if (paused) {
 
-                p1_theta                += pi / 50.0f;
+                p1_theta                += pi / 25.0f;
 
                 p1_vel                  = 0.0f;
                 p2_vel                  = 0.0f;
@@ -295,7 +295,7 @@ namespace dp {
 
             if (paused) {
 
-                p2_theta                += pi / 50.0f;
+                p2_theta                += pi / 25.0f;
 
                 p1_vel                  = 0.0f;
                 p2_vel                  = 0.0f;
