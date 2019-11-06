@@ -20,6 +20,10 @@ namespace dp {
     float               p2_theta        = pi;
     float               p1_vel          = 1.0f;
     float               p2_vel          = 0.1f;
+    float               x1_vel = 0.0f;
+    float               y1_vel = 0.0f;
+    float               x2_vel = 0.0f;
+    float               y2_vel = 0.0f;
     float               p1_acc          = 0.0f;
     float               p2_acc          = 0.0f;
     glm::vec3           p1_origin       = glm::vec3(0.0f, -1.0f, 4.0f);
@@ -72,17 +76,55 @@ namespace dp {
     }
 
     /**
-        Returns the maximum energy of the system
+        Returns the nominal acceleration of p1_mass in x-direction
 
-        @return     Returns a float representing the max allowed energy total of the douple pendulum
+        @return Returns a float representing the nominal acceleration of p1_mass in x-direction
     */
-    float getEmax() {
-    
-        float temp = 2.0f * g * (p1_mass * p1_length + p2_mass * (p1_length + p2_length)) + 
-            0.5f * p1_mass * p1_vel * p1_vel + 0.5f * p2_mass * p2_vel * p2_vel;
+    float getVelX1() {
+
+        float temp = p1_vel * p1_length * glm::cos(glm::radians(p1_theta));
 
         return temp;
-    
+
+    }
+
+    /**
+        Returns the nominal acceleration of p1_mass in y-direction
+
+        @return Returns a float representing the nominal acceleration of p1_mass in y-direction
+    */
+    float getVelY1() {
+
+        float temp = p2_vel * p1_length * glm::cos(glm::radians(p1_theta));
+
+        return temp;
+
+    }
+
+    /**
+        Returns the nominal acceleration of p2_mass in x-direction
+
+        @return Returns a float representing the nominal acceleration of p2_mass in x-direction
+    */
+    float getVelX2() {
+
+        float temp = getVelX1() + p2_vel * p2_length * glm::cos(glm::radians(p2_theta));
+
+        return temp;
+
+    }
+
+    /**
+        Returns the nominal acceleration of p2_mass in y-direction
+
+        @return Returns a float representing the nominal acceleration of p2_mass in y-direction
+    */
+    float getVelY2() {
+
+        float temp = getVelY1() + p2_vel * p2_length * glm::sin(glm::radians(p2_theta));
+
+        return temp;
+
     }
 
     /**
@@ -92,27 +134,13 @@ namespace dp {
     */
     float getEtot() {
     
-        float temp = g * (p1_mass * (p1_length * glm::cos(glm::radians(p1_theta)) + p1_length) + 
-            p2_mass * (p1_length * glm::cos(glm::radians(p1_theta)) + 
-            p2_length * glm::cos(glm::radians(p2_theta)) + p1_length + p2_length)) + 
-            0.5f * p1_mass * p1_vel * p1_vel * p1_length * p1_length + 0.5f * p2_mass * p2_vel * p2_vel * p2_length * p2_length;
+        float temp = p1_mass * g * (p2_length + p1_length * (1 - glm::cos(glm::radians(p1_theta)))) + 
+            p2_mass * g * (p2_length + p1_length * (1 - glm::cos(glm::radians(p1_theta))) - p2_length * 
+            glm::cos(glm::radians(p2_theta))) + 0.5f * p1_mass * (x1_vel * x1_vel + x2_vel * x2_vel) +
+            0.5f * p2_mass * ((x1_vel + x2_vel) * (x1_vel + x2_vel) + (y1_vel + y2_vel) * (y1_vel + y2_vel));
 
         return temp;
     
-    }
-
-    /**
-        Returns the maximum angular momentum of the system
-
-        @return     Returns a float representing the max allowed angular momentum total of the douple pendulum
-    */
-    float getLmax() {
-
-        float temp = p1_mass * p1_vel * ((2.0f / 5.0f) * p1_mass + p1_length * p1_length) + 
-            p2_mass * p2_vel * ((2.0f / 5.0f) * p2_mass + p2_length * p2_length);
-
-        return temp;
-
     }
 
     /**
@@ -122,7 +150,10 @@ namespace dp {
     */
     float getLtot() {
 
-        return getLmax();
+        float temp = (2.0f / 5.0f * p1_mass * p1_mass * p1_mass + p1_mass * p1_length * p1_length) * p1_vel + 
+            (2.0f / 5.0f * p2_mass * p2_mass * p2_mass + p2_mass * p2_length * p2_length) * p2_vel;
+
+        return temp;
 
     }
 
@@ -284,8 +315,8 @@ namespace dp {
                 p1_pos                  = glm::vec3(p1_length * glm::cos(glm::radians(p1_theta + 90.0f)), p1_length * glm::sin(glm::radians(p1_theta + 90.0f)), 0.0f);
                 p2_origin               = p1_origin + p1_pos;
                 p2_pos                  = glm::vec3(p2_length * glm::cos(glm::radians(p2_theta + 90.0f)), p2_length * glm::sin(glm::radians(p2_theta + 90.0f)), 0.0f);
-                emax                    = getEmax();
-                lmax                    = getLmax();
+                emax                    = getEtot();
+                lmax                    = getLtot();
 
             }
         
@@ -304,8 +335,8 @@ namespace dp {
                 p1_pos                  = glm::vec3(p1_length * glm::cos(glm::radians(p1_theta + 90.0f)), p1_length * glm::sin(glm::radians(p1_theta + 90.0f)), 0.0f);
                 p2_origin               = p1_origin + p1_pos;
                 p2_pos                  = glm::vec3(p2_length * glm::cos(glm::radians(p2_theta + 90.0f)), p2_length * glm::sin(glm::radians(p2_theta + 90.0f)), 0.0f);
-                emax                    = getEmax();
-                lmax                    = getLmax();
+                emax                    = getEtot();
+                lmax                    = getLtot();
 
             }
 
@@ -342,8 +373,8 @@ namespace dp {
         static bool onetime = true;
         if (onetime) {
         
-            emax = getEmax();
-            lmax = getLmax();
+            emax = getEtot();
+            lmax = getLtot();
             onetime = false;
 
         }
@@ -366,6 +397,10 @@ namespace dp {
             std::scoped_lock< std::mutex > p2lock(p2_pos_mutex);
             p1_acc          = getAccP1();
             p2_acc          = getAccP2();
+            x1_vel          = getVelX1();
+            y1_vel          = getVelY1();
+            x2_vel          = getVelX2();
+            y2_vel          = getVelY2();
 
             p1_pos          = glm::vec3(p1_length * glm::cos(glm::radians(p1_theta + 90.0f)), p1_length * glm::sin(glm::radians(p1_theta + 90.0f)), 0.0f);
             p2_origin       = p1_origin + p1_pos;
@@ -380,7 +415,7 @@ namespace dp {
             std::cout << "Etot: " << etot << " Ltot: " << ltot << std::endl;
             std::cout << "Emax: " << emax << " Lmax: " << lmax << std::endl;
             std::cout << "p1_vel: " << p1_vel << " p2_vel: " << p2_vel << std::endl;
-            if (etot > emax) {
+            /*if (etot > emax) {
 
                 delta_p1_vel = getDeltaP1Vel();
                 delta_p2_vel = getDeltaP2Vel();
@@ -389,7 +424,7 @@ namespace dp {
                 p1_vel      = p1_acc >= 0.0f ? p1_vel + delta_p1_vel : p1_vel - delta_p1_vel;
                 p2_vel      = p2_acc >= 0.0f ? p2_vel + delta_p2_vel : p2_vel - delta_p2_vel;
             
-            }
+            }*/
             last            = now;
 
         }
