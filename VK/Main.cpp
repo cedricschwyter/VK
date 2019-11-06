@@ -20,10 +20,6 @@ namespace dp {
     float               p2_theta        = pi;
     float               p1_vel          = 1.0f;
     float               p2_vel          = 0.1f;
-    float               x1_vel          = 0.0f;
-    float               y1_vel          = 0.0f;
-    float               x2_vel          = 0.0f;
-    float               y2_vel          = 0.0f;
     float               p1_acc          = 0.0f;
     float               p2_acc          = 0.0f;
     glm::vec3           p1_origin       = glm::vec3(0.0f, -1.0f, 4.0f);
@@ -38,7 +34,7 @@ namespace dp {
     float               ltot            = 0.0f;
     std::mutex          p1_pos_mutex;
     std::mutex          p2_pos_mutex;
-    std::ofstream stream;
+    std::ofstream estream, lstream;
 
     bool                paused          = false;
 
@@ -75,68 +71,14 @@ namespace dp {
     }
 
     /**
-        Returns the nominal acceleration of p1_mass in x-direction
-
-        @return Returns a float representing the nominal acceleration of p1_mass in x-direction
-    */
-    float getVelX1() {
-
-        float temp = p1_vel * p1_length * glm::cos(glm::radians(p1_theta));
-
-        return temp;
-
-    }
-
-    /**
-        Returns the nominal acceleration of p1_mass in y-direction
-
-        @return Returns a float representing the nominal acceleration of p1_mass in y-direction
-    */
-    float getVelY1() {
-
-        float temp = p2_vel * p1_length * glm::cos(glm::radians(p1_theta));
-
-        return temp;
-
-    }
-
-    /**
-        Returns the nominal acceleration of p2_mass in x-direction
-
-        @return Returns a float representing the nominal acceleration of p2_mass in x-direction
-    */
-    float getVelX2() {
-
-        float temp = getVelX1() + p2_vel * p2_length * glm::cos(glm::radians(p2_theta));
-
-        return temp;
-
-    }
-
-    /**
-        Returns the nominal acceleration of p2_mass in y-direction
-
-        @return Returns a float representing the nominal acceleration of p2_mass in y-direction
-    */
-    float getVelY2() {
-
-        float temp = getVelY1() + p2_vel * p2_length * glm::sin(glm::radians(p2_theta));
-
-        return temp;
-
-    }
-
-    /**
         Returns the total energy of the system
 
         @return     Returns a float representing the energy of the douple pendulum
     */
     float getEtot() {
     
-        float temp = p1_mass * g * (p2_length + p1_length * (1 - glm::cos(glm::radians(p1_theta)))) + 
-            p2_mass * g * (p2_length + p1_length * (1 - glm::cos(glm::radians(p1_theta))) - p2_length * 
-            glm::cos(glm::radians(p2_theta))) + 0.5f * p1_mass * (x1_vel * x1_vel + x2_vel * x2_vel) +
-            0.5f * p2_mass * ((x1_vel + x2_vel) * (x1_vel + x2_vel) + (y1_vel + y2_vel) * (y1_vel + y2_vel));
+        float temp = -(p1_mass + p2_mass) * g * p1_length * glm::cos(glm::radians(p1_theta)) -
+            p2_mass * g * p2_length * glm::cos(glm::radians(p2_theta));
 
         return temp;
     
@@ -335,10 +277,6 @@ namespace dp {
             p2_vel = 0.0f;
             p1_acc = 0.0f;
             p2_acc = 0.0f;
-            x1_vel = 0.0f;
-            y1_vel = 0.0f;
-            x2_vel = 0.0f;
-            y2_vel = 0.0f;
             return;
 
         }
@@ -354,19 +292,16 @@ namespace dp {
             p2_origin       = p1_origin + p1_pos;
             p2_pos          = glm::vec3(p2_length * glm::cos(glm::radians(p2_theta + 90.0f)), p2_length * glm::sin(glm::radians(p2_theta + 90.0f)), 0.0f);
 
-            p1_vel += p1_acc;// *(now - last);
-            p2_vel += p2_acc;// *(now - last);
-            p1_theta += p1_vel;// *(now - last);
-            p2_theta += p2_vel;// *(now - last);
-            x1_vel          = getVelX1();
-            y1_vel          = getVelY1();
-            x2_vel          = getVelX2();
-            y2_vel          = getVelY2();
+            p1_vel += p1_acc;
+            p2_vel += p2_acc;
+            p1_theta += p1_vel;
+            p2_theta += p2_vel;
             etot            = getEtot();
             ltot            = getLtot();
             if (onetime) {
 
-                stream.open("Etot.txt");
+                estream.open("Etot.txt");
+                lstream.open("Ltot.txt");
                 emax = getEtot();
                 lmax = getLtot();
                 onetime = false;
@@ -375,7 +310,8 @@ namespace dp {
             std::cout << "Etot: " << etot << " Ltot: " << ltot << std::endl;
             std::cout << "Emax: " << emax << " Lmax: " << lmax << std::endl;
             std::cout << "p1_vel: " << p1_vel << " p2_vel: " << p2_vel << std::endl;
-            stream << etot << std::endl;
+            estream << etot << std::endl;
+            lstream << ltot << std::endl;
             if (etot > emax || ltot > lmax) {
                 
                 p1_vel *= 99.0f / 100.0f;
