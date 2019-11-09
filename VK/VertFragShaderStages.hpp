@@ -45,8 +45,8 @@ public:
 
 private:
 
-    VkShaderModule                                        vertModule;
-    VkShaderModule                                        fragModule;
+    VkShaderModule                                         vertModule;
+    VkShaderModule                                         fragModule;
     VkPipelineShaderStageCreateInfo                        vertStageInfo;
     VkPipelineShaderStageCreateInfo                        fragStageInfo;
 

@@ -8,18 +8,18 @@
     @brief        Implementation of the Vulkan-part for my Vulkan vs. OpenGL comparison (Maturaarbeit)
 */
 #include "VK.hpp"
-#include <iomanip> 
+#include <iomanip>
 
 namespace dp {
 
     const float         pi              = 3.1415926535897932384626f;        // 23 digits in decimal (rounded), which will equal ~32 digits in binary
-    const float         g               = 0.98060000000000000000000f;        // which is the maximum floating point precision I want to use here 
+    const float         g               = 9.8060000000000000000000f;        // which is the maximum floating point precision I want to use here
 
-    float               p1_length       = 1.0f;
-    float               p2_length       = 1.0f;
-    float               p1_theta        = pi / 2.0f;
-    float               p2_theta        = pi / 2.0f;
-    float               p1_vel          = 1.0f;
+    float               p1_length       = 200.0f;
+    float               p2_length       = 200.0f;
+    float               p1_theta        = pi / 4.0f;
+    float               p2_theta        = pi / 4.0f;
+    float               p1_vel          = 0.001f;
     float               p2_vel          = 0.1f;
     float               p1_acc          = 0.0f;
     float               p2_acc          = 0.0f;
@@ -27,8 +27,8 @@ namespace dp {
     glm::vec3           p1_pos          = glm::vec3(p1_length * glm::cos(glm::radians(p1_theta)), p1_length * glm::sin(glm::radians(p1_theta)), 0.0f);
     glm::vec3           p2_origin       = p1_pos;
     glm::vec3           p2_pos          = glm::vec3(p2_length * glm::cos(glm::radians(p2_theta)), p2_length * glm::sin(glm::radians(p2_theta)), 0.0f);
-    float               p1_mass         = 2.0f;
-    float               p2_mass         = 2.0f;
+    float               p1_mass         = 20.0f;
+    float               p2_mass         = 20.0f;
     float               emax            = 0.0f;
     float               etot            = 0.0f;
     std::mutex          p1_pos_mutex;
@@ -46,7 +46,7 @@ namespace dp {
 
         float temp = (-g * (2.0f * p1_mass + p2_mass) * glm::sin(glm::radians(p1_theta)) -
             (p2_mass * g * glm::sin(glm::radians(p1_theta - 2.0f * p2_theta))) - 2.0f * glm::sin(glm::radians(p1_theta - p2_theta)) * p2_mass *
-            (p2_acc * p2_acc * p2_length + p1_acc * p1_acc * p1_length * glm::cos(glm::radians(p1_theta - p2_theta)))) /
+            (p2_vel * p2_vel * p2_length + p1_vel * p1_vel * p1_length * glm::cos(glm::radians(p1_theta - p2_theta)))) /
             (p1_length * (2.0f * p1_mass + p2_mass - p2_mass * glm::cos(glm::radians(2.0f * p1_theta - 2.0f * p2_theta))));
 
         return temp;
@@ -60,9 +60,9 @@ namespace dp {
     */
     float getAccP2() {
 
-        float temp = (2.0f * glm::sin(glm::radians(p1_theta - p2_theta)) * (p1_acc * p1_acc * p1_length *
+        float temp = (2.0f * glm::sin(glm::radians(p1_theta - p2_theta)) * (p1_vel * p1_vel * p1_length *
             (p1_mass + p2_mass) + g * (p1_mass + p2_mass) * glm::cos(glm::radians(p1_theta)) +
-            (p2_acc * p2_acc * p2_length * p2_mass * glm::cos(glm::radians(p1_theta - p2_theta))))) /
+            (p2_vel * p2_vel * p2_length * p2_mass * glm::cos(glm::radians(p1_theta - p2_theta))))) /
             (p2_length * (2.0f * p1_mass + p2_mass - p2_mass * glm::cos(glm::radians(2.0f * p1_theta - 2.0f * p2_theta))));
 
         return temp;
@@ -75,12 +75,14 @@ namespace dp {
         @return     Returns a float representing the energy of the douple pendulum
     */
     float getEtot() {
-    
-        float temp = -(p1_mass + p2_mass) * g * p1_length * glm::cos(glm::radians(p1_theta)) -
-            p2_mass * g * p2_length * glm::cos(glm::radians(p2_theta));
+
+        float temp = 0.5f * p1_mass * p1_vel * p1_vel * p1_length * p1_length + 0.5f * p2_mass *
+            (p1_vel * p1_vel * p1_length * p1_length + p2_vel * p2_vel * p2_length * p2_length +
+            2.0f * p1_length * p2_length * p1_vel * p2_vel * glm::cos(glm::radians(p1_theta - p2_theta)))
+            - (p1_mass + p2_mass) * g * p1_length * glm::cos(glm::radians(p1_theta)) - p2_mass * g * p2_length * glm::cos(glm::radians(p2_theta));
 
         return temp;
-    
+
     }
 
     /**
@@ -94,7 +96,7 @@ namespace dp {
         model = glm::translate(glm::mat4(1.0f), p1_origin);
         model = glm::scale(model, glm::vec3(p1_length));
         model = glm::rotate(model, glm::radians(p1_theta), glm::vec3(0.0f, 0.0f, 1.0f));
-        model = glm::scale(model, glm::vec3(0.115f));
+        model = glm::scale(model, glm::vec3(0.00085f));
 
         return model;
 
@@ -109,13 +111,13 @@ namespace dp {
 
         std::scoped_lock< std::mutex > lock(p1_pos_mutex);
         glm::mat4 model;
-        model = glm::translate(glm::mat4(1.0f), p1_origin + p1_pos);
+        model = glm::translate(glm::mat4(1.0f), p1_origin + p1_pos / 200.0f);
         model = glm::scale(model, glm::vec3(p2_length));
         model = glm::rotate(model, glm::radians(p2_theta), glm::vec3(0.0f, 0.0f, 1.0f));
-        model = glm::scale(model, glm::vec3(0.115f));
+        model = glm::scale(model, glm::vec3(0.00085f));
 
         return model;
-        
+
     }
 
     /**
@@ -127,10 +129,10 @@ namespace dp {
 
         std::scoped_lock< std::mutex > lock(p1_pos_mutex);
         glm::mat4 model;
-        model = glm::translate(glm::mat4(1.0f), p1_origin + p1_pos);
+        model = glm::translate(glm::mat4(1.0f), p1_origin + p1_pos / 200.0f);
         model = glm::rotate(model, glm::radians(p1_theta), glm::vec3(0.0f, 0.0f, 1.0f));
         model = glm::scale(model, glm::vec3(p1_mass));
-        model = glm::scale(model, glm::vec3(0.001f));
+        model = glm::scale(model, glm::vec3(0.0001f));
 
         return model;
 
@@ -146,10 +148,10 @@ namespace dp {
         std::scoped_lock< std::mutex > p1lock(p1_pos_mutex);
         std::scoped_lock< std::mutex > p2lock(p2_pos_mutex);
         glm::mat4 model;
-        model = glm::translate(glm::mat4(1.0f), p2_origin + p2_pos);
+        model = glm::translate(glm::mat4(1.0f), p1_origin + p1_pos / 200.0f + p2_pos / 200.0f);
         model = glm::rotate(model, glm::radians(p2_theta), glm::vec3(0.0f, 0.0f, 1.0f));
         model = glm::scale(model, glm::vec3(p2_mass));
-        model = glm::scale(model, glm::vec3(0.001f));
+        model = glm::scale(model, glm::vec3(0.0001f));
 
         return model;
 
@@ -161,7 +163,7 @@ namespace dp {
         @return     Returns a glm::mat4
     */
     glm::mat4 environment() {
-    
+
         glm::mat4 model;
         model           = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
         model           = glm::translate(model, glm::vec3(0.0f, 150.0f, 0.0f));
@@ -172,7 +174,7 @@ namespace dp {
 
     /**
         Serves as keyboard input callback
-    
+
         @param      window_     A pointer to the GLFWwindow
     */
     void keyboardInput(GLFWwindow* window_) {
@@ -188,7 +190,7 @@ namespace dp {
         }
 
         if (glfwGetKey(window_, GLFW_KEY_T) == GLFW_PRESS) {
-            
+
             if (paused) {
 
                 p1_theta                += pi / 25.0f;
@@ -203,7 +205,7 @@ namespace dp {
                 emax                    = getEtot();
 
             }
-        
+
         }
 
         if (glfwGetKey(window_, GLFW_KEY_B) == GLFW_PRESS) {
@@ -296,12 +298,6 @@ namespace dp {
             std::cout << "Emax: " << emax << std::endl;
             std::cout << "p1_vel: " << p1_vel << " p2_vel: " << p2_vel << std::endl;
             estream << std::setprecision (64) << etot << std::endl;
-            if (etot > emax) {
-                
-                p1_vel = p1_vel > 0.0f ? p1_vel - 7.0f / 10.0f * p1_mass * p1_vel : p1_vel - 7.0f / 10.0f * p1_mass * p1_vel;
-                p2_vel = p2_vel > 0.0f ? p2_vel - 7.0f / 10.0f * p2_mass * p2_vel : p2_vel - 7.0f / 10.0f * p2_mass * p2_vel;
-            
-            }
             last            = now;
 
         }
