@@ -33,7 +33,7 @@ namespace dp {
     float               etot            = 0.0f;
     std::mutex          p1_pos_mutex;
     std::mutex          p2_pos_mutex;
-    std::ofstream estream, lstream;
+    std::ofstream       estream, p1_stream, p2_stream;
 
     bool                paused          = false;
 
@@ -289,7 +289,8 @@ namespace dp {
             if (onetime) {
 
                 estream.open("Etot.txt");
-                lstream.open("Ltot.txt");
+                p1_stream.open("p1_pos.txt");
+                p2_stream.open("p2_pos.txt");
                 emax = getEtot();
                 onetime = false;
 
@@ -298,6 +299,8 @@ namespace dp {
             std::cout << "Emax: " << emax << std::endl;
             std::cout << "p1_vel: " << p1_vel << " p2_vel: " << p2_vel << std::endl;
             estream << std::setprecision (64) << etot << std::endl;
+            p1_stream << p1_theta << std::endl;
+            p2_stream << p2_theta << std::endl;
             last            = now;
 
         }
