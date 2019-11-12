@@ -70,16 +70,45 @@ namespace dp {
     }
 
     /**
+        Returns the potential energy of the system
+
+        @return     Returns a float representing the potential energy of the douple pendulum
+    */
+    float getEpot() {
+
+        float temp = p1_mass * g * (-p1_length * glm::cos(glm::radians(p1_theta))) + p2_mass * 
+            g * (-p1_length * glm::cos(glm::radians(p1_theta)) - p2_length * glm::cos(glm::radians(p2_theta)));
+
+        std::cout << std::setprecision(64) << "Epot: " << temp << std::endl;
+
+        return temp;
+
+    }
+
+    /**
+        Returns the kinetic energy of the system
+
+        @return     Returns a float representing the kinetic energy of the douple pendulum
+    */
+    float getEkin() {
+
+        float temp = 0.5f * p1_mass * (p1_vel * p1_length) * (p1_vel * p1_length) + 0.5f * p2_mass *
+            (p1_vel * p1_length + p2_vel * p2_length) * (p1_vel * p1_length + p2_vel * p2_length);
+
+        std::cout << std::setprecision(64) << "Ekin: " << temp << std::endl;
+
+        return temp;
+
+    }
+
+    /**
         Returns the total energy of the system
 
         @return     Returns a float representing the energy of the douple pendulum
     */
     float getEtot() {
 
-        float temp = 0.5f * p1_mass * p1_vel * p1_vel * p1_length * p1_length + 0.5f * p2_mass *
-            (p1_vel * p1_vel * p1_length * p1_length + p2_vel * p2_vel * p2_length * p2_length +
-            2.0f * p1_length * p2_length * p1_vel * p2_vel * glm::cos(glm::radians(p1_theta - p2_theta)))
-            - (p1_mass + p2_mass) * g * p1_length * glm::cos(glm::radians(p1_theta)) - p2_mass * g * p2_length * glm::cos(glm::radians(p2_theta));
+        float temp = getEpot() + getEkin();
 
         return temp;
 
