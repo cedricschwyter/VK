@@ -13,14 +13,14 @@
 namespace dp {
 
     const float         pi              = 3.1415926535897932384626f;        // 23 digits in decimal (rounded), which will equal ~32 digits in binary
-    const float         g               = 9.8060000000000000000000f;        // which is the maximum floating point precision I want to use here
+    const float         g               = 0.98060000000000000000000f;        // which is the maximum floating point precision I want to use here
 
     float               p1_length       = 200.0f;
     float               p2_length       = 200.0f;
     float               p1_theta        = 90.0f;
     float               p2_theta        = 90.0f;
-    float               p1_vel          = 0.0f;
-    float               p2_vel          = 0.0f;
+    float               p1_vel          = 0.001f;
+    float               p2_vel          = 0.1f;
     float               p1_acc          = 0.0f;
     float               p2_acc          = 0.0f;
     glm::vec3           p1_origin       = glm::vec3(0.0f, -1.0f, 4.0f);
@@ -296,6 +296,16 @@ namespace dp {
 
         if (now - last >= 1 / 60.0f) {
 
+            if (onetime) {
+
+                estream.open("Etot.txt");
+                p1_stream.open("p1_pos.txt");
+                p2_stream.open("p2_pos.txt");
+                emax = getEtot();
+                onetime = false;
+
+            }
+
             std::scoped_lock< std::mutex > p1lock(p1_pos_mutex);
             std::scoped_lock< std::mutex > p2lock(p2_pos_mutex);
             p1_acc          = getAccP1();
@@ -307,20 +317,9 @@ namespace dp {
 
             p1_vel          += p1_acc;
             p2_vel          += p2_acc;
-            p1_theta        += p1_vel;
-            p2_theta        += p2_vel;
-            p1_theta        = static_cast< int >(p1_theta) % 360;
-            p2_theta        = static_cast< int >(p2_theta) % 360;
+            p1_theta        += glm::degrees(p1_vel);
+            p2_theta        += glm::degrees(p2_vel);
             etot            = getEtot();
-            if (onetime) {
-
-                estream.open("Etot.txt");
-                p1_stream.open("p1_pos.txt");
-                p2_stream.open("p2_pos.txt");
-                emax = getEtot();
-                onetime = false;
-
-            }
             std::cout << "Etot: " << etot << std::endl;
             std::cout << "Emax: " << emax << std::endl;
             std::cout << "p1_vel: " << p1_vel << " p2_vel: " << p2_vel << std::endl;
