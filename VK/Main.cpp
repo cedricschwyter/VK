@@ -17,10 +17,10 @@ namespace dp {
 
     float               p1_length       = 200.0f;
     float               p2_length       = 200.0f;
-    float               p1_theta        = pi / 4.0f;
-    float               p2_theta        = pi / 4.0f;
-    float               p1_vel          = 0.001f;
-    float               p2_vel          = 0.1f;
+    float               p1_theta        = 90.0f;
+    float               p2_theta        = 90.0f;
+    float               p1_vel          = 0.0f;
+    float               p2_vel          = 0.0f;
     float               p1_acc          = 0.0f;
     float               p2_acc          = 0.0f;
     glm::vec3           p1_origin       = glm::vec3(0.0f, -1.0f, 4.0f);
@@ -31,15 +31,13 @@ namespace dp {
     float               p2_mass         = 20.0f;
     float               emax            = 0.0f;
     float               etot            = 0.0f;
-    std::mutex          p1_pos_mutex;
-    std::mutex          p2_pos_mutex;
+    std::mutex          p1_pos_mutex, p2_pos_mutex;
     std::ofstream       estream, p1_stream, p2_stream;
 
     bool                paused          = false;
 
     /**
         Returns the nominal acceleration of p1
-
         @return     Returns a float representing the nominal acceleration of p1
     */
     float getAccP1() {
@@ -55,7 +53,6 @@ namespace dp {
 
     /**
         Returns the nominal acceleration of p2
-
         @return     Returns a float representing the nominal acceleration of p2
     */
     float getAccP2() {
@@ -314,6 +311,8 @@ namespace dp {
             p2_vel          += p2_acc;
             p1_theta        += p1_vel;
             p2_theta        += p2_vel;
+            while (p1_theta >= 360.0f || p1_theta <= -360.0f) p1_theta /= 360.0f;
+            while (p2_theta >= 360.0f || p2_theta <= -360.0f) p2_theta /= 360.0f;
             etot            = getEtot();
             if (onetime) {
 
