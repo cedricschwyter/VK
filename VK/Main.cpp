@@ -85,8 +85,10 @@ namespace dp {
     */
     float getEkin() {
 
-        float temp = 0.5f * p1_mass * (p1_vel * p1_length) * (p1_vel * p1_length) + 0.5f * p2_mass *
-            (p1_vel * p1_length + p2_vel * p2_length) * (p1_vel * p1_length + p2_vel * p2_length);
+        float temp = 0.5f * p1_mass * p1_vel * p1_vel * p1_length * p1_length + 0.5 * 
+            (p1_mass * p2_vel * p2_vel * p2_length * p2_length + p2_mass * p1_vel * p1_vel * 
+            p1_length * p1_length + 2.0f * p2_mass * p1_vel * p2_vel * p1_length * p2_length * 
+            glm::cos(glm::radians(p1_theta - p2_theta)));
 
         std::cout << std::setprecision(64) << "Ekin: " << temp << std::endl;
 
@@ -307,8 +309,8 @@ namespace dp {
             p2_vel          += p2_acc;
             p1_theta        += p1_vel;
             p2_theta        += p2_vel;
-            while (p1_theta >= 360.0f || p1_theta <= -360.0f) p1_theta /= 360.0f;
-            while (p2_theta >= 360.0f || p2_theta <= -360.0f) p2_theta /= 360.0f;
+            p1_theta        = static_cast< int >(p1_theta) % 360;
+            p2_theta        = static_cast< int >(p2_theta) % 360;
             etot            = getEtot();
             if (onetime) {
 
