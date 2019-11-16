@@ -42,8 +42,10 @@ namespace dp {
     */
     float getAccP1() {
 
-        float temp = - p2_mass / (p1_mass + p2_mass) * p2_length / p1_length * (p2_acc * glm::cos(glm::radians(p1_theta - p2_theta)) 
-            + p2_vel * p2_vel * glm::sin(glm::radians(p1_theta - p2_theta))) - g / p1_length * glm::sin(glm::radians(p1_theta));
+        float temp = (-g * (2.0f * p1_mass + p2_mass) * glm::sin(glm::radians(p1_theta)) -
+            (p2_mass * g * glm::sin(glm::radians(p1_theta - 2.0f * p2_theta))) - 2.0f * glm::sin(glm::radians(p1_theta - p2_theta)) * p2_mass *
+            (p2_vel * p2_vel * p2_length + p1_vel * p1_vel * p1_length * glm::cos(glm::radians(p1_theta - p2_theta)))) /
+            (p1_length * (2.0f * p1_mass + p2_mass - p2_mass * glm::cos(glm::radians(2.0f * p1_theta - 2.0f * p2_theta))));
 
         return temp;
 
@@ -55,8 +57,10 @@ namespace dp {
     */
     float getAccP2() {
 
-        float temp = - p1_length / p2_length * (p1_acc * glm::cos(glm::radians(p1_theta - p2_theta)) - p1_vel * p1_vel * 
-            glm::sin(glm::radians(p1_theta - p2_theta))) - g / p2_length * glm::sin(p2_theta);
+        float temp = (2.0f * glm::sin(glm::radians(p1_theta - p2_theta)) * (p1_vel * p1_vel * p1_length *
+            (p1_mass + p2_mass) + g * (p1_mass + p2_mass) * glm::cos(glm::radians(p1_theta)) +
+            (p2_vel * p2_vel * p2_length * p2_mass * glm::cos(glm::radians(p1_theta - p2_theta))))) /
+            (p2_length * (2.0f * p1_mass + p2_mass - p2_mass * glm::cos(glm::radians(2.0f * p1_theta - 2.0f * p2_theta))));
 
         return temp;
 
