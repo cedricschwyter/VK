@@ -105,9 +105,6 @@ namespace std {
     /**
         Hash-function for vertex !!!This is some high level C++!!! (following recommended approach for hash-functions on cppreference.com's std::hash page)
     */
-    /**
-        Hash-function for vertex !!!This is some high level C++!!! (following recommended approach for hash-functions on cppreference.com's std::hash page)
-    */
     template<  > struct hash< BaseVertex > {
 
         size_t operator()(BaseVertex const& vertex) const noexcept {

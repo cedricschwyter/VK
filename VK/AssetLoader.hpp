@@ -22,7 +22,7 @@ public:
     AssetLoader(void);
 
     /**
-        Overload instantiation operator to create a functor
+        Overload invocation operator to create a functor
     */
     void operator()(void);
 
