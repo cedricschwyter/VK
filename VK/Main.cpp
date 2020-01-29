@@ -76,8 +76,6 @@ namespace dp {
         float temp = p1_mass * g * (-p1_length * glm::cos(glm::radians(p1_theta))) + p2_mass * 
             g * (-p1_length * glm::cos(glm::radians(p1_theta)) - p2_length * glm::cos(glm::radians(p2_theta)));
 
-        std::cout << std::setprecision(64) << "Epot: " << temp << std::endl;
-
         return temp;
 
     }
@@ -89,12 +87,10 @@ namespace dp {
     */
     float getEkin() {
 
-        float temp = 0.5f * p1_mass * p1_vel * p1_vel * p1_length * p1_length + 0.5 * 
+        float temp = 0.5f * p1_mass * p1_vel * p1_vel * p1_length * p1_length + 0.5f * 
             (p1_mass * p2_vel * p2_vel * p2_length * p2_length + p2_mass * p1_vel * p1_vel * 
             p1_length * p1_length + 2.0f * p2_mass * p1_vel * p2_vel * p1_length * p2_length * 
             glm::cos(glm::radians(p1_theta - p2_theta)));
-
-        std::cout << std::setprecision(64) << "Ekin: " << temp << std::endl;
 
         return temp;
 
@@ -186,6 +182,53 @@ namespace dp {
     }
 
     /**
+        Returns the model matrix for the crisis model
+
+        @return     Returns a glm::mat4
+    */
+    glm::mat4 crisis() {
+        
+        glm::mat4 model;
+        model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 50.0f));
+        model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model[1][1] *= -1;
+
+        return model;
+
+    }
+
+    /**
+        Returns the model matrix for the gun model
+
+        @return     Returns a glm::mat4
+    */
+    glm::mat4 gun() {
+    
+        glm::mat4 model;
+        model = glm::translate(glm::mat4(1.0f), glm::vec3(-30.0f, glm::cos(static_cast<float>(glfwGetTime())), 50.0f));
+        model = glm::rotate(model, static_cast<float>(glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
+        model[1][1] *= -1;
+
+        return model;
+
+    }
+
+    /**
+        Returns the model matrix for the tank model
+
+        @return     Returns a glm::mat4
+    */
+    glm::mat4 tank() {
+    
+        glm::mat4 model;
+        model = glm::translate(glm::mat4(1.0f), glm::vec3(-30.0f, 0.0f, 15.0f));
+        model[1][1] *= -1;
+
+        return model;
+    
+    }
+
+    /**
         Returns the model matrix for the environment model
 
         @return     Returns a glm::mat4
@@ -194,7 +237,8 @@ namespace dp {
 
         glm::mat4 model;
         model           = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
-        model           = glm::translate(model, glm::vec3(0.0f, 150.0f, 0.0f));
+        model           = glm::rotate(model, glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model           = glm::translate(model, glm::vec3(-100.0f, 100.0f, 100.0f));
         model[1][1]     *= -1.0f;
         return model;
 
@@ -270,7 +314,10 @@ namespace dp {
         vk::push("res/models/tennisball/Tennis Ball-1.obj", &ball2);
         vk::push("res/models/stick/lathi.obj", &stick1);
         vk::push("res/models/stick/lathi.obj", &stick2);
-        vk::push("res/models/floating_city/floating_city.obj", &environment);
+        vk::push("res/models/nanosuit/nanosuit.obj", &crisis);
+        vk::push("res/models/gun/gun.obj", &gun);
+        vk::push("res/models/tank/swat tank.obj", &tank);
+        vk::push("res/models/holodeck/holodeck.obj", &environment);
 
         vk::setKeyboardInputCallback(&keyboardInput);
 
@@ -302,7 +349,6 @@ namespace dp {
 
             if (onetime) {
 
-                estream.open("Etot.txt");
                 p1_stream.open("p1_pos.txt");
                 p2_stream.open("p2_pos.txt");
                 emax = getEtot();
@@ -324,12 +370,20 @@ namespace dp {
             p1_theta        += glm::degrees(p1_vel);
             p2_theta        += glm::degrees(p2_vel);
             etot            = getEtot();
-            std::cout << "Etot: " << etot << std::endl;
-            std::cout << "Emax: " << emax << std::endl;
-            std::cout << "p1_vel: " << p1_vel << " p2_vel: " << p2_vel << std::endl;
-            estream << std::setprecision (64) << etot << std::endl;
-            p1_stream << p1_theta << std::endl;
-            p2_stream << p2_theta << std::endl;
+            int out = 0;
+            if (static_cast<int>(p1_theta) % 360 > 180) {
+                out = -(360 - static_cast<int>(p1_theta) % 360);
+            } else {
+                out = static_cast<int>(p1_theta) % 360;
+            }
+            p1_stream << out << std::endl;
+            if (static_cast<int>(p2_theta) % 360 > 180) {
+                out = -(360 - static_cast<int>(p2_theta) % 360);
+            }
+            else {
+                out = static_cast<int>(p2_theta) % 360;
+            }
+            p2_stream << out << std::endl;
             last            = now;
 
         }
